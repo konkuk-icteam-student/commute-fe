@@ -1,0 +1,9 @@
+.next
+.github
+node_modules
+.pnpm-store
+out
+build
+coverage
+*.log
+pnpm-lock.yaml
