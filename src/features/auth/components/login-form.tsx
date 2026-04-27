@@ -10,7 +10,7 @@ export function LoginForm() {
         </label>
         <input
           autoComplete="email"
-          className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-gray-950"
+          className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-950 transition-colors outline-none placeholder:text-gray-400 focus:border-gray-950"
           id="email"
           name="email"
           placeholder="student@konkuk.ac.kr"
@@ -26,7 +26,7 @@ export function LoginForm() {
         </label>
         <input
           autoComplete="current-password"
-          className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-gray-950"
+          className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-950 transition-colors outline-none placeholder:text-gray-400 focus:border-gray-950"
           id="password"
           name="password"
           placeholder="Enter your password"

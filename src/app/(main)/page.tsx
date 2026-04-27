@@ -11,7 +11,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-6xl px-5 py-8">
         <section className="flex flex-col gap-5 border-b border-gray-200 pb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+            <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase">
               Today
             </p>
             <h1 className="mt-3 text-3xl font-bold text-gray-950 sm:text-4xl">

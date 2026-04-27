@@ -27,7 +27,7 @@ export function RecentCommuteTable() {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+          <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
             <tr>
               <th className="px-5 py-3">Name</th>
               <th className="px-5 py-3">Status</th>
@@ -43,9 +43,7 @@ export function RecentCommuteTable() {
                 </td>
                 <td className="px-5 py-4 text-gray-600">{commute.status}</td>
                 <td className="px-5 py-4 text-gray-600">{commute.time}</td>
-                <td className="px-5 py-4 text-gray-600">
-                  {commute.location}
-                </td>
+                <td className="px-5 py-4 text-gray-600">{commute.location}</td>
               </tr>
             ))}
           </tbody>
