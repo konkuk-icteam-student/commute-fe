@@ -1,5 +1,3 @@
 export default function WorkHoursPage() {
-  return (
-    <main className="flex min-h-screen w-full bg-blue-200">work hours</main>
-  );
+  return <main className="flex min-h-screen w-full">work hours</main>;
 }
