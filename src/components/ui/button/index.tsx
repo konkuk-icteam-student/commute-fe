@@ -4,14 +4,14 @@ interface ButtonProps {
   children: React.ReactNode;
   size?: "lg" | "md" | "sm";
   disabled?: boolean;
-  handleClick: () => void;
+  onClick: () => void;
 }
 
 export default function Button({
   children,
   size = "md",
   disabled = false,
-  handleClick,
+  onClick,
 }: ButtonProps) {
   const buttonStyles =
     size === "lg"
@@ -27,7 +27,7 @@ export default function Button({
         disabled && "bg-[#979797]",
       )}
       type="button"
-      onClick={handleClick}
+      onClick={onClick}
       disabled={disabled}
     >
       {children}
