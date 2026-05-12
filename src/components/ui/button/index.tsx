@@ -19,12 +19,13 @@ export default function Button({
       : size === "md"
         ? "w-29 h-9 text-sm rounded-lg"
         : "w-16 h-7 text-xs rounded-lg";
+
+  // TODO: 호버 시 커서 변경되도록 설정 필요!!!!
   return (
     <button
       className={cn(
-        "flex items-center justify-center bg-[#2076FF] text-white",
+        "flex cursor-pointer items-center justify-center bg-[#2076FF] text-white disabled:cursor-auto disabled:bg-[#979797]",
         buttonStyles,
-        disabled && "bg-[#979797]",
       )}
       type="button"
       onClick={onClick}
