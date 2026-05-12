@@ -26,7 +26,7 @@ export function RecentCommuteTable() {
         <h2 className="text-base font-bold text-gray-950">Recent Commutes</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-160 text-left text-sm">
           <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
             <tr>
               <th className="px-5 py-3">Name</th>
