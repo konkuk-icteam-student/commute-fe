@@ -6,7 +6,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative min-h-screen w-full max-w-150 pb-24">
+    <div className="relative min-h-screen w-full max-w-150">
       {children}
       <BottomNav />
     </div>
