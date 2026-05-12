@@ -1,6 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes } from "react";
+
 import { cn } from "@/lib/utils";
 
 interface ToggleProps
@@ -29,20 +30,25 @@ export default function Toggle({
       aria-checked={checked}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-2 font-['Noto_Sans_KR'] text-sm leading-5 font-medium text-[#19191B]",
+        "inline-flex cursor-pointer items-center gap-2 text-sm leading-5 font-medium text-[#19191B]",
         className,
       )}
     >
       <span>{label}</span>
 
-      <span
+      <div
         className={cn(
           "flex h-6 w-10 items-center rounded-xl px-1 transition-colors duration-200",
-          checked ? "justify-end bg-[#3A00E5]" : "justify-start bg-[#AFB1B6]",
+          checked ? "bg-[#3A00E5]" : "bg-[#AFB1B6]",
         )}
       >
-        <span className="h-4 w-4 rounded-full bg-white" />
-      </span>
+        <div
+          className={cn(
+            "h-4 w-4 rounded-full bg-white transition-transform duration-200",
+            checked ? "translate-x-4" : "translate-x-0",
+          )}
+        />
+      </div>
     </button>
   );
 }
