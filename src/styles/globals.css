@@ -25,3 +25,20 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* 스크롤 바를 위한 css 추가 -> modal 창에 사용했습니다. */
+.modal-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: #8892a6;
+  border-radius: 999px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  margin-top: 109px;
+  margin-bottom: 165px;
+  background: #c6cbd4;
+  border-radius: 999px;
+}
