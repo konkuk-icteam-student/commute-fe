@@ -30,7 +30,7 @@ export default function BottomNav() {
                 src={isActive ? item.activeIcon : item.icon}
               />
               <span
-                className={`text-center font-['Noto_Sans_KR'] text-xs leading-4 font-bold ${
+                className={`text-center text-xs leading-4 font-bold ${
                   isActive ? "text-[#3E9DF7]" : "text-[#B7B7B7]"
                 }`}
               >
