@@ -23,6 +23,7 @@ export default function BottomNav() {
               href={item.href}
               key={item.href}
             >
+              {/* TODO: 이거 기본 img 태그 사용하신 이유가 있으실까요??? */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt=""

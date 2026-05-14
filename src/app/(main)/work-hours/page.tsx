@@ -1,5 +1,9 @@
+import ScheduleScreen from "@/screens/schedule";
+
 export default function WorkHoursPage() {
   return (
-    <main className="flex min-h-screen w-full bg-blue-200">work hours</main>
+    <main className="min-h-screen w-full">
+      <ScheduleScreen />
+    </main>
   );
 }

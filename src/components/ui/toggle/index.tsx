@@ -39,7 +39,7 @@ export default function Toggle({
       <div
         className={cn(
           "flex h-6 w-10 items-center rounded-xl px-1 transition-colors duration-200",
-          checked ? "bg-[#3A00E5]" : "bg-[#AFB1B6]",
+          checked ? "bg-[#2076FF]" : "bg-[#AFB1B6]",
         )}
       >
         <div
