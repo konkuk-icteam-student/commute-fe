@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { userNavigationItems } from "@/constants/navigation";
 
@@ -23,12 +24,18 @@ export default function BottomNav() {
               href={item.href}
               key={item.href}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <div className="flex h-8 items-center justify-center">
-                <img
+                <Image
                   alt=""
                   aria-hidden="true"
+                  height={
+                    isActive ? item.activeIconSize.height : item.iconSize.height
+                  }
                   src={isActive ? item.activeIcon : item.icon}
+                  unoptimized
+                  width={
+                    isActive ? item.activeIconSize.width : item.iconSize.width
+                  }
                 />
               </div>
               <span
