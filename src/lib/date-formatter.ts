@@ -4,6 +4,7 @@ export const getMonthWeekOfDate = (date: Date) => {
   const month = date.getMonth(); // 0~11
 
   const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
 
   // 월요일 기준 주 시작일 구하기
   const firstDay = firstDayOfMonth.getDay(); // 일=0, 월=1...
@@ -22,11 +23,32 @@ export const getMonthWeekOfDate = (date: Date) => {
   const diffTime = currentWeekMonday.getTime() - firstWeekMonday.getTime();
   const week = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
 
+  const lastDay = lastDayOfMonth.getDay();
+  const diffLastToMonday = lastDay === 0 ? -6 : 1 - lastDay;
+
+  const lastWeekMonday = new Date(lastDayOfMonth);
+  lastWeekMonday.setDate(lastDayOfMonth.getDate() + diffLastToMonday);
+
+  const maxWeek =
+    Math.floor(
+      (lastWeekMonday.getTime() - firstWeekMonday.getTime()) /
+        (1000 * 60 * 60 * 24 * 7),
+    ) + 1;
+
   return {
     year,
     month: month + 1,
     week,
+    maxWeek,
   };
+};
+
+// 주 단위 이동 반환
+export const shiftDateByWeeks = (date: Date, weekOffset: number) => {
+  const shiftedDate = new Date(date);
+  shiftedDate.setDate(date.getDate() + weekOffset * 7);
+
+  return shiftedDate;
 };
 
 // 해당 주차가 가지는 요일,월,일 반환
