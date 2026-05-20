@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { userNavigationItems } from "@/constants/navigation";
 
@@ -8,7 +9,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto h-20 w-full max-w-150 bg-[#F0F4FC] px-6.5 py-4">
+    <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto h-20 w-full max-w-150 rounded-t-[20px] [border-width:0.5px_0.5px_0_0.5px] border-solid border-[#DDE3EF] bg-white px-6.5 py-4">
       <div className="flex h-full items-center justify-between">
         {userNavigationItems.map((item) => {
           const isActive =
@@ -19,20 +20,27 @@ export default function BottomNav() {
           return (
             <Link
               aria-current={isActive ? "page" : undefined}
-              className="flex w-17.5 flex-col items-center gap-2"
+              className="flex h-12 w-17.5 flex-col items-center"
               href={item.href}
               key={item.href}
             >
-              {/* TODO: 이거 기본 img 태그 사용하신 이유가 있으실까요??? */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt=""
-                aria-hidden="true"
-                src={isActive ? item.activeIcon : item.icon}
-              />
+              <div className="flex h-8 items-center justify-center">
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  height={
+                    isActive ? item.activeIconSize.height : item.iconSize.height
+                  }
+                  src={isActive ? item.activeIcon : item.icon}
+                  unoptimized
+                  width={
+                    isActive ? item.activeIconSize.width : item.iconSize.width
+                  }
+                />
+              </div>
               <span
-                className={`text-center font-['Noto_Sans_KR'] text-xs leading-4 font-bold ${
-                  isActive ? "text-[#3E9DF7]" : "text-[#B7B7B7]"
+                className={`h-4 text-center text-xs leading-4 font-bold ${
+                  isActive ? "text-[#2563EB]" : "text-[#C6CBD4]"
                 }`}
               >
                 {item.label}
