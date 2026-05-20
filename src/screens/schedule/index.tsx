@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ScheduleHeader, ScheduleTable } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
+import { DUMMY_GET_SCHEDULE } from "@/features/schedule/constants";
 
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -24,6 +25,7 @@ export default function ScheduleScreen() {
         year={year}
         month={month}
         week={week}
+        scheduleData={DUMMY_GET_SCHEDULE}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
       />

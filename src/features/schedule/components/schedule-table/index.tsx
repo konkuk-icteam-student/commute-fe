@@ -4,9 +4,8 @@ import { cn } from "@/lib/utils";
 import { getWeekdaysOfMonthWeek } from "@/lib/date-formatter";
 
 import { ScheduleTableHeader } from "../../components";
-import type { ScheduleSlotStatus } from "../../types";
+import type { ScheduleSlotStatus, WeekScheduleData } from "../../types";
 import { chunkScheduleSlots } from "../../utils";
-import { DUMMY_GET_SCHEDULE } from "../../constants";
 
 const SLOTS_PER_DAY = 18; // 09:00 ~ 18:00 까지. 일주일은 총 90개
 
@@ -19,17 +18,21 @@ const SLOT_STATUS_CLASS_NAME: Record<ScheduleSlotStatus, string> = {
 };
 
 interface ScheduleTableProps {
+  type?: "view" | "edit" | "apply";
   year: number;
   month: number;
   week: number;
+  scheduleData: WeekScheduleData;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
 }
 
 export default function ScheduleTable({
+  type = "view",
   year,
   month,
   week,
+  scheduleData,
   handlePrevWeek,
   handleNextWeek,
 }: ScheduleTableProps) {
@@ -37,7 +40,7 @@ export default function ScheduleTable({
 
   const result = getWeekdaysOfMonthWeek(year, month, week);
   const scheduleSlotsByDay = chunkScheduleSlots(
-    DUMMY_GET_SCHEDULE.slots,
+    scheduleData.slots,
     SLOTS_PER_DAY,
   );
 
@@ -77,7 +80,9 @@ export default function ScheduleTable({
                         "flex h-7 w-full items-center justify-center rounded-sm",
                         SLOT_STATUS_CLASS_NAME[slot.status],
                       )}
-                      disabled={slot.status === "UNAVAILABLE"}
+                      disabled={
+                        slot.status === "UNAVAILABLE" || type === "view"
+                      }
                       type="button"
                     >
                       {isChecked && slot.status !== "UNAVAILABLE" && (
@@ -90,7 +95,7 @@ export default function ScheduleTable({
                           )}
                         >
                           {slot.currentCount}/
-                          {DUMMY_GET_SCHEDULE.maxConcurrentWorkers}
+                          {scheduleData.maxConcurrentWorkers}
                         </span>
                       )}
                     </button>

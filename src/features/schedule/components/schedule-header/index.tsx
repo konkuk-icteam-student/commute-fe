@@ -1,3 +1,5 @@
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui";
 
 interface ScheduleHeaderProps {
@@ -6,11 +8,13 @@ interface ScheduleHeaderProps {
 }
 
 export default function ScheduleHeader({ year, month }: ScheduleHeaderProps) {
+  const router = useRouter();
+
   const handleToEdit = () => {
-    console.log("수정 요청 모드로 전환");
+    router.push("/schedule-edit");
   };
   const handleToApply = () => {
-    console.log("근로 시간 신청 모드로 전환");
+    router.push("/schedule-apply");
   };
 
   return (
@@ -25,7 +29,7 @@ export default function ScheduleHeader({ year, month }: ScheduleHeaderProps) {
             수정 요청
           </Button>
           {/* TODO: 근로 신청은 신청 기간이 아니면 disabled */}
-          <Button size="sm" onClick={handleToApply} disabled={true}>
+          <Button size="sm" onClick={handleToApply} disabled={false}>
             근로 신청
           </Button>
         </div>
