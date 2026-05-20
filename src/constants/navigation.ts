@@ -28,7 +28,7 @@ export const userNavigationItems = [
   },
   {
     label: "근로시간",
-    href: "/work-hours",
+    href: "/schedule",
     icon: assetSrc(timeIcon),
     iconSize: { width: 17, height: 17 },
     activeIcon: assetSrc(timeActiveIcon),
