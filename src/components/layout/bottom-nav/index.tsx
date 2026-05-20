@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { userNavigationItems } from "@/constants/navigation";
+import { USER_NAVIGATION_ITEMS } from "@/constants/navigation";
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -11,7 +11,7 @@ export default function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto h-20 w-full max-w-150 rounded-t-[20px] [border-width:0.5px_0.5px_0_0.5px] border-solid border-[#DDE3EF] bg-white px-6.5 py-4">
       <div className="flex h-full items-center justify-between">
-        {userNavigationItems.map((item) => {
+        {USER_NAVIGATION_ITEMS.map((item) => {
           const isActive =
             item.href === "/"
               ? pathname === "/"

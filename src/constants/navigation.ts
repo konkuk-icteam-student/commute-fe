@@ -10,7 +10,7 @@ import timeIcon from "@/assets/icons/nav/time-icon.svg";
 const assetSrc = (asset: string | { src: string }) =>
   typeof asset === "string" ? asset : asset.src;
 
-export const userNavigationItems = [
+export const USER_NAVIGATION_ITEMS = [
   {
     label: "홈",
     href: "/",
