@@ -6,7 +6,7 @@ export type ScheduleSlotStatus =
   | "EMPTY";
 
 // TODO: 추후 서버 api 관련 타입으로 변경 및 위치 이동
-export interface WeekSheduleData {
+export interface WeekScheduleData {
   maxConcurrentWorkers: number;
   // 총 90개의 slot 응답
   slots: {

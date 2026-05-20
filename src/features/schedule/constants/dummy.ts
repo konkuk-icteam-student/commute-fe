@@ -1,4 +1,4 @@
-import type { WeekSheduleData } from "../types";
+import type { WeekScheduleData } from "../types";
 
 const WEEKDAYS = [
   "2026-05-18",
@@ -49,7 +49,7 @@ const getPreviewSlotStatus = (dateIndex: number, timeIndex: number) => {
   return "EMPTY";
 };
 
-export const DUMMY_GET_SCHEDULE: WeekSheduleData = {
+export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
   maxConcurrentWorkers: 5,
   slots: WEEKDAYS.flatMap((date, dateIndex) =>
     TIME_SLOTS.map(({ start, end }, timeIndex) => {

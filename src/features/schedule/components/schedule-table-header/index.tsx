@@ -23,7 +23,7 @@ export default function ScheduleTableHeader({
       <div className="flex-1" />
       <div className="flex flex-row items-center gap-2">
         <button
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-[#DDE3EF]"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
           type="button"
           onClick={handlePrevWeek}
         >
@@ -31,7 +31,7 @@ export default function ScheduleTableHeader({
         </button>
         <span className="text-sm font-bold text-[#1A2236]">{week}주차</span>
         <button
-          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-[#DDE3EF]"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
           type="button"
           onClick={handleNextWeek}
         >
