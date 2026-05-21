@@ -23,6 +23,8 @@ interface ScheduleTableProps {
   month: number;
   week: number;
   scheduleData: WeekScheduleData;
+  isPrevWeekDisabled?: boolean;
+  isNextWeekDisabled?: boolean;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
 }
@@ -33,10 +35,13 @@ export default function ScheduleTable({
   month,
   week,
   scheduleData,
+  isPrevWeekDisabled = false,
+  isNextWeekDisabled = false,
   handlePrevWeek,
   handleNextWeek,
 }: ScheduleTableProps) {
   const [isChecked, setIsChecked] = useState(false);
+  const isApply = type === "apply";
 
   const result = getWeekdaysOfMonthWeek(year, month, week);
   const scheduleSlotsByDay = chunkScheduleSlots(
@@ -49,6 +54,8 @@ export default function ScheduleTable({
       <ScheduleTableHeader
         week={week}
         isChecked={isChecked}
+        isPrevWeekDisabled={isApply && isPrevWeekDisabled}
+        isNextWeekDisabled={isApply && isNextWeekDisabled}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         onCheckedChange={setIsChecked}
