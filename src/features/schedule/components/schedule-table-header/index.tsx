@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Toggle } from "@/components/ui";
-import icRight from "@/assets/icons/common/ic_right.svg";
+import icRightButton from "@/assets/icons/common/ic_right_button.svg";
 
 interface ScheduleTableHeaderProps {
   week: number;
@@ -27,7 +27,7 @@ export default function ScheduleTableHeader({
           type="button"
           onClick={handlePrevWeek}
         >
-          <Image className="rotate-180" src={icRight} alt="이전주차" />
+          <Image className="rotate-180" src={icRightButton} alt="이전주차" />
         </button>
         <span className="text-sm font-bold text-[#1A2236]">{week}주차</span>
         <button
@@ -35,7 +35,7 @@ export default function ScheduleTableHeader({
           type="button"
           onClick={handleNextWeek}
         >
-          <Image src={icRight} alt="다음주차" />
+          <Image src={icRightButton} alt="다음주차" />
         </button>
       </div>
       <div className="flex flex-1 justify-end">
