@@ -1,8 +1,8 @@
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui";
 import icLeft from "@/assets/icons/common/ic_left.svg";
-import Image from "next/image";
 
 interface ScheduleHeaderProps {
   type?: "view" | "edit" | "apply";

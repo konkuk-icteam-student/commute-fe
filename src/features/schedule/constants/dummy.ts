@@ -50,6 +50,14 @@ const getPreviewSlotStatus = (dateIndex: number, timeIndex: number) => {
   return "EMPTY";
 };
 
+const isSelectedSlotStatus = (status: string) =>
+  status === "MY_SCHEDULE" ||
+  status === "PENDING_ADD" ||
+  status === "PENDING_DELETE";
+
+const getSelectedSlotCurrentCount = (status: string, currentCount: number) =>
+  isSelectedSlotStatus(status) ? Math.max(1, currentCount) : currentCount;
+
 const isMyScheduleTime = (date: string, start: string, end: string) =>
   date === "2026-05-20" && start >= "14:00" && end <= "16:00";
 
@@ -66,15 +74,17 @@ export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
   slots: WEEKDAYS.flatMap((date, dateIndex) =>
     TIME_SLOTS.map(({ start, end }, timeIndex) => {
       const isUnavailable = isFixedUnavailableTime(start, end);
+      const status = isUnavailable
+        ? "UNAVAILABLE"
+        : getPreviewSlotStatus(dateIndex, timeIndex);
+      const currentCount = isUnavailable ? 0 : (dateIndex + timeIndex) % 4;
 
       return {
         date,
         start,
         end,
-        status: isUnavailable
-          ? "UNAVAILABLE"
-          : getPreviewSlotStatus(dateIndex, timeIndex),
-        currentCount: isUnavailable ? 0 : (dateIndex + timeIndex) % 4,
+        status,
+        currentCount: getSelectedSlotCurrentCount(status, currentCount),
       };
     }),
   ),
@@ -86,17 +96,19 @@ export const DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData = {
     TIME_SLOTS.map(({ start, end }) => {
       const isUnavailable = isFixedUnavailableTime(start, end);
       const isMySchedule = isMyScheduleTime(date, start, end);
+      const status = isUnavailable
+        ? "UNAVAILABLE"
+        : isMySchedule
+          ? "MY_SCHEDULE"
+          : "EMPTY";
+      const currentCount = isUnavailable ? 0 : getRandomWorkerCount(date, start);
 
       return {
         date,
         start,
         end,
-        status: isUnavailable
-          ? "UNAVAILABLE"
-          : isMySchedule
-            ? "MY_SCHEDULE"
-            : "EMPTY",
-        currentCount: isUnavailable ? 0 : getRandomWorkerCount(date, start),
+        status,
+        currentCount: getSelectedSlotCurrentCount(status, currentCount),
       };
     }),
   ),

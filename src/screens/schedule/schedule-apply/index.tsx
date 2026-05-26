@@ -4,19 +4,24 @@ import { useState } from "react";
 
 import {
   DUMMY_NEXT_MONTH_SCHEDULE,
+  type ScheduleApplyPayload,
   ScheduleHeader,
+  type ScheduleSlot,
   ScheduleTable,
+  getFirstDateOfNextMonth,
+  getApplySlotCurrentCount,
+  getApplySlotStatus,
+  toggleApplySlotChange,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
-
-const getFirstDateOfNextMonth = () => {
-  const today = new Date();
-
-  return new Date(today.getFullYear(), today.getMonth() + 1, 1);
-};
+import { Button } from "@/components/ui";
 
 export default function ScheduleApplyScreen() {
   const [selectedDate, setSelectedDate] = useState(getFirstDateOfNextMonth);
+  const [applyPayload, setApplyPayload] = useState<ScheduleApplyPayload>({
+    deleteSlots: [],
+    addSlots: [],
+  });
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const prevWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, -1));
   const nextWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, 1));
@@ -59,6 +64,16 @@ export default function ScheduleApplyScreen() {
     });
   };
 
+  const handleSlotClick = (slot: ScheduleSlot) => {
+    setApplyPayload((currentPayload) =>
+      toggleApplySlotChange(
+        currentPayload,
+        slot,
+        DUMMY_NEXT_MONTH_SCHEDULE.maxConcurrentWorkers,
+      ),
+    );
+  };
+
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader type="apply" year={year} month={month} />
@@ -72,7 +87,24 @@ export default function ScheduleApplyScreen() {
         isNextWeekDisabled={isNextWeekDisabled}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
+        getSlotCurrentCount={(slot) =>
+          getApplySlotCurrentCount(slot, applyPayload)
+        }
+        getSlotStatus={(slot) => getApplySlotStatus(slot, applyPayload)}
+        onSlotClick={handleSlotClick}
       />
+      {/* TODO: 아래 버튼은 추후에 제대로 구현 예정. 현재는 테스트 버튼 */}
+      <Button
+        size="lg"
+        onClick={() =>
+          console.log({
+            deleteSlots: applyPayload.deleteSlots,
+            addSlots: applyPayload.addSlots,
+          })
+        }
+      >
+        저장하기
+      </Button>
     </div>
   );
 }

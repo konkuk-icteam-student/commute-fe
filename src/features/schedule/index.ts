@@ -1,3 +1,23 @@
-export { ScheduleTable, ScheduleHeader } from "./components";
+export {
+  ScheduleTable,
+  ScheduleHeader,
+  ScheduleTableHeader,
+} from "./components";
+
 export { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } from "./constants";
-export { chunkScheduleSlots } from "./utils";
+
+export {
+  chunkScheduleSlots,
+  getFirstDateOfNextMonth,
+  getMonthFromDateLabel,
+  getApplySlotCurrentCount,
+  getApplySlotStatus,
+  toggleApplySlotChange,
+} from "./utils";
+
+export type {
+  ScheduleApplyPayload,
+  ScheduleSlot,
+  ScheduleSlotStatus,
+  WeekScheduleData,
+} from "./types";

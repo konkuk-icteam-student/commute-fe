@@ -1,7 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { DUMMY_NEXT_MONTH_SCHEDULE } from "./dummy.ts";
+import type { WeekScheduleData } from "../types";
+
+const { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } = (await import(
+  new URL("./dummy.ts", import.meta.url).href
+)) as {
+  DUMMY_GET_SCHEDULE: WeekScheduleData;
+  DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData;
+};
+
+const SELECTED_STATUSES = new Set([
+  "MY_SCHEDULE",
+  "PENDING_ADD",
+  "PENDING_DELETE",
+]);
 
 describe("DUMMY_NEXT_MONTH_SCHEDULE", () => {
   it("keeps every current count within max concurrent workers", () => {
@@ -18,5 +31,17 @@ describe("DUMMY_NEXT_MONTH_SCHEDULE", () => {
     );
 
     assert.ok(availableSlots.some((slot) => slot.currentCount > 0));
+  });
+});
+
+describe("schedule dummy data", () => {
+  it("keeps selected slots with at least one current worker", () => {
+    const selectedSlots = [
+      ...DUMMY_GET_SCHEDULE.slots,
+      ...DUMMY_NEXT_MONTH_SCHEDULE.slots,
+    ].filter((slot) => SELECTED_STATUSES.has(slot.status));
+
+    assert.ok(selectedSlots.length > 0);
+    assert.ok(selectedSlots.every((slot) => slot.currentCount >= 1));
   });
 });

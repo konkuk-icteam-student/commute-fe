@@ -3,8 +3,10 @@ import Image from "next/image";
 import { Toggle } from "@/components/ui";
 import icRightButton from "@/assets/icons/common/ic_right_button.svg";
 import { cn } from "@/lib/utils";
+import icScheduleRefresh from "@/assets/icons/common/ic_schedule_refresh.svg";
 
 interface ScheduleTableHeaderProps {
+  isView: boolean;
   week: number;
   isChecked: boolean;
   isPrevWeekDisabled?: boolean;
@@ -15,6 +17,7 @@ interface ScheduleTableHeaderProps {
 }
 
 export default function ScheduleTableHeader({
+  isView,
   week,
   isChecked,
   isPrevWeekDisabled = false,
@@ -51,13 +54,24 @@ export default function ScheduleTableHeader({
           <Image src={icRightButton} alt="다음주차" />
         </button>
       </div>
-      <div className="flex flex-1 justify-end">
-        <Toggle
-          checked={isChecked}
-          onCheckedChange={onCheckedChange}
-          label="자세히"
-        />
-      </div>
+      {isView ? (
+        <div className="flex flex-1 justify-end">
+          <Toggle
+            checked={isChecked}
+            onCheckedChange={onCheckedChange}
+            label="자세히"
+          />
+        </div>
+      ) : (
+        <div className="flex flex-1 justify-end">
+          <button
+            className="mr-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-[#DDE3EF]"
+            type="button"
+          >
+            <Image src={icScheduleRefresh} alt="새로고침" />
+          </button>
+        </div>
+      )}
     </header>
   );
 }

@@ -25,6 +25,7 @@ export default function ScheduleEditScreen() {
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader type="edit" year={year} month={month} />
       <ScheduleTable
+        type="edit"
         year={year}
         month={month}
         week={week}
