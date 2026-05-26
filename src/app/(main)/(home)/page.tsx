@@ -1,8 +1,8 @@
-import { HomeScreen } from "@/features/home";
+import HomeScreen from "@/screens/home";
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen w-full bg-blue-200 pb-24">
+    <main className="flex min-h-screen w-full bg-white pb-24">
       <HomeScreen />
     </main>
   );
