@@ -20,6 +20,11 @@ const attendanceText = {
     description: "출근 시간이 지났습니다",
     buttonText: "출근하기",
   },
+  empty: {
+    title: "근무 없음",
+    description: "오늘 예정된 근무가 없습니다",
+    buttonText: "출근하기",
+  },
 };
 
 const CLOCK_IN_AVAILABLE_BEFORE_MINUTES = 10;
@@ -27,17 +32,41 @@ const CLOCK_IN_AVAILABLE_BEFORE_MINUTES = 10;
 export type BaseWorkSchedule = Omit<WorkSchedule, "status">;
 
 const parseTimeToMinutes = (time: string) => {
-  const [hours, minutes] = time.split(":").map(Number);
+  const match = time.trim().match(/^(\d{1,2}):(\d{2})$/);
+
+  if (!match) {
+    throw new Error(`Invalid schedule time: "${time}"`);
+  }
+
+  const [, hoursText, minutesText] = match;
+  const hours = Number(hoursText);
+  const minutes = Number(minutesText);
+
+  if (hours > 23 || minutes > 59) {
+    throw new Error(`Invalid schedule time: "${time}"`);
+  }
 
   return hours * 60 + minutes;
 };
 
 const getScheduleTimeRange = (time: string) => {
-  const [startTime, endTime] = time.split(" - ");
+  const match = time.trim().match(/^(.+?)\s*-\s*(.+)$/);
+
+  if (!match) {
+    throw new Error(`Invalid schedule time range: "${time}"`);
+  }
+
+  const [, startTime, endTime] = match;
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = parseTimeToMinutes(endTime);
+
+  if (startMinutes > endMinutes) {
+    throw new Error(`Invalid schedule time range: "${time}"`);
+  }
 
   return {
-    startMinutes: parseTimeToMinutes(startTime),
-    endMinutes: parseTimeToMinutes(endTime),
+    startMinutes,
+    endMinutes,
   };
 };
 
@@ -103,6 +132,14 @@ const createScheduledAttendanceSummary = ({
   clockInScheduleId,
 });
 
+const createEmptyAttendanceSummary = (): AttendanceSummary => ({
+  status: "scheduled",
+  title: attendanceText.empty.title,
+  description: attendanceText.empty.description,
+  buttonText: attendanceText.empty.buttonText,
+  canClockIn: false,
+});
+
 export const syncSchedulesWithCurrentTime = (
   schedules: BaseWorkSchedule[],
   currentDate: Date,
@@ -129,6 +166,10 @@ export const getAttendanceSummary = (
       ...getScheduleTimeRange(schedule.time),
     }))
     .sort((a, b) => a.startMinutes - b.startMinutes);
+
+  if (orderedSchedules.length === 0) {
+    return createEmptyAttendanceSummary();
+  }
 
   const completedSchedule = orderedSchedules.find(
     (schedule) => schedule.status === "completed",

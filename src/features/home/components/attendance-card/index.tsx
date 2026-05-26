@@ -8,7 +8,7 @@ export type AttendanceStatus = "completed" | "scheduled";
 export type AttendanceSummary = {
   status: AttendanceStatus;
   title: string;
-  highlightTime: string;
+  highlightTime?: string;
   description: string;
   buttonText: string;
   canClockIn: boolean;
@@ -49,8 +49,19 @@ export default function AttendanceCard({
               {attendance.title}
             </p>
             <p className="mt-1 text-[12px] leading-5 font-bold text-[#8892A6]">
-              <span className="text-[#1D4ED8]">{attendance.highlightTime}</span>
-              <span className="font-medium"> {attendance.description}</span>
+              {attendance.highlightTime ? (
+                <>
+                  <span className="text-[#1D4ED8]">
+                    {attendance.highlightTime}
+                  </span>
+                  <span className="font-medium">
+                    {" "}
+                    {attendance.description}
+                  </span>
+                </>
+              ) : (
+                <span className="font-medium">{attendance.description}</span>
+              )}
             </p>
           </div>
         </div>
