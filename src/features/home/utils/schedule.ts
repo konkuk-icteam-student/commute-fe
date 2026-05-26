@@ -22,6 +22,8 @@ const attendanceText = {
   },
 };
 
+const CLOCK_IN_AVAILABLE_BEFORE_MINUTES = 10;
+
 export type BaseWorkSchedule = Omit<WorkSchedule, "status">;
 
 const parseTimeToMinutes = (time: string) => {
@@ -136,6 +138,14 @@ export const getAttendanceSummary = (
     return createCompletedAttendanceSummary(completedSchedule.startMinutes);
   }
 
+  const clockedInSchedule = orderedSchedules.find(
+    (schedule) => schedule.id === clockedInScheduleId,
+  );
+
+  if (clockedInSchedule) {
+    return createCompletedAttendanceSummary(clockedInSchedule.startMinutes);
+  }
+
   const activeSchedule = orderedSchedules.find(
     (schedule) => schedule.status === "working",
   );
@@ -147,6 +157,7 @@ export const getAttendanceSummary = (
 
     return createScheduledAttendanceSummary({
       startMinutes: activeSchedule.startMinutes,
+      description: attendanceText.expired.description,
       canClockIn: true,
       clockInScheduleId: activeSchedule.id,
     });
@@ -157,8 +168,14 @@ export const getAttendanceSummary = (
   );
 
   if (nextSchedule) {
+    const canClockIn =
+      currentMinutes >=
+      nextSchedule.startMinutes - CLOCK_IN_AVAILABLE_BEFORE_MINUTES;
+
     return createScheduledAttendanceSummary({
       startMinutes: nextSchedule.startMinutes,
+      canClockIn,
+      clockInScheduleId: canClockIn ? nextSchedule.id : undefined,
     });
   }
 
