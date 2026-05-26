@@ -101,12 +101,16 @@ const getScheduleStatus = (
   return isClockedIn ? "completed" : "absent";
 };
 
-const createCompletedAttendanceSummary = (
-  startMinutes: number,
-): AttendanceSummary => ({
+const createCompletedAttendanceSummary = ({
+  startMinutes,
+  clockedInAtMinutes = startMinutes,
+}: {
+  startMinutes: number;
+  clockedInAtMinutes?: number;
+}): AttendanceSummary => ({
   status: "completed",
   title: attendanceText.completed.title,
-  highlightTime: formatTimeLabel(startMinutes),
+  highlightTime: formatTimeLabel(clockedInAtMinutes),
   description: attendanceText.completed.description,
   buttonText: attendanceText.completed.buttonText,
   canClockIn: false,
@@ -158,8 +162,12 @@ export const getAttendanceSummary = (
   schedules: WorkSchedule[],
   currentDate: Date,
   clockedInScheduleId?: number | null,
+  clockedInAt?: Date | null,
 ): AttendanceSummary => {
   const currentMinutes = getCurrentMinutes(currentDate);
+  const clockedInAtMinutes = clockedInAt
+    ? getCurrentMinutes(clockedInAt)
+    : undefined;
   const orderedSchedules = schedules
     .map((schedule) => ({
       ...schedule,
@@ -176,7 +184,13 @@ export const getAttendanceSummary = (
   );
 
   if (completedSchedule) {
-    return createCompletedAttendanceSummary(completedSchedule.startMinutes);
+    return createCompletedAttendanceSummary({
+      startMinutes: completedSchedule.startMinutes,
+      clockedInAtMinutes:
+        completedSchedule.id === clockedInScheduleId
+          ? clockedInAtMinutes
+          : undefined,
+    });
   }
 
   const clockedInSchedule = orderedSchedules.find(
@@ -184,7 +198,10 @@ export const getAttendanceSummary = (
   );
 
   if (clockedInSchedule) {
-    return createCompletedAttendanceSummary(clockedInSchedule.startMinutes);
+    return createCompletedAttendanceSummary({
+      startMinutes: clockedInSchedule.startMinutes,
+      clockedInAtMinutes,
+    });
   }
 
   const activeSchedule = orderedSchedules.find(
@@ -193,7 +210,10 @@ export const getAttendanceSummary = (
 
   if (activeSchedule) {
     if (activeSchedule.id === clockedInScheduleId) {
-      return createCompletedAttendanceSummary(activeSchedule.startMinutes);
+      return createCompletedAttendanceSummary({
+        startMinutes: activeSchedule.startMinutes,
+        clockedInAtMinutes,
+      });
     }
 
     return createScheduledAttendanceSummary({
