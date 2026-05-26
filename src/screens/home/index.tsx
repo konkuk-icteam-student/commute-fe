@@ -38,6 +38,7 @@ export default function HomeScreen() {
   const [clockedInScheduleId, setClockedInScheduleId] = useState<number | null>(
     null,
   );
+  const [clockedInAt, setClockedInAt] = useState<Date | null>(null);
   const currentDateTime = formatCurrentDateTime(currentDate);
   const schedules = syncSchedulesWithCurrentTime(
     mockHomeData.schedules,
@@ -48,6 +49,7 @@ export default function HomeScreen() {
     schedules,
     currentDate,
     clockedInScheduleId,
+    clockedInAt,
   );
 
   useEffect(() => {
@@ -69,8 +71,11 @@ export default function HomeScreen() {
       return;
     }
 
+    const now = new Date();
+
     setClockedInScheduleId(attendance.clockInScheduleId);
-    setCurrentDate(new Date());
+    setClockedInAt(now);
+    setCurrentDate(now);
   };
 
   return (
