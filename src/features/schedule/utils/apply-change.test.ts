@@ -7,7 +7,9 @@ const {
   getApplySlotCurrentCount,
   getApplySlotStatus,
   getMergedApplyPayload,
+  getRequestEditSlotStatus,
   mergeContinuousSlotTimes,
+  toggleRequestEditSlotChange,
   toggleApplySlotChange,
 } = (await import(new URL("./index.ts", import.meta.url).href)) as typeof import("./index");
 
@@ -35,6 +37,21 @@ const emptySlot: ScheduleSlot = {
 const fullEmptySlot: ScheduleSlot = {
   ...emptySlot,
   currentCount: 5,
+};
+
+const pendingAddSlot: ScheduleSlot = {
+  ...myScheduleSlot,
+  status: "PENDING_ADD",
+};
+
+const pendingDeleteSlot: ScheduleSlot = {
+  ...myScheduleSlot,
+  status: "PENDING_DELETE",
+};
+
+const unavailableSlot: ScheduleSlot = {
+  ...myScheduleSlot,
+  status: "UNAVAILABLE",
 };
 
 describe("toggleApplySlotChange", () => {
@@ -71,6 +88,73 @@ describe("toggleApplySlotChange", () => {
 
     assert.deepEqual(payload.deleteSlots, []);
     assert.deepEqual(payload.addSlots, []);
+  });
+});
+
+describe("toggleRequestEditSlotChange", () => {
+  it("adds existing slots to deleteSlots and removes them on second click", () => {
+    const addedToDelete = toggleRequestEditSlotChange(basePayload, myScheduleSlot);
+
+    assert.deepEqual(addedToDelete.deleteSlots, [
+      { date: "2026-04-06", start: "13:00", end: "14:30" },
+    ]);
+    assert.deepEqual(addedToDelete.addSlots, []);
+
+    const reverted = toggleRequestEditSlotChange(addedToDelete, myScheduleSlot);
+
+    assert.deepEqual(reverted.deleteSlots, []);
+    assert.deepEqual(reverted.addSlots, []);
+  });
+
+  it("adds empty slots to addSlots and removes them on second click", () => {
+    const addedToAdd = toggleRequestEditSlotChange(basePayload, emptySlot);
+
+    assert.deepEqual(addedToAdd.deleteSlots, []);
+    assert.deepEqual(addedToAdd.addSlots, [
+      { date: "2026-04-09", start: "13:00", end: "14:30" },
+    ]);
+
+    const reverted = toggleRequestEditSlotChange(addedToAdd, emptySlot);
+
+    assert.deepEqual(reverted.deleteSlots, []);
+    assert.deepEqual(reverted.addSlots, []);
+  });
+
+  it("does not change payload for pending or unavailable slots", () => {
+    assert.deepEqual(toggleRequestEditSlotChange(basePayload, pendingAddSlot), {
+      deleteSlots: [],
+      addSlots: [],
+    });
+    assert.deepEqual(
+      toggleRequestEditSlotChange(basePayload, pendingDeleteSlot),
+      {
+        deleteSlots: [],
+        addSlots: [],
+      },
+    );
+    assert.deepEqual(toggleRequestEditSlotChange(basePayload, unavailableSlot), {
+      deleteSlots: [],
+      addSlots: [],
+    });
+  });
+
+  it("does not add empty slots when the current count is already full", () => {
+    const payload = toggleRequestEditSlotChange(basePayload, fullEmptySlot, 5);
+
+    assert.deepEqual(payload.deleteSlots, []);
+    assert.deepEqual(payload.addSlots, []);
+  });
+});
+
+describe("getRequestEditSlotStatus", () => {
+  it("returns request delete for deleteSlots and request add for addSlots", () => {
+    const payload = toggleRequestEditSlotChange(
+      toggleRequestEditSlotChange(basePayload, myScheduleSlot),
+      emptySlot,
+    );
+
+    assert.equal(getRequestEditSlotStatus(myScheduleSlot, payload), "REQUEST_DELETE");
+    assert.equal(getRequestEditSlotStatus(emptySlot, payload), "REQUEST_ADD");
   });
 });
 

@@ -77,7 +77,9 @@ export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
       const status = isUnavailable
         ? "UNAVAILABLE"
         : getPreviewSlotStatus(dateIndex, timeIndex);
-      const currentCount = isUnavailable ? 0 : (dateIndex + timeIndex) % 4;
+      const currentCount = isUnavailable
+        ? 0
+        : (dateIndex + timeIndex) % (MAX_CONCURRENT_WORKERS + 1);
 
       return {
         date,

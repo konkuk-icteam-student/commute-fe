@@ -28,7 +28,10 @@ interface ScheduleTableProps {
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
   getSlotCurrentCount?: (slot: ScheduleSlot) => number;
+  getSlotClassName?: (slot: ScheduleSlot) => string | undefined;
+  getSlotDisabled?: (slot: ScheduleSlot) => boolean;
   getSlotStatus?: (slot: ScheduleSlot) => ScheduleSlotStatus;
+  getSlotTextClassName?: (slot: ScheduleSlot) => string | undefined;
   onSlotClick?: (slot: ScheduleSlot) => void;
   unavailableBeforeDate?: Date;
 }
@@ -44,7 +47,10 @@ export default function ScheduleTable({
   handlePrevWeek,
   handleNextWeek,
   getSlotCurrentCount,
+  getSlotClassName,
+  getSlotDisabled,
   getSlotStatus,
+  getSlotTextClassName,
   onSlotClick,
   unavailableBeforeDate,
 }: ScheduleTableProps) {
@@ -87,6 +93,7 @@ export default function ScheduleTable({
                     year,
                     date.date,
                   );
+                  const displaySlot = { ...slot, date: displayDate };
                   const isOutsideApplyMonth =
                     isApply && getMonthFromDateLabel(date.date) !== month;
                   const isPastDate =
@@ -95,9 +102,21 @@ export default function ScheduleTable({
                   const slotStatus: ScheduleSlotStatus =
                     isOutsideApplyMonth || isPastDate
                       ? "UNAVAILABLE"
-                      : (getSlotStatus?.(slot) ?? slot.status);
+                      : (getSlotStatus?.(displaySlot) ?? slot.status);
                   const slotCurrentCount =
-                    getSlotCurrentCount?.(slot) ?? slot.currentCount;
+                    getSlotCurrentCount?.(displaySlot) ?? slot.currentCount;
+                  const slotClassName =
+                    getSlotClassName?.(displaySlot) ??
+                    SLOT_STATUS_CLASS_NAME[slotStatus];
+                  const isSlotDisabled =
+                    slotStatus === "UNAVAILABLE" ||
+                    type === "view" ||
+                    (getSlotDisabled?.(displaySlot) ?? false);
+                  const slotTextClassName =
+                    getSlotTextClassName?.(displaySlot) ??
+                    (slotStatus === "MY_SCHEDULE"
+                      ? "text-white"
+                      : "text-[#C2C4C6]");
 
                   return (
                     <div
@@ -112,12 +131,10 @@ export default function ScheduleTable({
                       <button
                         className={cn(
                           "flex h-7 w-full items-center justify-center rounded-sm",
-                          SLOT_STATUS_CLASS_NAME[slotStatus],
+                          slotClassName,
                         )}
-                        disabled={
-                          slotStatus === "UNAVAILABLE" || type === "view"
-                        }
-                        onClick={() => onSlotClick?.(slot)}
+                        disabled={isSlotDisabled}
+                        onClick={() => onSlotClick?.(displaySlot)}
                         type="button"
                       >
                         {((isChecked && slotStatus !== "UNAVAILABLE") ||
@@ -125,9 +142,7 @@ export default function ScheduleTable({
                           <span
                             className={cn(
                               "text-xs",
-                              slotStatus === "MY_SCHEDULE"
-                                ? "text-white"
-                                : "text-[#C2C4C6]",
+                              slotTextClassName,
                             )}
                           >
                             {slotCurrentCount}/

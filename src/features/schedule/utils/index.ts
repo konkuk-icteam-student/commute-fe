@@ -1,5 +1,6 @@
 import type {
   ScheduleApplyPayload,
+  ScheduleRequestEditStatus,
   ScheduleSlot,
   ScheduleSlotStatus,
   ScheduleSlotTime,
@@ -139,6 +140,65 @@ export const toggleApplySlotChange = (
   }
 
   return payload;
+};
+
+// 수정 요청 화면에서 슬롯 클릭에 따라 addSlots/deleteSlots를 토글합니다.
+export const toggleRequestEditSlotChange = (
+  payload: ScheduleApplyPayload,
+  slot: ScheduleSlot,
+  maxConcurrentWorkers?: number,
+): ScheduleApplyPayload => {
+  const slotTime = toSlotTime(slot);
+
+  if (
+    slot.status === "PENDING_ADD" ||
+    slot.status === "PENDING_DELETE" ||
+    slot.status === "UNAVAILABLE"
+  ) {
+    return payload;
+  }
+
+  if (slot.status === "EMPTY") {
+    if (
+      maxConcurrentWorkers !== undefined &&
+      slot.currentCount >= maxConcurrentWorkers &&
+      !hasSlotTime(payload.addSlots, slotTime)
+    ) {
+      return payload;
+    }
+
+    return {
+      ...payload,
+      addSlots: hasSlotTime(payload.addSlots, slotTime)
+        ? removeSlotTime(payload.addSlots, slotTime)
+        : [...payload.addSlots, slotTime],
+    };
+  }
+
+  return {
+    ...payload,
+    deleteSlots: hasSlotTime(payload.deleteSlots, slotTime)
+      ? removeSlotTime(payload.deleteSlots, slotTime)
+      : [...payload.deleteSlots, slotTime],
+  };
+};
+
+// 수정 요청 내역을 반영해 화면에 표시할 요청 상태를 계산합니다.
+export const getRequestEditSlotStatus = (
+  slot: ScheduleSlot,
+  payload: ScheduleApplyPayload,
+): ScheduleRequestEditStatus | undefined => {
+  const slotTime = toSlotTime(slot);
+
+  if (hasSlotTime(payload.deleteSlots, slotTime)) {
+    return "REQUEST_DELETE";
+  }
+
+  if (hasSlotTime(payload.addSlots, slotTime)) {
+    return "REQUEST_ADD";
+  }
+
+  return undefined;
 };
 
 // 신청 변경 내역을 반영해 화면에 표시할 슬롯 상태를 계산합니다.

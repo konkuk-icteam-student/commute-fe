@@ -5,6 +5,8 @@ export type ScheduleSlotStatus =
   | "UNAVAILABLE"
   | "EMPTY";
 
+export type ScheduleRequestEditStatus = "REQUEST_ADD" | "REQUEST_DELETE";
+
 export interface ScheduleSlotTime {
   date: string; // YYYY-MM-dd
   start: string; // HH:MM

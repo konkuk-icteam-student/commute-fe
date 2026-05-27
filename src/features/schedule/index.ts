@@ -14,13 +14,16 @@ export {
   getApplySlotCurrentCount,
   getApplySlotStatus,
   getMergedApplyPayload,
+  getRequestEditSlotStatus,
   isBeforeDate,
   mergeContinuousSlotTimes,
+  toggleRequestEditSlotChange,
   toggleApplySlotChange,
 } from "./utils";
 
 export type {
   ScheduleApplyPayload,
+  ScheduleRequestEditStatus,
   ScheduleSlot,
   ScheduleSlotStatus,
   WeekScheduleData,
