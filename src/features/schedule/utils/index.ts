@@ -54,6 +54,36 @@ const removeSlotTime = (
   targetSlot: ScheduleSlotTime,
 ) => slots.filter((slot) => !isSameSlotTime(slot, targetSlot));
 
+// 같은 날짜의 이어진 슬롯 시간들을 하나의 시간 구간으로 병합합니다.
+export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
+  const sortedSlots = [...slots].sort((leftSlot, rightSlot) => {
+    if (leftSlot.date !== rightSlot.date) {
+      return leftSlot.date.localeCompare(rightSlot.date);
+    }
+
+    return leftSlot.start.localeCompare(rightSlot.start);
+  });
+
+  return sortedSlots.reduce<ScheduleSlotTime[]>((mergedSlots, slot) => {
+    const lastSlot = mergedSlots.at(-1);
+
+    if (lastSlot && lastSlot.date === slot.date && lastSlot.end === slot.start) {
+      lastSlot.end = slot.end;
+      return mergedSlots;
+    }
+
+    return [...mergedSlots, { ...slot }];
+  }, []);
+};
+
+// 신청 payload의 addSlots와 deleteSlots를 각각 이어진 시간 단위로 병합합니다.
+export const getMergedApplyPayload = (
+  payload: ScheduleApplyPayload,
+): ScheduleApplyPayload => ({
+  deleteSlots: mergeContinuousSlotTimes(payload.deleteSlots),
+  addSlots: mergeContinuousSlotTimes(payload.addSlots),
+});
+
 // 신청 화면에서 슬롯 클릭에 따라 addSlots/deleteSlots를 토글합니다.
 export const toggleApplySlotChange = (
   payload: ScheduleApplyPayload,

@@ -12,6 +12,8 @@ export {
   getMonthFromDateLabel,
   getApplySlotCurrentCount,
   getApplySlotStatus,
+  getMergedApplyPayload,
+  mergeContinuousSlotTimes,
   toggleApplySlotChange,
 } from "./utils";
 

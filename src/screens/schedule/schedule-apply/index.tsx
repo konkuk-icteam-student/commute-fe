@@ -11,6 +11,7 @@ import {
   getFirstDateOfNextMonth,
   getApplySlotCurrentCount,
   getApplySlotStatus,
+  getMergedApplyPayload,
   toggleApplySlotChange,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
@@ -96,12 +97,13 @@ export default function ScheduleApplyScreen() {
       {/* TODO: 아래 버튼은 추후에 제대로 구현 예정. 현재는 테스트 버튼 */}
       <Button
         size="lg"
-        onClick={() =>
-          console.log({
+        onClick={() => {
+          console.log("각각의 slot : ", {
             deleteSlots: applyPayload.deleteSlots,
             addSlots: applyPayload.addSlots,
-          })
-        }
+          });
+          console.log("slot 병합 이후 : ", getMergedApplyPayload(applyPayload));
+        }}
       >
         저장하기
       </Button>
