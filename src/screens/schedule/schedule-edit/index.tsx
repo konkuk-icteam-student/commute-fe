@@ -10,9 +10,11 @@ import {
   ScheduleHeader,
   ScheduleTable,
   toggleRequestEditSlotChange,
+  getMergedApplyPayload,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
+import { Button } from "@/components/ui";
 
 export default function ScheduleEditScreen() {
   const today = new Date();
@@ -111,6 +113,19 @@ export default function ScheduleEditScreen() {
         onSlotClick={handleSlotClick}
         unavailableBeforeDate={today}
       />
+      {/* TODO: 아래 버튼은 추후에 제대로 구현 예정. 현재는 테스트 버튼 */}
+      <Button
+        size="lg"
+        onClick={() => {
+          console.log("각각의 slot : ", {
+            deleteSlots: editPayload.deleteSlots,
+            addSlots: editPayload.addSlots,
+          });
+          console.log("slot 병합 이후 : ", getMergedApplyPayload(editPayload));
+        }}
+      >
+        저장하기
+      </Button>
     </div>
   );
 }
