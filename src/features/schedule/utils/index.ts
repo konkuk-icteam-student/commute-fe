@@ -24,11 +24,31 @@ export const chunkScheduleSlots = (
 export const getMonthFromDateLabel = (dateLabel: string) =>
   Number(dateLabel.split(".")[0]);
 
+// "M.DD" 형식의 날짜 라벨을 YYYY-MM-DD 날짜 문자열로 변환합니다.
+export const getDateStringFromDateLabel = (year: number, dateLabel: string) => {
+  const [month, day] = dateLabel.split(".");
+
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
 // 오늘 기준 다음 달 1일 Date 객체를 반환합니다.
 export const getFirstDateOfNextMonth = () => {
   const today = new Date();
 
   return new Date(today.getFullYear(), today.getMonth() + 1, 1);
+};
+
+// YYYY-MM-DD 날짜 문자열이 기준 날짜보다 이전 날짜인지 확인합니다.
+export const isBeforeDate = (date: string, baseDate: Date) => {
+  const [year, month, day] = date.split("-").map(Number);
+  const scheduleDate = new Date(year, month - 1, day);
+  const normalizedBaseDate = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+  );
+
+  return scheduleDate.getTime() < normalizedBaseDate.getTime();
 };
 
 // 스케줄 슬롯에서 API 요청에 필요한 시간 정보만 추출합니다.

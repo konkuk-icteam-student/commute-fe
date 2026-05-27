@@ -23,6 +23,7 @@ export default function ScheduleApplyScreen() {
     deleteSlots: [],
     addSlots: [],
   });
+
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const prevWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, -1));
   const nextWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, 1));

@@ -9,7 +9,12 @@ import type {
   ScheduleSlotStatus,
   WeekScheduleData,
 } from "../../types";
-import { chunkScheduleSlots, getMonthFromDateLabel } from "../../utils";
+import {
+  chunkScheduleSlots,
+  getDateStringFromDateLabel,
+  getMonthFromDateLabel,
+  isBeforeDate,
+} from "../../utils";
 import { SLOT_STATUS_CLASS_NAME, SLOTS_PER_DAY } from "../../constants";
 
 interface ScheduleTableProps {
@@ -25,6 +30,7 @@ interface ScheduleTableProps {
   getSlotCurrentCount?: (slot: ScheduleSlot) => number;
   getSlotStatus?: (slot: ScheduleSlot) => ScheduleSlotStatus;
   onSlotClick?: (slot: ScheduleSlot) => void;
+  unavailableBeforeDate?: Date;
 }
 
 export default function ScheduleTable({
@@ -40,6 +46,7 @@ export default function ScheduleTable({
   getSlotCurrentCount,
   getSlotStatus,
   onSlotClick,
+  unavailableBeforeDate,
 }: ScheduleTableProps) {
   const [isChecked, setIsChecked] = useState(false);
   const isView = type === "view";
@@ -57,8 +64,8 @@ export default function ScheduleTable({
         isView={isView}
         week={week}
         isChecked={isChecked}
-        isPrevWeekDisabled={isApply && isPrevWeekDisabled}
-        isNextWeekDisabled={isApply && isNextWeekDisabled}
+        isPrevWeekDisabled={isPrevWeekDisabled}
+        isNextWeekDisabled={isNextWeekDisabled}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         onCheckedChange={setIsChecked}
@@ -76,11 +83,19 @@ export default function ScheduleTable({
               <span className="text-[10px] text-[#2563EB]">{date.date}</span>
               <div className="flex w-full flex-col items-center gap-1 pt-1">
                 {scheduleSlotsByDay[index]?.map((slot) => {
+                  const displayDate = getDateStringFromDateLabel(
+                    year,
+                    date.date,
+                  );
                   const isOutsideApplyMonth =
                     isApply && getMonthFromDateLabel(date.date) !== month;
-                  const slotStatus: ScheduleSlotStatus = isOutsideApplyMonth
-                    ? "UNAVAILABLE"
-                    : (getSlotStatus?.(slot) ?? slot.status);
+                  const isPastDate =
+                    unavailableBeforeDate !== undefined &&
+                    isBeforeDate(displayDate, unavailableBeforeDate);
+                  const slotStatus: ScheduleSlotStatus =
+                    isOutsideApplyMonth || isPastDate
+                      ? "UNAVAILABLE"
+                      : (getSlotStatus?.(slot) ?? slot.status);
                   const slotCurrentCount =
                     getSlotCurrentCount?.(slot) ?? slot.currentCount;
 
