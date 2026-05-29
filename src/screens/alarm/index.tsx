@@ -4,6 +4,8 @@ import Link from "next/link";
 import addTimeIcon from "@/assets/icons/add-time-icon.svg";
 import emptyNotificationIcon from "@/assets/icons/empty-notification-icon.svg";
 import {
+  formatNotificationCreatedAt,
+  getNotificationDateTime,
   getNotificationIcon,
   mockNotifications,
   shouldShowAddTimeIcon,
@@ -30,12 +32,12 @@ export default function AlarmScreen() {
           {notifications.map((notification) => (
             <li
               className="border-b border-[#EEF1F6] px-2.5"
-              key={notification.id}
+              key={notification.notificationId}
             >
               <article className="flex flex-col">
                 <p className="text-[12px] leading-6 tracking-[0.24px] text-[#717171]">
                   <span aria-hidden="true" className="mr-0.5">
-                    {getNotificationIcon(notification.type)}
+                    {getNotificationIcon(notification.typeCode)}
                   </span>
                   {notification.title}
                 </p>
@@ -50,10 +52,13 @@ export default function AlarmScreen() {
                       height={10}
                     />
                   )}
-                  {notification.message}
+                  {notification.content}
                 </p>
-                <time className="text-[10px] leading-6 tracking-[0.24px] text-[#717171]">
-                  {notification.createdAt}
+                <time
+                  className="text-[10px] leading-6 tracking-[0.24px] text-[#717171]"
+                  dateTime={getNotificationDateTime(notification.createdAt)}
+                >
+                  {formatNotificationCreatedAt(notification.createdAt)}
                 </time>
               </article>
             </li>

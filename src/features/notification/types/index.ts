@@ -1,14 +1,14 @@
-export type NotificationType =
-  | "WORK_TIME_CHANGE_REJECTED"
-  | "WORK_TIME_CHANGED"
-  | "WORK_REQUEST_STARTED";
+export type NotificationTypeCode = "NT01" | "NT02" | "NT03";
 
 export type Notification = {
-  id: number;
-  type: NotificationType;
+  notificationId: string;
+  typeCode: NotificationTypeCode;
+  typeName: string;
   title: string;
-  message: string;
+  content: string;
+  refId: string;
   createdAt: string;
+  isNew: boolean;
 };
 
 export type NotificationSummary = {
