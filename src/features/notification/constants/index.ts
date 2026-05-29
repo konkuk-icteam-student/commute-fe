@@ -34,5 +34,10 @@ export const mockNotifications: Notification[] = [
 ];
 
 export const mockNotificationSummary: NotificationSummary = {
-  newNotificationCount: 3,
+  isSuccess: true,
+  message: "새 알림 여부를 조회했습니다.",
+  details: {
+    hasNewNotification: true,
+    newNotificationCount: 3,
+  },
 };

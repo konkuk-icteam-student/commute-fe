@@ -43,12 +43,15 @@ export default function HomeScreen() {
     currentDate,
     clockedInScheduleId,
   );
-  const attendance = getAttendanceSummary(
-    schedules,
-    currentDate,
-    clockedInScheduleId,
-    clockedInAt,
-  );
+  const hasSchedules = schedules.length > 0;
+  const attendance = hasSchedules
+    ? getAttendanceSummary(
+        schedules,
+        currentDate,
+        clockedInScheduleId,
+        clockedInAt,
+      )
+    : null;
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -65,7 +68,7 @@ export default function HomeScreen() {
   };
 
   const clockIn = () => {
-    if (attendance.clockInScheduleId == null) {
+    if (attendance?.clockInScheduleId == null) {
       return;
     }
 
@@ -79,7 +82,9 @@ export default function HomeScreen() {
   return (
     <section className="min-h-full w-full bg-white px-6.5 pt-14.5 pb-28 text-[#111827]">
       <HomeHeader
-        newNotificationCount={mockNotificationSummary.newNotificationCount}
+        newNotificationCount={
+          mockNotificationSummary.details.newNotificationCount
+        }
       />
       <HomeGreeting
         teamName={mockHomeData.teamName}
@@ -89,7 +94,9 @@ export default function HomeScreen() {
         currentDateTime={currentDateTime}
         onRefresh={refreshCurrentDateTime}
       />
-      <AttendanceCard attendance={attendance} onClockIn={clockIn} />
+      {attendance && (
+        <AttendanceCard attendance={attendance} onClockIn={clockIn} />
+      )}
       <WorkScheduleCard schedules={schedules} />
     </section>
   );

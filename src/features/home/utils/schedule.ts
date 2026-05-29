@@ -20,11 +20,6 @@ const attendanceText = {
     description: "출근 시간이 지났습니다",
     buttonText: "출근하기",
   },
-  empty: {
-    title: "근무 없음",
-    description: "오늘 예정된 근무가 없습니다",
-    buttonText: "출근하기",
-  },
 };
 
 const CLOCK_IN_AVAILABLE_BEFORE_MINUTES = 10;
@@ -136,14 +131,6 @@ const createScheduledAttendanceSummary = ({
   clockInScheduleId,
 });
 
-const createEmptyAttendanceSummary = (): AttendanceSummary => ({
-  status: "scheduled",
-  title: attendanceText.empty.title,
-  description: attendanceText.empty.description,
-  buttonText: attendanceText.empty.buttonText,
-  canClockIn: false,
-});
-
 export const syncSchedulesWithCurrentTime = (
   schedules: BaseWorkSchedule[],
   currentDate: Date,
@@ -163,7 +150,7 @@ export const getAttendanceSummary = (
   currentDate: Date,
   clockedInScheduleId?: number | null,
   clockedInAt?: Date | null,
-): AttendanceSummary => {
+): AttendanceSummary | null => {
   const currentMinutes = getCurrentMinutes(currentDate);
   const clockedInAtMinutes = clockedInAt
     ? getCurrentMinutes(clockedInAt)
@@ -176,7 +163,7 @@ export const getAttendanceSummary = (
     .sort((a, b) => a.startMinutes - b.startMinutes);
 
   if (orderedSchedules.length === 0) {
-    return createEmptyAttendanceSummary();
+    return null;
   }
 
   const completedSchedule = orderedSchedules.find(
@@ -241,7 +228,7 @@ export const getAttendanceSummary = (
   }
 
   return createScheduledAttendanceSummary({
-    startMinutes: orderedSchedules.at(-1)?.startMinutes ?? 0,
+    startMinutes: orderedSchedules.at(-1)?.startMinutes ?? currentMinutes,
     description: attendanceText.expired.description,
   });
 };

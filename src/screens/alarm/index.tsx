@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import addTimeIcon from "@/assets/icons/add-time-icon.svg";
+import icLeft from "@/assets/icons/common/ic_left.svg";
 import emptyNotificationIcon from "@/assets/icons/empty-notification-icon.svg";
 import {
   formatNotificationCreatedAt,
@@ -19,12 +20,18 @@ export default function AlarmScreen() {
       <header className="relative mb-10 flex h-15.25 shrink-0 items-center justify-center">
         <Link
           aria-label="홈으로 이동"
-          className="absolute left-2.5 flex items-center justify-center text-[28px] leading-none text-[#111827]"
+          className="absolute left-2.5 flex items-center justify-center"
           href="/"
         >
-          ‹
+          <Image
+            alt=""
+            aria-hidden="true"
+            src={icLeft}
+            width={20}
+            height={20}
+          />
         </Link>
-        <h1 className="text-[16px] leading-6 font-bold">알림</h1>
+        <h1 className="text-[16px] leading-6">알림</h1>
       </header>
 
       {notifications.length > 0 ? (
@@ -74,7 +81,7 @@ export default function AlarmScreen() {
             height={28}
           />
           <p className="mt-2.25 text-[15px] leading-6 font-bold text-[#111827]">
-            새로운 알림이 없습니다.
+            최근 30일 내 알림이 없습니다.
           </p>
         </div>
       )}
