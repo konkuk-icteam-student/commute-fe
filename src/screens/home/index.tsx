@@ -8,8 +8,6 @@ import {
   HomeGreeting,
   HomeHeader,
   WorkScheduleCard,
-} from "@/features/home/components";
-import {
   formatCurrentDateTime,
   getAttendanceSummary,
   syncSchedulesWithCurrentTime,
