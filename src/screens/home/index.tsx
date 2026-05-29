@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 import {
   AttendanceCard,
   DateRefreshButton,
-  HomeGreeting,
-  HomeHeader,
-  WorkScheduleCard,
   formatCurrentDateTime,
   getAttendanceSummary,
+  HomeGreeting,
+  HomeHeader,
   syncSchedulesWithCurrentTime,
+  WorkScheduleCard,
 } from "@/features/home";
+import { mockNotificationSummary } from "@/features/notification";
 
 const mockHomeData = {
-  unreadNotificationCount: 3,
   userName: "홍길동",
   teamName: "정보운영팀",
   schedules: [
@@ -79,7 +79,7 @@ export default function HomeScreen() {
   return (
     <section className="min-h-full w-full bg-white px-6.5 pt-14.5 pb-28 text-[#111827]">
       <HomeHeader
-        unreadNotificationCount={mockHomeData.unreadNotificationCount}
+        newNotificationCount={mockNotificationSummary.newNotificationCount}
       />
       <HomeGreeting
         teamName={mockHomeData.teamName}
