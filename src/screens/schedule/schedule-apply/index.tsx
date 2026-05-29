@@ -78,7 +78,7 @@ export default function ScheduleApplyScreen() {
 
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
-      <ScheduleHeader type="apply" year={year} month={month} />
+      <ScheduleHeader mode="apply" year={year} month={month} />
       <ScheduleTable
         type="apply"
         year={year}

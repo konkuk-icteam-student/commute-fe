@@ -5,20 +5,20 @@ import { Button } from "@/components/ui";
 import icLeft from "@/assets/icons/common/ic_left.svg";
 
 interface ScheduleHeaderProps {
-  type?: "view" | "edit" | "apply";
+  mode?: "view" | "edit" | "apply";
   year: number;
   month: number;
 }
 
 export default function ScheduleHeader({
-  type = "view",
+  mode = "view",
   year,
   month,
 }: ScheduleHeaderProps) {
   const router = useRouter();
 
   const handleToGoBack = () => {
-    router.push("/schedule");
+    router.back();
   };
 
   const handleToEdit = () => {
@@ -28,7 +28,7 @@ export default function ScheduleHeader({
     router.push("/schedule-apply");
   };
 
-  return type === "view" ? (
+  return mode === "view" ? (
     <header className="flex flex-col gap-1.5 pl-4">
       <h2 className="text-base leading-5 font-medium text-[#1D4ED8]">
         {year}년 {month}월
@@ -53,7 +53,7 @@ export default function ScheduleHeader({
       </button>
       <div className="flex flex-col gap-1">
         <h1 className="text-xl leading-5 font-bold text-[#1A2236]">
-          {type === "apply" ? "근로시간 신청" : "근로시간 수정 요청"}
+          {mode === "apply" ? "근로시간 신청" : "근로시간 수정 요청"}
         </h1>
         <h2 className="text-base leading-5 font-medium text-[#1D4ED8]">
           {year}년 {month}월
