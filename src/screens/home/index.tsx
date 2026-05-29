@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import {
   AttendanceCard,
   DateRefreshButton,
-  HomeGreeting,
-  HomeHeader,
-  WorkScheduleCard,
   formatCurrentDateTime,
   getAttendanceSummary,
+  HomeGreeting,
+  HomeHeader,
   syncSchedulesWithCurrentTime,
-} from "@/features/home/utils";
+  WorkScheduleCard,
+} from "@/features/home";
 import { mockNotificationSummary } from "@/features/notification";
 
 const mockHomeData = {
