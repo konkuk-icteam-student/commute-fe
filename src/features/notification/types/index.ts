@@ -12,5 +12,10 @@ export type Notification = {
 };
 
 export type NotificationSummary = {
-  newNotificationCount: number;
+  isSuccess: boolean;
+  message: string;
+  details: {
+    hasNewNotification: boolean;
+    newNotificationCount: number;
+  };
 };

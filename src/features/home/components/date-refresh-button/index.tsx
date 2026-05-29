@@ -34,7 +34,7 @@ export default function DateRefreshButton({
         width={12}
         height={12}
       />
-      <span className="min-w-0 truncate tracking-[0.015em]">
+      <span className="mt-0.5 min-w-0 truncate tracking-[0.015em]">
         {currentDateTime}
       </span>
     </button>

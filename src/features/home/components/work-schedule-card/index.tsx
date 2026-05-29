@@ -32,33 +32,43 @@ type WorkScheduleCardProps = {
 };
 
 export default function WorkScheduleCard({ schedules }: WorkScheduleCardProps) {
+  const hasSchedules = schedules.length > 0;
+
   return (
-    <div className="mt-4 w-[86vw] max-w-full rounded-[20px] border border-[#DDE3EF] px-5.5 py-3.25">
+    <div className="mt-4 w-[86vw] max-w-full rounded-[20px] border border-[#DDE3EF] px-5.5 py-3">
       <h2 className="text-[11px] leading-5 font-bold text-[#8892A6]">
         오늘의 근무 일정
       </h2>
 
-      <ul className="mt-5 divide-y divide-[#F0F2F8]">
-        {schedules.map((schedule) => (
-          <li
-            className="flex justify-between gap-4 py-2.5 first:pt-0 last:pb-1"
-            key={schedule.id}
-          >
-            <div>
-              <p className="text-[13px] leading-5 font-bold text-[#1A2236]">
-                {schedule.title}
-              </p>
-              <p className="mt-1 text-[11px] leading-4 font-bold text-[#8892A6]">
-                {schedule.time}
-              </p>
-            </div>
-            <Badge
-              text={statusLabel[schedule.status]}
-              variant={statusVariant[schedule.status]}
-            />
-          </li>
-        ))}
-      </ul>
+      {!hasSchedules && (
+        <p className="flex min-h-11.75 items-center justify-center text-[10px] leading-3 tracking-[0.21px] text-[#8892A6]">
+          오늘은 예정된 근무가 없습니다
+        </p>
+      )}
+
+      {hasSchedules && (
+        <ul className="mt-5 divide-y divide-[#F0F2F8]">
+          {schedules.map((schedule) => (
+            <li
+              className="flex justify-between gap-4 py-2.5 first:pt-0 last:pb-1"
+              key={schedule.id}
+            >
+              <div>
+                <p className="text-[13px] leading-5 font-bold text-[#1A2236]">
+                  {schedule.title}
+                </p>
+                <p className="mt-1 text-[11px] leading-4 font-bold text-[#8892A6]">
+                  {schedule.time}
+                </p>
+              </div>
+              <Badge
+                text={statusLabel[schedule.status]}
+                variant={statusVariant[schedule.status]}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
