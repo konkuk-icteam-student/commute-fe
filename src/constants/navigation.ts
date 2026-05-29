@@ -10,14 +10,7 @@ import timeIcon from "@/assets/icons/nav/time-icon.svg";
 const assetSrc = (asset: string | { src: string }) =>
   typeof asset === "string" ? asset : asset.src;
 
-export const navigationItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Records", href: "/" },
-  { label: "Members", href: "/" },
-  { label: "Settings", href: "/" },
-];
-
-export const userNavigationItems = [
+export const USER_NAVIGATION_ITEMS = [
   {
     label: "홈",
     href: "/",
@@ -28,7 +21,7 @@ export const userNavigationItems = [
   },
   {
     label: "근로시간",
-    href: "/work-hours",
+    href: "/schedule",
     icon: assetSrc(timeIcon),
     iconSize: { width: 17, height: 17 },
     activeIcon: assetSrc(timeActiveIcon),

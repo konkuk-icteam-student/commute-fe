@@ -8,12 +8,10 @@ import {
   HomeGreeting,
   HomeHeader,
   WorkScheduleCard,
-} from "@/features/home/components";
-import {
   formatCurrentDateTime,
   getAttendanceSummary,
   syncSchedulesWithCurrentTime,
-} from "@/features/home/utils";
+} from "@/features/home";
 
 const mockHomeData = {
   unreadNotificationCount: 3,

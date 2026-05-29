@@ -54,10 +54,7 @@ export default function AttendanceCard({
                   <span className="text-[#1D4ED8]">
                     {attendance.highlightTime}
                   </span>
-                  <span className="font-medium">
-                    {" "}
-                    {attendance.description}
-                  </span>
+                  <span className="font-medium"> {attendance.description}</span>
                 </>
               ) : (
                 <span className="font-medium">{attendance.description}</span>
