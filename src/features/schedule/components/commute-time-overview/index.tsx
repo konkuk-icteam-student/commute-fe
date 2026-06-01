@@ -13,11 +13,8 @@ export default function CommuteTimeOverview({
   weeklyTotalHours,
   monthlyTargetHours,
 }: CommuteTimeOverviewProps) {
-  const cappedUsedHours = Math.min(Math.max(usedHours, 0), monthlyTargetHours);
   const monthlyProgressPercent =
-    monthlyTargetHours > 0
-      ? (cappedUsedHours / monthlyTargetHours) * 100
-      : 0;
+    monthlyTargetHours > 0 ? (usedHours / monthlyTargetHours) * 100 : 0;
 
   return (
     <section className="flex w-full flex-col gap-2">
@@ -43,7 +40,7 @@ export default function CommuteTimeOverview({
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={monthlyTargetHours}
-          aria-valuenow={cappedUsedHours}
+          aria-valuenow={usedHours}
         >
           <div
             className="absolute left-0 h-full rounded-full bg-[#1D4ED8]"

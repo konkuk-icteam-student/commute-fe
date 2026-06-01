@@ -49,7 +49,7 @@ export default function ScheduleStatusLegend({
         <Image
           className="pt-px pr-px"
           src={informIcon}
-          alt="inform"
+          alt=""
           aria-hidden="true"
         />
         <span className="text-[11px] leading-3 text-[#1A2236]">{`1회 최소 ${minSessionHours}시간 · 주 최대 ${weeklyMaxHours}시간 · 월 목표 ${monthlyTargetHours}시간`}</span>
