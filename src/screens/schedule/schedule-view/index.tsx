@@ -6,6 +6,8 @@ import {
   ScheduleHeader,
   ScheduleTable,
   DUMMY_GET_SCHEDULE,
+  ScheduleStatusLegend,
+  CommuteTimeOverview,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
@@ -22,16 +24,32 @@ export default function ScheduleViewScreen() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-5 px-3 py-4">
+    <div className="flex w-full flex-col gap-4 px-3 py-4">
       <ScheduleHeader year={year} month={month} />
-      <ScheduleTable
-        year={year}
-        month={month}
-        week={week}
-        scheduleData={DUMMY_GET_SCHEDULE}
-        handlePrevWeek={handlePrevWeek}
-        handleNextWeek={handleNextWeek}
-      />
+      <div className="flex flex-col gap-2">
+        <ScheduleTable
+          year={year}
+          month={month}
+          week={week}
+          scheduleData={DUMMY_GET_SCHEDULE}
+          handlePrevWeek={handlePrevWeek}
+          handleNextWeek={handleNextWeek}
+        />
+        <ScheduleStatusLegend
+          minSessionHours={1}
+          weeklyMaxHours={13}
+          monthlyTargetHours={27}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <CommuteTimeOverview
+          week={1}
+          month={6}
+          usedHours={3}
+          weeklyTotalHours={7}
+          monthlyTargetHours={27}
+        />
+      </div>
     </div>
   );
 }
