@@ -1,5 +1,6 @@
 import type {
   ScheduleApplyPayload,
+  ScheduleChangeHistorySlot,
   ScheduleRequestEditStatus,
   ScheduleSlot,
   ScheduleSlotStatus,
@@ -50,6 +51,42 @@ export const isBeforeDate = (date: string, baseDate: Date) => {
   );
 
   return scheduleDate.getTime() < normalizedBaseDate.getTime();
+};
+
+const parseIsoDateTime = (dateTime: string) => {
+  const [date, time] = dateTime.split("T");
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.slice(0, 5).split(":").map(Number);
+
+  return {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    totalMinutes: new Date(year, month - 1, day, hour, minute).getTime() / 60000,
+  };
+};
+
+const formatDurationHours = (durationMinutes: number) => {
+  const durationHours = durationMinutes / 60;
+
+  return Number.isInteger(durationHours)
+    ? String(durationHours)
+    : String(durationHours);
+};
+
+export const formatScheduleChangeHistorySlot = ({
+  start,
+  end,
+}: ScheduleChangeHistorySlot) => {
+  const startDateTime = parseIsoDateTime(start);
+  const endDateTime = parseIsoDateTime(end);
+  const durationHours = formatDurationHours(
+    endDateTime.totalMinutes - startDateTime.totalMinutes,
+  );
+
+  return `${startDateTime.month}월 ${startDateTime.day}일 ${start.slice(11, 16)}-${end.slice(11, 16)} (${durationHours}h)`;
 };
 
 // 스케줄 슬롯에서 API 요청에 필요한 시간 정보만 추출합니다.

@@ -18,7 +18,7 @@ export default function CommuteTimeProgressSection({
 
   return (
     <section className="flex w-full flex-col gap-2">
-      <div className="flex flex-row items-center justify-between rounded-[10px] border border-[#DDE3EF] px-3 py-2">
+      <div className="flex flex-row items-center justify-between rounded-2xl border border-[#DDE3EF] px-3 py-2">
         <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
           {week}주차 총 시간
         </span>
@@ -26,7 +26,7 @@ export default function CommuteTimeProgressSection({
           {usedHours} / {weeklyTotalHours}h
         </span>
       </div>
-      <div className="flex flex-col items-center gap-2 rounded-[10px] border border-[#DDE3EF] p-3">
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-[#DDE3EF] p-3">
         <div className="flex w-full flex-row items-center justify-between">
           <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
             {month}월 전체

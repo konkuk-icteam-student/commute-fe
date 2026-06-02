@@ -9,6 +9,7 @@ import {
   ScheduleStatusLegend,
   CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
+  DUUMY_SCHEDULE_CHANGE_HISTORY,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
@@ -50,7 +51,9 @@ export default function ScheduleViewScreen() {
           weeklyTotalHours={7}
           monthlyTargetHours={27}
         />
-        <ScheduleChangeHistoryPreview />
+        <ScheduleChangeHistoryPreview
+          histories={DUUMY_SCHEDULE_CHANGE_HISTORY}
+        />
       </div>
     </div>
   );
