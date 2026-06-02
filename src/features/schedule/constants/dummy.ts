@@ -118,7 +118,7 @@ export const DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData = {
   ),
 };
 
-export const DUUMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[] = [
+export const DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[] = [
   {
     requestId: "5fd54f21-9b83-49f2-bdf7-8f1a6f946601",
     statusCode: "CS01",

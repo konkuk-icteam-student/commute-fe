@@ -6,11 +6,11 @@ import type { ScheduleChangeHistoryType, WeekScheduleData } from "../types";
 const {
   DUMMY_GET_SCHEDULE,
   DUMMY_NEXT_MONTH_SCHEDULE,
-  DUUMY_SCHEDULE_CHANGE_HISTORY,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
 } = (await import(new URL("./dummy.ts", import.meta.url).href)) as {
   DUMMY_GET_SCHEDULE: WeekScheduleData;
   DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData;
-  DUUMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[];
+  DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[];
 };
 
 const SELECTED_STATUSES = new Set([
@@ -24,9 +24,7 @@ describe("DUMMY_NEXT_MONTH_SCHEDULE", () => {
   it("keeps every current count within max concurrent workers", () => {
     const { maxConcurrentWorkers, slots } = DUMMY_NEXT_MONTH_SCHEDULE;
 
-    assert.ok(
-      slots.every((slot) => slot.currentCount <= maxConcurrentWorkers),
-    );
+    assert.ok(slots.every((slot) => slot.currentCount <= maxConcurrentWorkers));
   });
 
   it("fills empty available slots with preview worker counts", () => {
@@ -61,13 +59,13 @@ describe("schedule dummy data", () => {
   });
 });
 
-describe("DUUMY_SCHEDULE_CHANGE_HISTORY", () => {
+describe("DUMMY_SCHEDULE_CHANGE_HISTORY", () => {
   it("includes all schedule change history status cases", () => {
-    assert.ok(DUUMY_SCHEDULE_CHANGE_HISTORY.length >= 3);
+    assert.ok(DUMMY_SCHEDULE_CHANGE_HISTORY.length >= 3);
 
     for (const statusCode of HISTORY_STATUS_CODES) {
       assert.ok(
-        DUUMY_SCHEDULE_CHANGE_HISTORY.some(
+        DUMMY_SCHEDULE_CHANGE_HISTORY.some(
           (history) => history.statusCode === statusCode,
         ),
       );
@@ -76,12 +74,12 @@ describe("DUUMY_SCHEDULE_CHANGE_HISTORY", () => {
 
   it("uses delete and add change type codes by slot group", () => {
     assert.ok(
-      DUUMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
+      DUMMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
         history.deleteSlots.every((slot) => slot.changeTypeCode === "CR02"),
       ),
     );
     assert.ok(
-      DUUMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
+      DUMMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
         history.addSlots.every((slot) => slot.changeTypeCode === "CR01"),
       ),
     );

@@ -9,7 +9,7 @@ import {
   ScheduleStatusLegend,
   CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
-  DUUMY_SCHEDULE_CHANGE_HISTORY,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
@@ -45,14 +45,14 @@ export default function ScheduleViewScreen() {
       </div>
       <div className="flex flex-col gap-2">
         <CommuteTimeProgressSection
-          week={1}
-          month={6}
+          week={week}
+          month={month}
           usedHours={3}
           weeklyTotalHours={7}
           monthlyTargetHours={27}
         />
         <ScheduleChangeHistoryPreview
-          histories={DUUMY_SCHEDULE_CHANGE_HISTORY}
+          histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
         />
       </div>
     </div>

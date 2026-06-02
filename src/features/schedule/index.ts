@@ -10,7 +10,7 @@ export {
 export {
   DUMMY_GET_SCHEDULE,
   DUMMY_NEXT_MONTH_SCHEDULE,
-  DUUMY_SCHEDULE_CHANGE_HISTORY,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
 } from "./constants";
 
 export {
