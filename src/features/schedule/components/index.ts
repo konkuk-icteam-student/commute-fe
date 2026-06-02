@@ -2,4 +2,5 @@ export { default as ScheduleTable } from "./schedule-table";
 export { default as ScheduleHeader } from "./schedule-header";
 export { default as ScheduleTableHeader } from "./schedule-table-header";
 export { default as ScheduleStatusLegend } from "./schedule-status-legend";
-export { default as CommuteTimeOverview } from "./commute-time-overview";
+export { default as CommuteTimeProgressSection } from "./commute-time-progress-section";
+export { default as ScheduleChangeHistoryPreview } from "./schedule-change-history-preview";

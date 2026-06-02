@@ -1,4 +1,4 @@
-interface CommuteTimeOverviewProps {
+interface CommuteTimeProgressSectionProps {
   week: number;
   month: number;
   usedHours: number;
@@ -6,13 +6,13 @@ interface CommuteTimeOverviewProps {
   monthlyTargetHours: number;
 }
 
-export default function CommuteTimeOverview({
+export default function CommuteTimeProgressSection({
   week,
   month,
   usedHours,
   weeklyTotalHours,
   monthlyTargetHours,
-}: CommuteTimeOverviewProps) {
+}: CommuteTimeProgressSectionProps) {
   const monthlyProgressPercent =
     monthlyTargetHours > 0 ? (usedHours / monthlyTargetHours) * 100 : 0;
 

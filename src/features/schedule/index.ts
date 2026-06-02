@@ -3,7 +3,8 @@ export {
   ScheduleHeader,
   ScheduleTableHeader,
   ScheduleStatusLegend,
-  CommuteTimeOverview,
+  CommuteTimeProgressSection,
+  ScheduleChangeHistoryPreview,
 } from "./components";
 
 export { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } from "./constants";

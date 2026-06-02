@@ -7,7 +7,8 @@ import {
   ScheduleTable,
   DUMMY_GET_SCHEDULE,
   ScheduleStatusLegend,
-  CommuteTimeOverview,
+  CommuteTimeProgressSection,
+  ScheduleChangeHistoryPreview,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
@@ -42,13 +43,14 @@ export default function ScheduleViewScreen() {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <CommuteTimeOverview
+        <CommuteTimeProgressSection
           week={1}
           month={6}
           usedHours={3}
           weeklyTotalHours={7}
           monthlyTargetHours={27}
         />
+        <ScheduleChangeHistoryPreview />
       </div>
     </div>
   );
