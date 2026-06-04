@@ -10,8 +10,18 @@ import {
   TaskChecklist,
   todayTaskDate,
   type DailyTaskPeriod,
+  type HandoverMemo,
   WorkTimeList,
 } from "@/features/daily-tasks";
+
+const formatMemoCreatedAt = (date: Date) => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${month}.${day} ${hours}:${minutes}`;
+};
 
 export default function DailyTasksScreen() {
   const [selectedPeriod, setSelectedPeriod] =
@@ -69,15 +79,30 @@ export default function DailyTasksScreen() {
     setHandoverMemosByPeriod((currentMemosByPeriod) => ({
       ...currentMemosByPeriod,
       [selectedPeriod]: currentMemosByPeriod[selectedPeriod].filter(
-        (handoverMemo) => handoverMemo.id !== memoId,
+        (handoverMemo) => handoverMemo.id !== memoId || !handoverMemo.isMine,
       ),
     }));
   };
 
   const saveMemo = (nextMemo: string) => {
-    if (nextMemo.trim().length === 0) {
+    const trimmedMemo = nextMemo.trim();
+
+    if (trimmedMemo.length === 0) {
       return;
     }
+
+    const newMemo: HandoverMemo = {
+      id: Date.now(),
+      author: "현재 사용자",
+      createdAt: formatMemoCreatedAt(new Date()),
+      content: trimmedMemo,
+      isMine: true,
+    };
+
+    setHandoverMemosByPeriod((currentMemosByPeriod) => ({
+      ...currentMemosByPeriod,
+      [selectedPeriod]: [...currentMemosByPeriod[selectedPeriod], newMemo],
+    }));
 
     setMemoByPeriod((currentMemoByPeriod) => ({
       ...currentMemoByPeriod,

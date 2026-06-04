@@ -29,6 +29,7 @@ export type HandoverMemo = {
   author: string;
   createdAt: string;
   content: string;
+  isMine: boolean;
 };
 
 export type DailyTasksByPeriod = Record<

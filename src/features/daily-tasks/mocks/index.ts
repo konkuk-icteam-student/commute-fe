@@ -3,7 +3,18 @@ import type {
   DailyTasksByPeriod,
   HandoverMemo,
   WorkTimeSlot,
+  WorkTimeWorker,
 } from "../types";
+
+const mockWorkers = {
+  studentA: { id: 1, name: "학생A", tone: "student-blue" },
+  studentB: { id: 2, name: "학생B", tone: "student-green" },
+  studentC: { id: 3, name: "학생C", tone: "student-red" },
+  studentD: { id: 4, name: "학생D", tone: "student-orange" },
+  studentE: { id: 5, name: "학생E", tone: "student-purple" },
+  studentF: { id: 6, name: "학생F", tone: "student-cyan" },
+  studentG: { id: 7, name: "학생G", tone: "student-pink" },
+} satisfies Record<string, WorkTimeWorker>;
 
 const mockMorningDailyTasks: DailyTaskItem[] = [
   {
@@ -54,44 +65,33 @@ const mockAfternoonDailyTasks: DailyTaskItem[] = [
 const mockMorningWorkTimeSlots: WorkTimeSlot[] = [
   {
     time: "09:00",
-    workers: [
-      { id: 1, name: "학생A", tone: "student-blue" },
-      { id: 2, name: "학생B", tone: "student-green" },
-    ],
+    workers: [mockWorkers.studentA, mockWorkers.studentB],
   },
   {
     time: "09:30",
-    workers: [
-      { id: 3, name: "학생A", tone: "student-blue" },
-      { id: 4, name: "학생B", tone: "student-green" },
-      { id: 5, name: "학생C", tone: "student-red" },
-    ],
+    workers: [mockWorkers.studentA, mockWorkers.studentB, mockWorkers.studentC],
   },
   {
     time: "10:00",
-    workers: [
-      { id: 6, name: "학생B", tone: "student-green" },
-      { id: 7, name: "학생C", tone: "student-red" },
-      { id: 8, name: "학생A", tone: "student-orange" },
-    ],
+    workers: [mockWorkers.studentB, mockWorkers.studentC, mockWorkers.studentD],
   },
   {
     time: "10:30",
     workers: [
-      { id: 9, name: "학생B", tone: "student-green" },
-      { id: 10, name: "학생B", tone: "student-purple" },
-      { id: 11, name: "학생A", tone: "student-orange" },
-      { id: 12, name: "학생C", tone: "student-cyan" },
-      { id: 13, name: "학생C", tone: "student-pink" },
+      mockWorkers.studentB,
+      mockWorkers.studentE,
+      mockWorkers.studentD,
+      mockWorkers.studentF,
+      mockWorkers.studentG,
     ],
   },
   {
     time: "11:00",
     workers: [
-      { id: 14, name: "학생A", tone: "student-orange" },
-      { id: 15, name: "학생C", tone: "student-cyan" },
-      { id: 16, name: "학생C", tone: "student-pink" },
-      { id: 17, name: "학생B", tone: "student-purple" },
+      mockWorkers.studentD,
+      mockWorkers.studentF,
+      mockWorkers.studentG,
+      mockWorkers.studentE,
     ],
   },
 ];
@@ -99,43 +99,28 @@ const mockMorningWorkTimeSlots: WorkTimeSlot[] = [
 const mockAfternoonWorkTimeSlots: WorkTimeSlot[] = [
   {
     time: "13:00",
-    workers: [
-      { id: 1, name: "학생C", tone: "student-pink" },
-      { id: 2, name: "학생D", tone: "student-cyan" },
-    ],
+    workers: [mockWorkers.studentG, mockWorkers.studentF],
   },
   {
     time: "13:30",
-    workers: [
-      { id: 3, name: "학생D", tone: "student-cyan" },
-      { id: 4, name: "학생A", tone: "student-orange" },
-      { id: 5, name: "학생B", tone: "student-purple" },
-    ],
+    workers: [mockWorkers.studentF, mockWorkers.studentD, mockWorkers.studentE],
   },
   {
     time: "14:00",
-    workers: [
-      { id: 6, name: "학생A", tone: "student-orange" },
-      { id: 7, name: "학생C", tone: "student-red" },
-      { id: 8, name: "학생D", tone: "student-cyan" },
-    ],
+    workers: [mockWorkers.studentD, mockWorkers.studentC, mockWorkers.studentF],
   },
   {
     time: "14:30",
     workers: [
-      { id: 9, name: "학생B", tone: "student-green" },
-      { id: 10, name: "학생C", tone: "student-pink" },
-      { id: 11, name: "학생D", tone: "student-cyan" },
-      { id: 12, name: "학생A", tone: "student-blue" },
+      mockWorkers.studentB,
+      mockWorkers.studentG,
+      mockWorkers.studentF,
+      mockWorkers.studentA,
     ],
   },
   {
     time: "15:00",
-    workers: [
-      { id: 13, name: "학생B", tone: "student-purple" },
-      { id: 14, name: "학생A", tone: "student-orange" },
-      { id: 15, name: "학생C", tone: "student-red" },
-    ],
+    workers: [mockWorkers.studentE, mockWorkers.studentD, mockWorkers.studentC],
   },
 ];
 
@@ -145,6 +130,7 @@ const mockMorningHandoverMemos: HandoverMemo[] = [
     author: "홍길동A",
     createdAt: "05.26 (수) 10:36",
     content: "다음 근무자가 쓰레기봉투 꼭 갈아주세요.",
+    isMine: true,
   },
 ];
 
@@ -154,12 +140,14 @@ const mockAfternoonHandoverMemos: HandoverMemo[] = [
     author: "김철수B",
     createdAt: "05.26 (수) 14:20",
     content: "오후에 프린터 토너 부족하면 사무실에 말씀해주세요.",
+    isMine: false,
   },
   {
     id: 2,
     author: "이영희C",
     createdAt: "05.26 (수) 15:05",
     content: "창가 좌석 분실물은 데스크 서랍에 보관했습니다.",
+    isMine: false,
   },
 ];
 
