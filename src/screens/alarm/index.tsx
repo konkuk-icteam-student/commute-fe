@@ -81,7 +81,7 @@ export default function AlarmScreen() {
             height={28}
           />
           <p className="mt-2.25 text-[15px] leading-6 font-bold text-[#111827]">
-            최근 30일 내 알림이 없습니다.
+            최근 30일 내 새로운 알림이 없습니다.
           </p>
         </div>
       )}
