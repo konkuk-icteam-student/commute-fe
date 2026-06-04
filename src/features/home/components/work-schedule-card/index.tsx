@@ -14,10 +14,10 @@ export type WorkSchedule = {
 };
 
 const statusVariant: Record<WorkScheduleStatus, BadgeVariant> = {
-  working: "blue",
-  scheduled: "gray",
-  absent: "red",
-  completed: "green",
+  working: "status-working",
+  scheduled: "status-scheduled",
+  absent: "status-absent",
+  completed: "status-completed",
 };
 
 const statusLabel = {
