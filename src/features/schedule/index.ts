@@ -22,6 +22,8 @@ export {
   getApplySlotStatus,
   getMergedApplyPayload,
   getRequestEditSlotStatus,
+  getRequestEditSlotDisabled,
+  getSlotTimesTotalHours,
   isBeforeDate,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,

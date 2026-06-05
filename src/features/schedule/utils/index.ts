@@ -112,6 +112,55 @@ const removeSlotTime = (
   targetSlot: ScheduleSlotTime,
 ) => slots.filter((slot) => !isSameSlotTime(slot, targetSlot));
 
+const getTimeMinutes = (time: string) => {
+  const [hour, minute] = time.split(":").map(Number);
+
+  return hour * 60 + minute;
+};
+
+export const getSlotTimesTotalHours = (slots: ScheduleSlotTime[]) =>
+  slots.reduce(
+    (totalMinutes, slot) =>
+      totalMinutes + getTimeMinutes(slot.end) - getTimeMinutes(slot.start),
+    0,
+  ) / 60;
+
+export const getRequestEditSlotDisabled = (
+  slot: ScheduleSlot,
+  payload: ScheduleApplyPayload,
+  maxConcurrentWorkers?: number,
+) => {
+  const slotTime = toSlotTime(slot);
+
+  if (
+    slot.status === "PENDING_ADD" ||
+    slot.status === "PENDING_DELETE" ||
+    slot.status === "UNAVAILABLE"
+  ) {
+    return true;
+  }
+
+  if (slot.status !== "EMPTY") {
+    return false;
+  }
+
+  if (hasSlotTime(payload.addSlots, slotTime)) {
+    return false;
+  }
+
+  if (
+    maxConcurrentWorkers !== undefined &&
+    slot.currentCount >= maxConcurrentWorkers
+  ) {
+    return true;
+  }
+
+  return (
+    getSlotTimesTotalHours([...payload.addSlots, slotTime]) >
+    getSlotTimesTotalHours(payload.deleteSlots)
+  );
+};
+
 // 같은 날짜의 이어진 슬롯 시간들을 하나의 시간 구간으로 병합합니다.
 export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
   const sortedSlots = [...slots].sort((leftSlot, rightSlot) => {
@@ -196,11 +245,7 @@ export const toggleRequestEditSlotChange = (
   }
 
   if (slot.status === "EMPTY") {
-    if (
-      maxConcurrentWorkers !== undefined &&
-      slot.currentCount >= maxConcurrentWorkers &&
-      !hasSlotTime(payload.addSlots, slotTime)
-    ) {
+    if (getRequestEditSlotDisabled(slot, payload, maxConcurrentWorkers)) {
       return payload;
     }
 

@@ -19,9 +19,9 @@ export default function WorkingHoursCard({
     maxHours && maxHours > 0 ? (hours / maxHours) * 100 : 0;
 
   return (
-    <div
+    <section
       className={cn(
-        "flex flex-col items-center gap-2 rounded-2xl border border-[#DDE3EF] px-3",
+        "flex w-full flex-col items-center gap-2 rounded-[10px] border border-[#DDE3EF] px-3",
         withProgressBar ? "py-3" : "py-2",
       )}
     >
@@ -31,12 +31,13 @@ export default function WorkingHoursCard({
         </span>
         <span className="text-xs leading-4.5 font-bold text-[#C6CBD4]">
           <span className={isRed ? "text-[#FD7171]" : "text-[#1D4ED8]"}>
-            {hours}{" "}
+            {hours}
+            {maxHours === undefined && "h"}
           </span>
-          {maxHours && `/ ${maxHours}h`}
+          {maxHours !== undefined && ` / ${maxHours}h`}
         </span>
       </div>
-      {maxHours && withProgressBar && (
+      {maxHours !== undefined && withProgressBar && (
         <div
           className="relative h-1.5 w-full overflow-hidden rounded-full bg-[#EAEAEA]"
           role="progressbar"
@@ -50,6 +51,6 @@ export default function WorkingHoursCard({
           />
         </div>
       )}
-    </div>
+    </section>
   );
 }

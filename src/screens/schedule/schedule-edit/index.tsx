@@ -5,13 +5,16 @@ import { useState } from "react";
 import {
   DUMMY_GET_SCHEDULE,
   getRequestEditSlotStatus,
+  getRequestEditSlotDisabled,
   type ScheduleApplyPayload,
   type ScheduleSlot,
   ScheduleHeader,
   ScheduleTable,
   toggleRequestEditSlotChange,
   getMergedApplyPayload,
+  getSlotTimesTotalHours,
   ScheduleStatusLegend,
+  WorkingHoursCard,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
@@ -24,6 +27,7 @@ export default function ScheduleEditScreen() {
     deleteSlots: [],
     addSlots: [],
   });
+  const [reason, setReason] = useState("");
 
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const currentMonthWeek = getMonthWeekOfDate(today);
@@ -79,6 +83,11 @@ export default function ScheduleEditScreen() {
       ),
     );
   };
+  const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
+  const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
+
+  const buttonDisabled =
+    (deleteRequestHours === 0 && addRequestHours === 0) || reason === "";
 
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
@@ -102,10 +111,11 @@ export default function ScheduleEditScreen() {
               : undefined;
           }}
           getSlotDisabled={(slot) =>
-            slot.status === "PENDING_DELETE" ||
-            slot.status === "PENDING_ADD" ||
-            (slot.status === "EMPTY" &&
-              slot.currentCount >= DUMMY_GET_SCHEDULE.maxConcurrentWorkers)
+            getRequestEditSlotDisabled(
+              slot,
+              editPayload,
+              DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+            )
           }
           getSlotTextClassName={(slot) =>
             getRequestEditSlotStatus(slot, editPayload) === "REQUEST_DELETE"
@@ -121,8 +131,40 @@ export default function ScheduleEditScreen() {
           monthlyTargetHours={27}
         />
       </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex w-full flex-row items-center gap-2">
+          <WorkingHoursCard label={`${week}주차 근무시간`} hours={4} />
+          <WorkingHoursCard label={`${month}월 근무시간`} hours={27} />
+        </div>
+        <WorkingHoursCard
+          label="근무 삭제 신청"
+          hours={deleteRequestHours}
+          maxHours={27}
+          isRed
+        />
+        <WorkingHoursCard
+          label="추가 근무 신청"
+          hours={addRequestHours}
+          maxHours={deleteRequestHours}
+        />
+        <section className="flex w-full flex-col gap-2 rounded-[10px] border border-[#DDE3EF] px-3 py-2">
+          <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
+            사유 입력
+          </span>
+          <div className="flex flex-col gap-1">
+            <input
+              className="text-[11px] text-[#1A2236] placeholder:text-[#C2C4C6]"
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="변경 사유를 입력하세요."
+            />
+            <div className="h-px w-full bg-[#C2C4C6]" />
+          </div>
+        </section>
+      </div>
 
-      {/* TODO: 아래 버튼은 추후에 제대로 구현 예정. 현재는 테스트 버튼 */}
+      {/* TODO: 서버 연동 시 요청 바디 고려 */}
       <Button
         size="lg"
         onClick={() => {
@@ -131,7 +173,9 @@ export default function ScheduleEditScreen() {
             addSlots: editPayload.addSlots,
           });
           console.log("slot 병합 이후 : ", getMergedApplyPayload(editPayload));
+          console.log("변경 사유 : ", reason);
         }}
+        disabled={buttonDisabled}
       >
         신청하기
       </Button>
