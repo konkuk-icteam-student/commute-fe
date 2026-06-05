@@ -100,6 +100,8 @@ export default function ScheduleEditScreen() {
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) || reason === "";
 
+  // TODO: 추가 근무 신청 섹션의 경우, maxHours와 클릭 disabled 처리 수정 필요. 피그마 참고하여 조건 추가해야함. 추후 필수적으로 수정 필요.
+
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader mode="edit" year={year} month={month} />
