@@ -3,10 +3,15 @@ export {
   ScheduleHeader,
   ScheduleTableHeader,
   ScheduleStatusLegend,
-  CommuteTimeOverview,
+  CommuteTimeProgressSection,
+  ScheduleChangeHistoryPreview,
 } from "./components";
 
-export { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } from "./constants";
+export {
+  DUMMY_GET_SCHEDULE,
+  DUMMY_NEXT_MONTH_SCHEDULE,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
+} from "./constants";
 
 export {
   chunkScheduleSlots,
@@ -25,6 +30,11 @@ export {
 
 export type {
   ScheduleApplyPayload,
+  ScheduleChangeHistoryFilterStatusCode,
+  ScheduleChangeHistorySlot,
+  ScheduleChangeHistoryStatusCode,
+  ScheduleChangeHistoryType,
+  ScheduleChangeTypeCode,
   ScheduleRequestEditStatus,
   ScheduleSlot,
   ScheduleSlotStatus,

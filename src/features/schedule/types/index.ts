@@ -29,3 +29,30 @@ export interface WeekScheduleData {
 }
 
 export type ScheduleSlot = WeekScheduleData["slots"][number];
+
+// 수정 처리내역 관련 type
+export type ScheduleChangeHistoryStatusCode = "CS01" | "CS02" | "CS03";
+
+export type ScheduleChangeHistoryFilterStatusCode =
+  | "ALL"
+  | ScheduleChangeHistoryStatusCode;
+
+export type ScheduleChangeTypeCode = "CR01" | "CR02";
+
+export interface ScheduleChangeHistorySlot {
+  start: string;
+  end: string;
+  changeTypeCode: ScheduleChangeTypeCode;
+}
+
+export interface ScheduleChangeHistoryType {
+  requestId: string;
+  statusCode: ScheduleChangeHistoryStatusCode;
+  statusName: string;
+  requestedAt: string;
+  processedAt: string | null;
+  reason: string;
+  rejectReason: string | null;
+  deleteSlots: ScheduleChangeHistorySlot[];
+  addSlots: ScheduleChangeHistorySlot[];
+}

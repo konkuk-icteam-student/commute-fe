@@ -1,4 +1,8 @@
-export { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } from "./dummy";
+export {
+  DUMMY_GET_SCHEDULE,
+  DUMMY_NEXT_MONTH_SCHEDULE,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
+} from "./dummy";
 
 export {
   SLOTS_PER_DAY,

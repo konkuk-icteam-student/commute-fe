@@ -1,4 +1,4 @@
-import type { WeekScheduleData } from "../types";
+import type { ScheduleChangeHistoryType, WeekScheduleData } from "../types";
 
 const WEEKDAYS = [
   "2026-05-18",
@@ -103,7 +103,9 @@ export const DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData = {
         : isMySchedule
           ? "MY_SCHEDULE"
           : "EMPTY";
-      const currentCount = isUnavailable ? 0 : getRandomWorkerCount(date, start);
+      const currentCount = isUnavailable
+        ? 0
+        : getRandomWorkerCount(date, start);
 
       return {
         date,
@@ -115,3 +117,80 @@ export const DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData = {
     }),
   ),
 };
+
+export const DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[] = [
+  {
+    requestId: "5fd54f21-9b83-49f2-bdf7-8f1a6f946601",
+    statusCode: "CS01",
+    statusName: "대기",
+    requestedAt: "2026-04-01T10:00:00",
+    processedAt: null,
+    reason: "수업 일정 변경으로 근무 시간을 조정합니다.",
+    rejectReason: null,
+    deleteSlots: [
+      {
+        start: "2026-04-06T13:00:00",
+        end: "2026-04-06T14:30:00",
+        changeTypeCode: "CR02",
+      },
+      {
+        start: "2026-04-08T14:00:00",
+        end: "2026-04-08T15:00:00",
+        changeTypeCode: "CR02",
+      },
+    ],
+    addSlots: [
+      {
+        start: "2026-04-09T13:00:00",
+        end: "2026-04-09T15:30:00",
+        changeTypeCode: "CR01",
+      },
+    ],
+  },
+  {
+    requestId: "9dc21a62-7d24-4411-9369-427d8e54cc2f",
+    statusCode: "CS02",
+    statusName: "승인",
+    requestedAt: "2026-04-03T09:20:00",
+    processedAt: "2026-04-03T14:10:00",
+    reason: "개인 일정으로 오후 근무를 오전으로 변경합니다.",
+    rejectReason: null,
+    deleteSlots: [
+      {
+        start: "2026-04-10T15:00:00",
+        end: "2026-04-10T16:30:00",
+        changeTypeCode: "CR02",
+      },
+    ],
+    addSlots: [
+      {
+        start: "2026-04-10T10:00:00",
+        end: "2026-04-10T11:30:00",
+        changeTypeCode: "CR01",
+      },
+    ],
+  },
+  {
+    requestId: "c76e05b4-cd1c-4c69-b51e-1c62e684b7aa",
+    statusCode: "CS03",
+    statusName: "거절",
+    requestedAt: "2026-04-05T18:45:00",
+    processedAt: "2026-04-06T11:00:00",
+    reason: "동아리 행사 참석으로 근무 시간을 변경합니다.",
+    rejectReason: "추가 요청한 시간대의 근무 인원이 이미 충족되었습니다.",
+    deleteSlots: [
+      {
+        start: "2026-04-13T09:00:00",
+        end: "2026-04-13T10:30:00",
+        changeTypeCode: "CR02",
+      },
+    ],
+    addSlots: [
+      {
+        start: "2026-04-13T16:00:00",
+        end: "2026-04-13T17:30:00",
+        changeTypeCode: "CR01",
+      },
+    ],
+  },
+];

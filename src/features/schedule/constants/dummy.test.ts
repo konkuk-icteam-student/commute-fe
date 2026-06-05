@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { WeekScheduleData } from "../types";
+import type { ScheduleChangeHistoryType, WeekScheduleData } from "../types";
 
-const { DUMMY_GET_SCHEDULE, DUMMY_NEXT_MONTH_SCHEDULE } = (await import(
-  new URL("./dummy.ts", import.meta.url).href
-)) as {
+const {
+  DUMMY_GET_SCHEDULE,
+  DUMMY_NEXT_MONTH_SCHEDULE,
+  DUMMY_SCHEDULE_CHANGE_HISTORY,
+} = (await import(new URL("./dummy.ts", import.meta.url).href)) as {
   DUMMY_GET_SCHEDULE: WeekScheduleData;
   DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData;
+  DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[];
 };
 
 const SELECTED_STATUSES = new Set([
@@ -15,14 +18,13 @@ const SELECTED_STATUSES = new Set([
   "PENDING_ADD",
   "PENDING_DELETE",
 ]);
+const HISTORY_STATUS_CODES = ["CS01", "CS02", "CS03"] as const;
 
 describe("DUMMY_NEXT_MONTH_SCHEDULE", () => {
   it("keeps every current count within max concurrent workers", () => {
     const { maxConcurrentWorkers, slots } = DUMMY_NEXT_MONTH_SCHEDULE;
 
-    assert.ok(
-      slots.every((slot) => slot.currentCount <= maxConcurrentWorkers),
-    );
+    assert.ok(slots.every((slot) => slot.currentCount <= maxConcurrentWorkers));
   });
 
   it("fills empty available slots with preview worker counts", () => {
@@ -54,5 +56,32 @@ describe("schedule dummy data", () => {
 
     assert.ok(selectedSlots.length > 0);
     assert.ok(selectedSlots.every((slot) => slot.currentCount >= 1));
+  });
+});
+
+describe("DUMMY_SCHEDULE_CHANGE_HISTORY", () => {
+  it("includes all schedule change history status cases", () => {
+    assert.ok(DUMMY_SCHEDULE_CHANGE_HISTORY.length >= 3);
+
+    for (const statusCode of HISTORY_STATUS_CODES) {
+      assert.ok(
+        DUMMY_SCHEDULE_CHANGE_HISTORY.some(
+          (history) => history.statusCode === statusCode,
+        ),
+      );
+    }
+  });
+
+  it("uses delete and add change type codes by slot group", () => {
+    assert.ok(
+      DUMMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
+        history.deleteSlots.every((slot) => slot.changeTypeCode === "CR02"),
+      ),
+    );
+    assert.ok(
+      DUMMY_SCHEDULE_CHANGE_HISTORY.every((history) =>
+        history.addSlots.every((slot) => slot.changeTypeCode === "CR01"),
+      ),
+    );
   });
 });
