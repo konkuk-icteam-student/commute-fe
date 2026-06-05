@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 import {
   DUMMY_GET_SCHEDULE,
@@ -19,6 +20,16 @@ import {
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 import { Button } from "@/components/ui";
+import addTimeIcon from "@/assets/icons/common/ic_add_time.svg";
+import deleteTimeIcon from "@/assets/icons/common/ic_delete_time.svg";
+
+const formatRequestSlotLabel = (
+  slot: ScheduleApplyPayload["deleteSlots"][number],
+) => {
+  const [, month, day] = slot.date.split("-").map(Number);
+
+  return `${month}월 ${day}일 ${slot.start}-${slot.end} (${getSlotTimesTotalHours([slot])}h)`;
+};
 
 export default function ScheduleEditScreen() {
   const today = new Date();
@@ -142,11 +153,39 @@ export default function ScheduleEditScreen() {
           maxHours={27}
           isRed
         />
+        <div className="flex flex-col gap-1.5 px-3">
+          {getMergedApplyPayload(editPayload).deleteSlots.map((item) => (
+            <div
+              key={`${item.date}-${item.start}-${item.end}`}
+              className="flex flex-row items-center gap-1.5"
+            >
+              <Image alt="삭제" src={deleteTimeIcon} />
+              <span className="text-xs text-[#09121C]">
+                {formatRequestSlotLabel(item)}
+              </span>
+            </div>
+          ))}
+        </div>
+
         <WorkingHoursCard
           label="추가 근무 신청"
           hours={addRequestHours}
           maxHours={deleteRequestHours}
         />
+        <div className="flex flex-col gap-1.5 px-3">
+          {getMergedApplyPayload(editPayload).addSlots.map((item) => (
+            <div
+              key={`${item.date}-${item.start}-${item.end}`}
+              className="flex flex-row items-center gap-1.5"
+            >
+              <Image alt="추가" src={addTimeIcon} />
+              <span className="text-xs text-[#09121C]">
+                {formatRequestSlotLabel(item)}
+              </span>
+            </div>
+          ))}
+        </div>
+
         <section className="flex w-full flex-col gap-2 rounded-[10px] border border-[#DDE3EF] px-3 py-2">
           <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
             사유 입력
@@ -168,11 +207,7 @@ export default function ScheduleEditScreen() {
       <Button
         size="lg"
         onClick={() => {
-          console.log("각각의 slot : ", {
-            deleteSlots: editPayload.deleteSlots,
-            addSlots: editPayload.addSlots,
-          });
-          console.log("slot 병합 이후 : ", getMergedApplyPayload(editPayload));
+          console.log("변경 시간 : ", getMergedApplyPayload(editPayload));
           console.log("변경 사유 : ", reason);
         }}
         disabled={buttonDisabled}
