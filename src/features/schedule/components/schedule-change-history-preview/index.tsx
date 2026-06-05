@@ -51,31 +51,39 @@ export default function ScheduleChangeHistoryPreview({
           <Image alt="처리내역 자세히보기" src={chevronRightIcon} />
         </button>
       </div>
-      {histories.map((history, index) => (
-        <div key={history.requestId} className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2">
-            {history.deleteSlots.map((slot) => (
-              <ScheduleChangeHistorySlotRow
-                key={`delete-${slot.start}-${slot.end}`}
-                alt="삭제"
-                icon={minusIcon}
-                slot={slot}
-              />
-            ))}
-            {history.addSlots.map((slot) => (
-              <ScheduleChangeHistorySlotRow
-                key={`add-${slot.start}-${slot.end}`}
-                alt="추가"
-                icon={plusIcon}
-                slot={slot}
-              />
-            ))}
-          </div>
-          {index !== histories.length - 1 && (
-            <div className="h-px w-full bg-[#EFEFEF]" />
-          )}
+      {histories.length === 0 ? (
+        <div className="flex w-full items-center justify-center pb-3">
+          <span className="text-[10px] text-[#8892A6]">
+            지금은 처리 중인 내역이 없습니다.
+          </span>
         </div>
-      ))}
+      ) : (
+        histories.map((history, index) => (
+          <div key={history.requestId} className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              {history.deleteSlots.map((slot) => (
+                <ScheduleChangeHistorySlotRow
+                  key={`delete-${slot.start}-${slot.end}`}
+                  alt="삭제"
+                  icon={minusIcon}
+                  slot={slot}
+                />
+              ))}
+              {history.addSlots.map((slot) => (
+                <ScheduleChangeHistorySlotRow
+                  key={`add-${slot.start}-${slot.end}`}
+                  alt="추가"
+                  icon={plusIcon}
+                  slot={slot}
+                />
+              ))}
+            </div>
+            {index !== histories.length - 1 && (
+              <div className="h-px w-full bg-[#EFEFEF]" />
+            )}
+          </div>
+        ))
+      )}
     </section>
   );
 }
