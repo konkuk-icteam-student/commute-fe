@@ -7,9 +7,9 @@ import {
   ScheduleTable,
   DUMMY_GET_SCHEDULE,
   ScheduleStatusLegend,
-  CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
   DUMMY_SCHEDULE_CHANGE_HISTORY,
+  WorkingHoursCard,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
@@ -44,12 +44,16 @@ export default function ScheduleViewScreen() {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <CommuteTimeProgressSection
-          week={week}
-          month={month}
-          usedHours={3}
-          weeklyTotalHours={7}
-          monthlyTargetHours={27}
+        <WorkingHoursCard
+          label={`${week}주차 총 시간`}
+          hours={3}
+          maxHours={7}
+        />
+        <WorkingHoursCard
+          label={`${month}월 전체`}
+          hours={3}
+          maxHours={27}
+          withProgressBar
         />
         <ScheduleChangeHistoryPreview
           histories={DUMMY_SCHEDULE_CHANGE_HISTORY}

@@ -11,6 +11,7 @@ import {
   ScheduleTable,
   toggleRequestEditSlotChange,
   getMergedApplyPayload,
+  ScheduleStatusLegend,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
@@ -82,37 +83,45 @@ export default function ScheduleEditScreen() {
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader mode="edit" year={year} month={month} />
-      <ScheduleTable
-        type="edit"
-        year={year}
-        month={month}
-        week={week}
-        scheduleData={DUMMY_GET_SCHEDULE}
-        isPrevWeekDisabled={isPrevWeekDisabled}
-        isNextWeekDisabled={isNextWeekDisabled}
-        handlePrevWeek={handlePrevWeek}
-        handleNextWeek={handleNextWeek}
-        getSlotClassName={(slot) => {
-          const requestStatus = getRequestEditSlotStatus(slot, editPayload);
+      <div className="flex flex-col gap-2">
+        <ScheduleTable
+          type="edit"
+          year={year}
+          month={month}
+          week={week}
+          scheduleData={DUMMY_GET_SCHEDULE}
+          isPrevWeekDisabled={isPrevWeekDisabled}
+          isNextWeekDisabled={isNextWeekDisabled}
+          handlePrevWeek={handlePrevWeek}
+          handleNextWeek={handleNextWeek}
+          getSlotClassName={(slot) => {
+            const requestStatus = getRequestEditSlotStatus(slot, editPayload);
 
-          return requestStatus
-            ? SLOT_REQUEST_EDIT_CLASS_NAME[requestStatus]
-            : undefined;
-        }}
-        getSlotDisabled={(slot) =>
-          slot.status === "PENDING_DELETE" ||
-          slot.status === "PENDING_ADD" ||
-          (slot.status === "EMPTY" &&
-            slot.currentCount >= DUMMY_GET_SCHEDULE.maxConcurrentWorkers)
-        }
-        getSlotTextClassName={(slot) =>
-          getRequestEditSlotStatus(slot, editPayload) === "REQUEST_DELETE"
-            ? "text-[#C2C4C6]"
-            : undefined
-        }
-        onSlotClick={handleSlotClick}
-        unavailableBeforeDate={today}
-      />
+            return requestStatus
+              ? SLOT_REQUEST_EDIT_CLASS_NAME[requestStatus]
+              : undefined;
+          }}
+          getSlotDisabled={(slot) =>
+            slot.status === "PENDING_DELETE" ||
+            slot.status === "PENDING_ADD" ||
+            (slot.status === "EMPTY" &&
+              slot.currentCount >= DUMMY_GET_SCHEDULE.maxConcurrentWorkers)
+          }
+          getSlotTextClassName={(slot) =>
+            getRequestEditSlotStatus(slot, editPayload) === "REQUEST_DELETE"
+              ? "text-[#C2C4C6]"
+              : undefined
+          }
+          onSlotClick={handleSlotClick}
+          unavailableBeforeDate={today}
+        />
+        <ScheduleStatusLegend
+          minSessionHours={1}
+          weeklyMaxHours={13}
+          monthlyTargetHours={27}
+        />
+      </div>
+
       {/* TODO: 아래 버튼은 추후에 제대로 구현 예정. 현재는 테스트 버튼 */}
       <Button
         size="lg"
@@ -124,7 +133,7 @@ export default function ScheduleEditScreen() {
           console.log("slot 병합 이후 : ", getMergedApplyPayload(editPayload));
         }}
       >
-        저장하기
+        신청하기
       </Button>
     </div>
   );

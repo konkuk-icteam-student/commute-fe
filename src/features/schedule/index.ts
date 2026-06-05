@@ -3,8 +3,8 @@ export {
   ScheduleHeader,
   ScheduleTableHeader,
   ScheduleStatusLegend,
-  CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
+  WorkingHoursCard,
 } from "./components";
 
 export {
