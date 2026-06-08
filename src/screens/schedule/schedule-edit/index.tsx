@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 import {
   DUMMY_GET_SCHEDULE,
@@ -16,28 +15,22 @@ import {
   getSlotTimesTotalHours,
   ScheduleStatusLegend,
   WorkingHoursCard,
+  ScheduleChangeList,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 import { Button } from "@/components/ui";
-import addTimeIcon from "@/assets/icons/common/ic_add_time.svg";
-import deleteTimeIcon from "@/assets/icons/common/ic_delete_time.svg";
 
 // TODO: 추후 서버에서 받아올 값
+const MIN_SESSION_HOURS = 1;
+const MAX_WEEK_HOURS = 13;
+
 const WEEK_HOURS = 2;
 const MONTH_TOTAL_HOURS = 26;
 const MAX_MONTH_HOURS = 27;
 
 const getAbleToAddHours = (deleteRequestHours: number) =>
   MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
-
-const formatRequestSlotLabel = (
-  slot: ScheduleApplyPayload["deleteSlots"][number],
-) => {
-  const [, month, day] = slot.date.split("-").map(Number);
-
-  return `${month}월 ${day}일 ${slot.start}-${slot.end} (${getSlotTimesTotalHours([slot])}h)`;
-};
 
 export default function ScheduleEditScreen() {
   const today = new Date();
@@ -152,9 +145,9 @@ export default function ScheduleEditScreen() {
           unavailableBeforeDate={today}
         />
         <ScheduleStatusLegend
-          minSessionHours={1}
-          weeklyMaxHours={13}
-          monthlyTargetHours={27}
+          minSessionHours={MIN_SESSION_HOURS}
+          weeklyMaxHours={MAX_WEEK_HOURS}
+          monthlyTargetHours={MAX_MONTH_HOURS}
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -172,19 +165,10 @@ export default function ScheduleEditScreen() {
           isRed
           isOverflow={deleteRequestHours > MONTH_TOTAL_HOURS}
         />
-        <div className="flex flex-col gap-1.5 px-3">
-          {getMergedApplyPayload(editPayload).deleteSlots.map((item) => (
-            <div
-              key={`${item.date}-${item.start}-${item.end}`}
-              className="flex flex-row items-center gap-1.5"
-            >
-              <Image alt="삭제" src={deleteTimeIcon} />
-              <span className="text-xs text-[#09121C]">
-                {formatRequestSlotLabel(item)}
-              </span>
-            </div>
-          ))}
-        </div>
+        <ScheduleChangeList
+          isAdd={false}
+          changeItems={getMergedApplyPayload(editPayload).deleteSlots}
+        />
 
         <WorkingHoursCard
           label="추가 근무 신청"
@@ -192,19 +176,9 @@ export default function ScheduleEditScreen() {
           maxHours={ableToAddHours}
           isOverflow={addRequestHours > ableToAddHours}
         />
-        <div className="flex flex-col gap-1.5 px-3">
-          {getMergedApplyPayload(editPayload).addSlots.map((item) => (
-            <div
-              key={`${item.date}-${item.start}-${item.end}`}
-              className="flex flex-row items-center gap-1.5"
-            >
-              <Image alt="추가" src={addTimeIcon} />
-              <span className="text-xs text-[#09121C]">
-                {formatRequestSlotLabel(item)}
-              </span>
-            </div>
-          ))}
-        </div>
+        <ScheduleChangeList
+          changeItems={getMergedApplyPayload(editPayload).addSlots}
+        />
 
         <section className="flex w-full flex-col gap-2 rounded-[10px] border border-[#DDE3EF] px-3 py-2">
           <span className="text-xs leading-4.5 font-medium text-[#1A2236]">

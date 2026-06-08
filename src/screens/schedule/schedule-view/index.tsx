@@ -14,6 +14,10 @@ import {
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
 // TODO: 추후 서버에서 받아올 값
+const MIN_SESSION_HOURS = 1;
+const MAX_WEEK_HOURS = 13;
+const MAX_MONTH_HOURS = 27;
+
 const WEEK_HOURS = 4;
 const WEEK_TOTAL_HOURS = 7;
 const MONTH_HOURS = 13;
@@ -44,9 +48,9 @@ export default function ScheduleViewScreen() {
           handleNextWeek={handleNextWeek}
         />
         <ScheduleStatusLegend
-          minSessionHours={1}
-          weeklyMaxHours={13}
-          monthlyTargetHours={27}
+          minSessionHours={MIN_SESSION_HOURS}
+          weeklyMaxHours={MAX_WEEK_HOURS}
+          monthlyTargetHours={MAX_MONTH_HOURS}
         />
       </div>
       <div className="flex flex-col gap-2">

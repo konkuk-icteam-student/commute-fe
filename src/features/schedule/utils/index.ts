@@ -132,6 +132,15 @@ export const getSlotTimesTotalHours = (slots: ScheduleSlotTime[]) =>
     0,
   ) / 60;
 
+export const getSlotTimesTotalHoursOnWeek = (
+  slots: ScheduleSlotTime[],
+  dates: string[],
+) => {
+  const dateSet = new Set(dates);
+
+  return getSlotTimesTotalHours(slots.filter((slot) => dateSet.has(slot.date)));
+};
+
 export const getRequestEditSlotDisabled = (
   slot: ScheduleSlot,
   payload: ScheduleApplyPayload,

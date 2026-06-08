@@ -10,10 +10,13 @@ const {
   getRequestEditSlotStatus,
   getRequestEditSlotDisabled,
   getSlotTimesTotalHours,
+  getSlotTimesTotalHoursOnWeek,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,
   toggleApplySlotChange,
-} = (await import(new URL("./index.ts", import.meta.url).href)) as typeof import("./index");
+} = (await import(
+  new URL("./index.ts", import.meta.url).href
+)) as typeof import("./index");
 
 const basePayload: ScheduleApplyPayload = {
   deleteSlots: [],
@@ -103,7 +106,10 @@ describe("toggleApplySlotChange", () => {
 
 describe("toggleRequestEditSlotChange", () => {
   it("adds existing slots to deleteSlots and removes them on second click", () => {
-    const addedToDelete = toggleRequestEditSlotChange(basePayload, myScheduleSlot);
+    const addedToDelete = toggleRequestEditSlotChange(
+      basePayload,
+      myScheduleSlot,
+    );
 
     assert.deepEqual(addedToDelete.deleteSlots, [
       { date: "2026-04-06", start: "13:00", end: "14:30" },
@@ -153,10 +159,13 @@ describe("toggleRequestEditSlotChange", () => {
         addSlots: [],
       },
     );
-    assert.deepEqual(toggleRequestEditSlotChange(basePayload, unavailableSlot), {
-      deleteSlots: [],
-      addSlots: [],
-    });
+    assert.deepEqual(
+      toggleRequestEditSlotChange(basePayload, unavailableSlot),
+      {
+        deleteSlots: [],
+        addSlots: [],
+      },
+    );
   });
 
   it("does not add empty slots when the current count is already full", () => {
@@ -246,7 +255,10 @@ describe("getRequestEditSlotStatus", () => {
       emptySlot,
     );
 
-    assert.equal(getRequestEditSlotStatus(myScheduleSlot, payload), "REQUEST_DELETE");
+    assert.equal(
+      getRequestEditSlotStatus(myScheduleSlot, payload),
+      "REQUEST_DELETE",
+    );
     assert.equal(getRequestEditSlotStatus(emptySlot, payload), "REQUEST_ADD");
   });
 });
@@ -298,6 +310,22 @@ describe("getSlotTimesTotalHours", () => {
         { date: "2026-04-06", start: "13:00", end: "14:30" },
         { date: "2026-04-09", start: "09:30", end: "10:00" },
       ]),
+      2,
+    );
+  });
+});
+
+describe("getSlotTimesTotalHoursOnWeek", () => {
+  it("returns total duration only for slots on the provided dates", () => {
+    assert.equal(
+      getSlotTimesTotalHoursOnWeek(
+        [
+          { date: "2026-04-06", start: "13:00", end: "14:30" },
+          { date: "2026-04-09", start: "09:30", end: "10:00" },
+          { date: "2026-04-13", start: "13:00", end: "14:30" },
+        ],
+        ["2026-04-06", "2026-04-09"],
+      ),
       2,
     );
   });
@@ -355,12 +383,8 @@ describe("getMergedApplyPayload", () => {
         ],
       }),
       {
-        deleteSlots: [
-          { date: "2026-04-06", start: "13:00", end: "14:00" },
-        ],
-        addSlots: [
-          { date: "2026-04-09", start: "13:30", end: "14:30" },
-        ],
+        deleteSlots: [{ date: "2026-04-06", start: "13:00", end: "14:00" }],
+        addSlots: [{ date: "2026-04-09", start: "13:30", end: "14:30" }],
       },
     );
   });
