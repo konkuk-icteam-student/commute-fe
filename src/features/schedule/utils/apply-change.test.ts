@@ -187,6 +187,24 @@ describe("toggleRequestEditSlotChange", () => {
 
     assert.deepEqual(blockedPayload, filledToDeletedHours);
   });
+
+  it("adds empty slots within the provided max add hours", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+    const updatedPayload = toggleRequestEditSlotChange(
+      payload,
+      shortEmptySlot,
+      undefined,
+      2,
+    );
+
+    assert.deepEqual(updatedPayload.addSlots, [
+      { date: "2026-04-09", start: "13:00", end: "14:30" },
+      { date: "2026-04-10", start: "09:00", end: "09:30" },
+    ]);
+  });
 });
 
 describe("getRequestEditSlotDisabled", () => {
@@ -206,6 +224,18 @@ describe("getRequestEditSlotDisabled", () => {
     };
 
     assert.equal(getRequestEditSlotDisabled(emptySlot, payload), false);
+  });
+
+  it("uses the provided max add hours for add slot disabled checks", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+
+    assert.equal(
+      getRequestEditSlotDisabled(shortEmptySlot, payload, undefined, 2),
+      false,
+    );
   });
 });
 

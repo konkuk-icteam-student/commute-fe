@@ -129,6 +129,7 @@ export const getRequestEditSlotDisabled = (
   slot: ScheduleSlot,
   payload: ScheduleApplyPayload,
   maxConcurrentWorkers?: number,
+  maxAddHours = getSlotTimesTotalHours(payload.deleteSlots),
 ) => {
   const slotTime = toSlotTime(slot);
 
@@ -156,8 +157,7 @@ export const getRequestEditSlotDisabled = (
   }
 
   return (
-    getSlotTimesTotalHours([...payload.addSlots, slotTime]) >
-    getSlotTimesTotalHours(payload.deleteSlots)
+    getSlotTimesTotalHours([...payload.addSlots, slotTime]) > maxAddHours
   );
 };
 
@@ -233,6 +233,7 @@ export const toggleRequestEditSlotChange = (
   payload: ScheduleApplyPayload,
   slot: ScheduleSlot,
   maxConcurrentWorkers?: number,
+  maxAddHours?: number,
 ): ScheduleApplyPayload => {
   const slotTime = toSlotTime(slot);
 
@@ -245,7 +246,14 @@ export const toggleRequestEditSlotChange = (
   }
 
   if (slot.status === "EMPTY") {
-    if (getRequestEditSlotDisabled(slot, payload, maxConcurrentWorkers)) {
+    if (
+      getRequestEditSlotDisabled(
+        slot,
+        payload,
+        maxConcurrentWorkers,
+        maxAddHours,
+      )
+    ) {
       return payload;
     }
 

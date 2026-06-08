@@ -23,6 +23,14 @@ import { Button } from "@/components/ui";
 import addTimeIcon from "@/assets/icons/common/ic_add_time.svg";
 import deleteTimeIcon from "@/assets/icons/common/ic_delete_time.svg";
 
+// TODO: 추후 서버에서 받아올 값
+const WEEK_HOURS = 2;
+const MONTH_TOTAL_HOURS = 26;
+const MAX_MONTH_HOURS = 27;
+
+const getAbleToAddHours = (deleteRequestHours: number) =>
+  MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
+
 const formatRequestSlotLabel = (
   slot: ScheduleApplyPayload["deleteSlots"][number],
 ) => {
@@ -51,6 +59,16 @@ export default function ScheduleEditScreen() {
   const isNextWeekDisabled =
     currentMonthWeek.year !== nextWeekMonth.year ||
     currentMonthWeek.month !== nextWeekMonth.month;
+
+  const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
+  const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
+  const ableToAddHours = getAbleToAddHours(deleteRequestHours);
+
+  const buttonDisabled =
+    (deleteRequestHours === 0 && addRequestHours === 0) ||
+    deleteRequestHours > MONTH_TOTAL_HOURS ||
+    addRequestHours > ableToAddHours ||
+    reason === "";
 
   const handlePrevWeek = () => {
     setSelectedDate((currentDate) => {
@@ -91,16 +109,10 @@ export default function ScheduleEditScreen() {
         currentPayload,
         slot,
         DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+        getAbleToAddHours(getSlotTimesTotalHours(currentPayload.deleteSlots)),
       ),
     );
   };
-  const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
-  const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
-
-  const buttonDisabled =
-    (deleteRequestHours === 0 && addRequestHours === 0) || reason === "";
-
-  // TODO: 추가 근무 신청 섹션의 경우, maxHours와 클릭 disabled 처리 수정 필요. 피그마 참고하여 조건 추가해야함. 추후 필수적으로 수정 필요.
 
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
@@ -128,6 +140,7 @@ export default function ScheduleEditScreen() {
               slot,
               editPayload,
               DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+              ableToAddHours,
             )
           }
           getSlotTextClassName={(slot) =>
@@ -146,14 +159,18 @@ export default function ScheduleEditScreen() {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex w-full flex-row items-center gap-2">
-          <WorkingHoursCard label={`${week}주차 근무시간`} hours={4} />
-          <WorkingHoursCard label={`${month}월 근무시간`} hours={27} />
+          <WorkingHoursCard label={`${week}주차 근무시간`} hours={WEEK_HOURS} />
+          <WorkingHoursCard
+            label={`${month}월 근무시간`}
+            hours={MONTH_TOTAL_HOURS}
+          />
         </div>
         <WorkingHoursCard
           label="근무 삭제 신청"
           hours={deleteRequestHours}
-          maxHours={27}
+          maxHours={MONTH_TOTAL_HOURS}
           isRed
+          isOverflow={deleteRequestHours > MONTH_TOTAL_HOURS}
         />
         <div className="flex flex-col gap-1.5 px-3">
           {getMergedApplyPayload(editPayload).deleteSlots.map((item) => (
@@ -172,7 +189,8 @@ export default function ScheduleEditScreen() {
         <WorkingHoursCard
           label="추가 근무 신청"
           hours={addRequestHours}
-          maxHours={deleteRequestHours}
+          maxHours={ableToAddHours}
+          isOverflow={addRequestHours > ableToAddHours}
         />
         <div className="flex flex-col gap-1.5 px-3">
           {getMergedApplyPayload(editPayload).addSlots.map((item) => (

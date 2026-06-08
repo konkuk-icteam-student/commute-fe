@@ -6,6 +6,7 @@ interface WorkingHoursCardProps {
   maxHours?: number;
   withProgressBar?: boolean;
   isRed?: boolean;
+  isOverflow?: boolean;
 }
 
 export default function WorkingHoursCard({
@@ -14,6 +15,7 @@ export default function WorkingHoursCard({
   maxHours,
   withProgressBar = false,
   isRed = false,
+  isOverflow = false,
 }: WorkingHoursCardProps) {
   const progressPercent =
     maxHours && maxHours > 0 ? (hours / maxHours) * 100 : 0;
@@ -23,6 +25,7 @@ export default function WorkingHoursCard({
       className={cn(
         "flex w-full flex-col items-center gap-2 rounded-[10px] border border-[#DDE3EF] px-3",
         withProgressBar ? "py-3" : "py-2",
+        isOverflow && "border-[#FD7171]",
       )}
     >
       <div className="flex w-full flex-row items-center justify-between">
