@@ -13,6 +13,12 @@ import {
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 
+// TODO: 추후 서버에서 받아올 값
+const WEEK_HOURS = 4;
+const WEEK_TOTAL_HOURS = 7;
+const MONTH_HOURS = 13;
+const MONTH_TOTAL_HOURS = 27;
+
 export default function ScheduleViewScreen() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
@@ -46,13 +52,13 @@ export default function ScheduleViewScreen() {
       <div className="flex flex-col gap-2">
         <WorkingHoursCard
           label={`${week}주차 총 시간`}
-          hours={3}
-          maxHours={7}
+          hours={WEEK_HOURS}
+          maxHours={WEEK_TOTAL_HOURS}
         />
         <WorkingHoursCard
           label={`${month}월 전체`}
-          hours={3}
-          maxHours={27}
+          hours={MONTH_HOURS}
+          maxHours={MONTH_TOTAL_HOURS}
           withProgressBar
         />
         <ScheduleChangeHistoryPreview

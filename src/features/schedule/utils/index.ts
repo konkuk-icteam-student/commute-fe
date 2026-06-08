@@ -64,7 +64,8 @@ const parseIsoDateTime = (dateTime: string) => {
     day,
     hour,
     minute,
-    totalMinutes: new Date(year, month - 1, day, hour, minute).getTime() / 60000,
+    totalMinutes:
+      new Date(year, month - 1, day, hour, minute).getTime() / 60000,
   };
 };
 
@@ -113,7 +114,13 @@ const removeSlotTime = (
 ) => slots.filter((slot) => !isSameSlotTime(slot, targetSlot));
 
 const getTimeMinutes = (time: string) => {
+  if (!/^\d{2}:\d{2}$/.test(time)) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
   const [hour, minute] = time.split(":").map(Number);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    throw new Error(`Invalid time value: ${time}`);
+  }
 
   return hour * 60 + minute;
 };
@@ -156,9 +163,7 @@ export const getRequestEditSlotDisabled = (
     return true;
   }
 
-  return (
-    getSlotTimesTotalHours([...payload.addSlots, slotTime]) > maxAddHours
-  );
+  return getSlotTimesTotalHours([...payload.addSlots, slotTime]) > maxAddHours;
 };
 
 // 같은 날짜의 이어진 슬롯 시간들을 하나의 시간 구간으로 병합합니다.
@@ -174,7 +179,11 @@ export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
   return sortedSlots.reduce<ScheduleSlotTime[]>((mergedSlots, slot) => {
     const lastSlot = mergedSlots.at(-1);
 
-    if (lastSlot && lastSlot.date === slot.date && lastSlot.end === slot.start) {
+    if (
+      lastSlot &&
+      lastSlot.date === slot.date &&
+      lastSlot.end === slot.start
+    ) {
       lastSlot.end = slot.end;
       return mergedSlots;
     }

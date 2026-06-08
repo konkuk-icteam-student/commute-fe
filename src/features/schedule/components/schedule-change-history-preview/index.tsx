@@ -61,17 +61,17 @@ export default function ScheduleChangeHistoryPreview({
         histories.map((history, index) => (
           <div key={history.requestId} className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
-              {history.deleteSlots.map((slot) => (
+              {history.deleteSlots.map((slot, slotIndex) => (
                 <ScheduleChangeHistorySlotRow
-                  key={`delete-${slot.start}-${slot.end}`}
+                  key={`delete-${slotIndex}-${slot.start}-${slot.end}`}
                   alt="삭제"
                   icon={minusIcon}
                   slot={slot}
                 />
               ))}
-              {history.addSlots.map((slot) => (
+              {history.addSlots.map((slot, slotIndex) => (
                 <ScheduleChangeHistorySlotRow
-                  key={`add-${slot.start}-${slot.end}`}
+                  key={`add-${slotIndex}-${slot.start}-${slot.end}`}
                   alt="추가"
                   icon={plusIcon}
                   slot={slot}
