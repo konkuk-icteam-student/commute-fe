@@ -64,7 +64,8 @@ const parseIsoDateTime = (dateTime: string) => {
     day,
     hour,
     minute,
-    totalMinutes: new Date(year, month - 1, day, hour, minute).getTime() / 60000,
+    totalMinutes:
+      new Date(year, month - 1, day, hour, minute).getTime() / 60000,
   };
 };
 
@@ -112,6 +113,59 @@ const removeSlotTime = (
   targetSlot: ScheduleSlotTime,
 ) => slots.filter((slot) => !isSameSlotTime(slot, targetSlot));
 
+const getTimeMinutes = (time: string) => {
+  if (!/^\d{2}:\d{2}$/.test(time)) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
+  const [hour, minute] = time.split(":").map(Number);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    throw new Error(`Invalid time value: ${time}`);
+  }
+
+  return hour * 60 + minute;
+};
+
+export const getSlotTimesTotalHours = (slots: ScheduleSlotTime[]) =>
+  slots.reduce(
+    (totalMinutes, slot) =>
+      totalMinutes + getTimeMinutes(slot.end) - getTimeMinutes(slot.start),
+    0,
+  ) / 60;
+
+export const getRequestEditSlotDisabled = (
+  slot: ScheduleSlot,
+  payload: ScheduleApplyPayload,
+  maxConcurrentWorkers?: number,
+  maxAddHours = getSlotTimesTotalHours(payload.deleteSlots),
+) => {
+  const slotTime = toSlotTime(slot);
+
+  if (
+    slot.status === "PENDING_ADD" ||
+    slot.status === "PENDING_DELETE" ||
+    slot.status === "UNAVAILABLE"
+  ) {
+    return true;
+  }
+
+  if (slot.status !== "EMPTY") {
+    return false;
+  }
+
+  if (hasSlotTime(payload.addSlots, slotTime)) {
+    return false;
+  }
+
+  if (
+    maxConcurrentWorkers !== undefined &&
+    slot.currentCount >= maxConcurrentWorkers
+  ) {
+    return true;
+  }
+
+  return getSlotTimesTotalHours([...payload.addSlots, slotTime]) > maxAddHours;
+};
+
 // 같은 날짜의 이어진 슬롯 시간들을 하나의 시간 구간으로 병합합니다.
 export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
   const sortedSlots = [...slots].sort((leftSlot, rightSlot) => {
@@ -125,7 +179,11 @@ export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
   return sortedSlots.reduce<ScheduleSlotTime[]>((mergedSlots, slot) => {
     const lastSlot = mergedSlots.at(-1);
 
-    if (lastSlot && lastSlot.date === slot.date && lastSlot.end === slot.start) {
+    if (
+      lastSlot &&
+      lastSlot.date === slot.date &&
+      lastSlot.end === slot.start
+    ) {
       lastSlot.end = slot.end;
       return mergedSlots;
     }
@@ -184,6 +242,7 @@ export const toggleRequestEditSlotChange = (
   payload: ScheduleApplyPayload,
   slot: ScheduleSlot,
   maxConcurrentWorkers?: number,
+  maxAddHours?: number,
 ): ScheduleApplyPayload => {
   const slotTime = toSlotTime(slot);
 
@@ -197,9 +256,12 @@ export const toggleRequestEditSlotChange = (
 
   if (slot.status === "EMPTY") {
     if (
-      maxConcurrentWorkers !== undefined &&
-      slot.currentCount >= maxConcurrentWorkers &&
-      !hasSlotTime(payload.addSlots, slotTime)
+      getRequestEditSlotDisabled(
+        slot,
+        payload,
+        maxConcurrentWorkers,
+        maxAddHours,
+      )
     ) {
       return payload;
     }

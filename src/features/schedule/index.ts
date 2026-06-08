@@ -3,8 +3,8 @@ export {
   ScheduleHeader,
   ScheduleTableHeader,
   ScheduleStatusLegend,
-  CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
+  WorkingHoursCard,
 } from "./components";
 
 export {
@@ -22,6 +22,8 @@ export {
   getApplySlotStatus,
   getMergedApplyPayload,
   getRequestEditSlotStatus,
+  getRequestEditSlotDisabled,
+  getSlotTimesTotalHours,
   isBeforeDate,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,

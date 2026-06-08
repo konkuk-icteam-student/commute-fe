@@ -7,11 +7,17 @@ import {
   ScheduleTable,
   DUMMY_GET_SCHEDULE,
   ScheduleStatusLegend,
-  CommuteTimeProgressSection,
   ScheduleChangeHistoryPreview,
   DUMMY_SCHEDULE_CHANGE_HISTORY,
+  WorkingHoursCard,
 } from "@/features/schedule";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
+
+// TODO: 추후 서버에서 받아올 값
+const WEEK_HOURS = 4;
+const WEEK_TOTAL_HOURS = 7;
+const MONTH_HOURS = 13;
+const MONTH_TOTAL_HOURS = 27;
 
 export default function ScheduleViewScreen() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -44,12 +50,16 @@ export default function ScheduleViewScreen() {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <CommuteTimeProgressSection
-          week={week}
-          month={month}
-          usedHours={3}
-          weeklyTotalHours={7}
-          monthlyTargetHours={27}
+        <WorkingHoursCard
+          label={`${week}주차 총 시간`}
+          hours={WEEK_HOURS}
+          maxHours={WEEK_TOTAL_HOURS}
+        />
+        <WorkingHoursCard
+          label={`${month}월 전체`}
+          hours={MONTH_HOURS}
+          maxHours={MONTH_TOTAL_HOURS}
+          withProgressBar
         />
         <ScheduleChangeHistoryPreview
           histories={DUMMY_SCHEDULE_CHANGE_HISTORY}

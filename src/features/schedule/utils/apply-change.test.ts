@@ -8,6 +8,8 @@ const {
   getApplySlotStatus,
   getMergedApplyPayload,
   getRequestEditSlotStatus,
+  getRequestEditSlotDisabled,
+  getSlotTimesTotalHours,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,
   toggleApplySlotChange,
@@ -30,6 +32,14 @@ const emptySlot: ScheduleSlot = {
   date: "2026-04-09",
   start: "13:00",
   end: "14:30",
+  status: "EMPTY",
+  currentCount: 0,
+};
+
+const shortEmptySlot: ScheduleSlot = {
+  date: "2026-04-10",
+  start: "09:00",
+  end: "09:30",
   status: "EMPTY",
   currentCount: 0,
 };
@@ -107,16 +117,27 @@ describe("toggleRequestEditSlotChange", () => {
   });
 
   it("adds empty slots to addSlots and removes them on second click", () => {
-    const addedToAdd = toggleRequestEditSlotChange(basePayload, emptySlot);
+    const payloadWithDeletedHours = toggleRequestEditSlotChange(
+      basePayload,
+      myScheduleSlot,
+    );
+    const addedToAdd = toggleRequestEditSlotChange(
+      payloadWithDeletedHours,
+      emptySlot,
+    );
 
-    assert.deepEqual(addedToAdd.deleteSlots, []);
+    assert.deepEqual(addedToAdd.deleteSlots, [
+      { date: "2026-04-06", start: "13:00", end: "14:30" },
+    ]);
     assert.deepEqual(addedToAdd.addSlots, [
       { date: "2026-04-09", start: "13:00", end: "14:30" },
     ]);
 
     const reverted = toggleRequestEditSlotChange(addedToAdd, emptySlot);
 
-    assert.deepEqual(reverted.deleteSlots, []);
+    assert.deepEqual(reverted.deleteSlots, [
+      { date: "2026-04-06", start: "13:00", end: "14:30" },
+    ]);
     assert.deepEqual(reverted.addSlots, []);
   });
 
@@ -143,6 +164,78 @@ describe("toggleRequestEditSlotChange", () => {
 
     assert.deepEqual(payload.deleteSlots, []);
     assert.deepEqual(payload.addSlots, []);
+  });
+
+  it("does not add empty slots beyond the deleted slot total hours", () => {
+    const deletedOneAndHalfHoursPayload: ScheduleApplyPayload = {
+      deleteSlots: [{ date: "2026-04-06", start: "13:00", end: "14:30" }],
+      addSlots: [],
+    };
+    const filledToDeletedHours = toggleRequestEditSlotChange(
+      deletedOneAndHalfHoursPayload,
+      emptySlot,
+    );
+
+    assert.deepEqual(filledToDeletedHours.addSlots, [
+      { date: "2026-04-09", start: "13:00", end: "14:30" },
+    ]);
+
+    const blockedPayload = toggleRequestEditSlotChange(
+      filledToDeletedHours,
+      shortEmptySlot,
+    );
+
+    assert.deepEqual(blockedPayload, filledToDeletedHours);
+  });
+
+  it("adds empty slots within the provided max add hours", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+    const updatedPayload = toggleRequestEditSlotChange(
+      payload,
+      shortEmptySlot,
+      undefined,
+      2,
+    );
+
+    assert.deepEqual(updatedPayload.addSlots, [
+      { date: "2026-04-09", start: "13:00", end: "14:30" },
+      { date: "2026-04-10", start: "09:00", end: "09:30" },
+    ]);
+  });
+});
+
+describe("getRequestEditSlotDisabled", () => {
+  it("disables add slots that would exceed deleted slot total hours", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [{ date: "2026-04-06", start: "13:00", end: "14:30" }],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+
+    assert.equal(getRequestEditSlotDisabled(shortEmptySlot, payload), true);
+  });
+
+  it("keeps selected add slots enabled so they can be removed", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [{ date: "2026-04-06", start: "13:00", end: "14:30" }],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+
+    assert.equal(getRequestEditSlotDisabled(emptySlot, payload), false);
+  });
+
+  it("uses the provided max add hours for add slot disabled checks", () => {
+    const payload: ScheduleApplyPayload = {
+      deleteSlots: [],
+      addSlots: [{ date: "2026-04-09", start: "13:00", end: "14:30" }],
+    };
+
+    assert.equal(
+      getRequestEditSlotDisabled(shortEmptySlot, payload, undefined, 2),
+      false,
+    );
   });
 });
 
@@ -195,6 +288,18 @@ describe("getApplySlotCurrentCount", () => {
 
     assert.equal(getApplySlotCurrentCount(myScheduleSlot, payload), 1);
     assert.equal(getApplySlotCurrentCount(emptySlot, payload), 0);
+  });
+});
+
+describe("getSlotTimesTotalHours", () => {
+  it("returns the total duration of slot times in hours", () => {
+    assert.equal(
+      getSlotTimesTotalHours([
+        { date: "2026-04-06", start: "13:00", end: "14:30" },
+        { date: "2026-04-09", start: "09:30", end: "10:00" },
+      ]),
+      2,
+    );
   });
 });
 
