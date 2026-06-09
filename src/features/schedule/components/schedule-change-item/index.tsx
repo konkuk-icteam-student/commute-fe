@@ -14,7 +14,17 @@ interface ScheduleChangeListProps {
 const formatRequestSlotLabel = (
   slot: ScheduleApplyPayload["deleteSlots"][number],
 ) => {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  if (!datePattern.test(slot.date)) {
+    console.error(`Invalid date format: ${slot.date}`);
+    return "잘못된 날짜 형식";
+  }
+
   const [, month, day] = slot.date.split("-").map(Number);
+
+  if (isNaN(month) || isNaN(day)) {
+    return "날짜 파싱 실패";
+  }
 
   return `${month}월 ${day}일 ${slot.start}-${slot.end} (${getSlotTimesTotalHours([slot])}h)`;
 };
