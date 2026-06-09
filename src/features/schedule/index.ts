@@ -5,6 +5,7 @@ export {
   ScheduleStatusLegend,
   ScheduleChangeHistoryPreview,
   WorkingHoursCard,
+  ScheduleChangeList,
 } from "./components";
 
 export {
@@ -24,6 +25,7 @@ export {
   getRequestEditSlotStatus,
   getRequestEditSlotDisabled,
   getSlotTimesTotalHours,
+  getSlotTimesTotalHoursOnWeek,
   isBeforeDate,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,

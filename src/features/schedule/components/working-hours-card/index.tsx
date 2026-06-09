@@ -33,7 +33,11 @@ export default function WorkingHoursCard({
           {label}
         </span>
         <span className="text-xs leading-4.5 font-bold text-[#C6CBD4]">
-          <span className={isRed ? "text-[#FD7171]" : "text-[#1D4ED8]"}>
+          <span
+            className={
+              isRed || isOverflow ? "text-[#FD7171]" : "text-[#1D4ED8]"
+            }
+          >
             {hours}
             {maxHours === undefined && "h"}
           </span>
@@ -49,7 +53,10 @@ export default function WorkingHoursCard({
           aria-valuenow={hours}
         >
           <div
-            className="absolute left-0 h-full rounded-full bg-[#1D4ED8]"
+            className={cn(
+              "absolute left-0 h-full rounded-full bg-[#1D4ED8]",
+              isOverflow && "bg-[#FD7171]",
+            )}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
