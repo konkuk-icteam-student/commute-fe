@@ -6,16 +6,12 @@ import {
   ADMIN_NAVIGATION_ITEMS,
   ADMIN_ROUTE_META,
 } from "@/constants/navigation";
+import { isPathActive } from "@/lib/route-match";
 import AdminHeader from "./admin-header";
 import AdminSidebar from "./admin-sidebar";
 
-const DEFAULT_ADMIN_USER = {
-  name: "관리자 1212님",
-  team: "정보운영팀",
-} as const;
-
 export default function AdminLayout({
-  adminUser = DEFAULT_ADMIN_USER,
+  adminUser,
   children,
   showBackButton = false,
   title,
@@ -23,7 +19,7 @@ export default function AdminLayout({
 }: Readonly<{
   adminUser?: {
     name: string;
-    team: string;
+    team?: string;
   };
   children: React.ReactNode;
   showBackButton?: boolean;
@@ -36,9 +32,7 @@ export default function AdminLayout({
     title ??
     routeMeta?.label ??
     ADMIN_NAVIGATION_ITEMS.find((item) =>
-      item.href === "/admin"
-        ? pathname === item.href
-        : pathname.startsWith(item.href),
+      isPathActive(pathname, item.href, { exact: item.href === "/admin" }),
     )?.label ??
     ADMIN_NAVIGATION_ITEMS[0].label;
   const shouldShowBackButton = showBackButton || !!routeMeta?.showBackButton;

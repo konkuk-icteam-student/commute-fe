@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import kuLogo from "@/assets/icons/admin-nav/ic-KU-logo.svg";
 import { ADMIN_NAVIGATION_ITEMS } from "@/constants/navigation";
+import { isPathActive } from "@/lib/route-match";
 import AdminNavLink from "../admin-nav-link";
 
 // 1728px 이상에서는 Figma 데스크톱 기준 치수를 사용합니다.
@@ -26,10 +27,9 @@ export default function AdminSidebar({ pathname }: { pathname: string }) {
 
       <nav className="mt-10 h-auto w-full space-y-2 min-[1728px]:mt-12 min-[1728px]:h-68 min-[1728px]:w-48.75">
         {ADMIN_NAVIGATION_ITEMS.map((item) => {
-          const isActive =
-            item.href === "/admin"
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+          const isActive = isPathActive(pathname, item.href, {
+            exact: item.href === "/admin",
+          });
 
           return (
             <AdminNavLink isActive={isActive} item={item} key={item.href} />

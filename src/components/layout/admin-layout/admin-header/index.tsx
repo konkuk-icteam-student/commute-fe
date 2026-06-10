@@ -12,17 +12,20 @@ export default function AdminHeader({
   showBackButton,
   title,
 }: {
-  adminUser: {
+  adminUser?: {
     name: string;
-    team: string;
+    team?: string;
   };
   showBackButton: boolean;
   title: string;
 }) {
   const router = useRouter();
+  const adminLabel = adminUser?.team
+    ? `${adminUser.name} (${adminUser.team})`
+    : (adminUser?.name ?? "관리자");
 
   return (
-    <header className="flex h-22 shrink-0 items-center justify-between border-b border-l border-[#D1D1D1] bg-white pr-10 pl-9 [border-bottom-width:0.5px] [border-left-width:0.5px] min-[1728px]:h-25 min-[1728px]:pr-14.5 min-[1728px]:pl-10">
+    <header className="flex h-22 shrink-0 items-center justify-between border-b [border-bottom-width:0.5px] border-l [border-left-width:0.5px] border-[#D1D1D1] bg-white pr-10 pl-9 min-[1728px]:h-25 min-[1728px]:pr-14.5 min-[1728px]:pl-10">
       <div className="flex items-center gap-4">
         {showBackButton ? (
           <button
@@ -46,9 +49,7 @@ export default function AdminHeader({
           height={45}
           className="h-10 w-10 min-[1728px]:h-11.25 min-[1728px]:w-11.25"
         />
-        <span>
-          {adminUser.name} ({adminUser.team})
-        </span>
+        <span>{adminLabel}</span>
       </div>
     </header>
   );
