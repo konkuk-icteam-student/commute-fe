@@ -19,7 +19,7 @@ import {
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
-import { Button } from "@/components/ui";
+import { Button, Modal } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
 const MIN_SESSION_HOURS = 1;
@@ -40,6 +40,7 @@ export default function ScheduleEditScreen() {
     addSlots: [],
   });
   const [reason, setReason] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const currentMonthWeek = getMonthWeekOfDate(today);
@@ -105,6 +106,13 @@ export default function ScheduleEditScreen() {
         getAbleToAddHours(getSlotTimesTotalHours(currentPayload.deleteSlots)),
       ),
     );
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -198,16 +206,24 @@ export default function ScheduleEditScreen() {
       </div>
 
       {/* TODO: 서버 연동 시 요청 바디 고려 */}
-      <Button
-        size="lg"
-        onClick={() => {
+      <Button size="lg" onClick={handleOpenModal} disabled={buttonDisabled}>
+        신청하기
+      </Button>
+
+      <Modal
+        open={isModalOpen}
+        title="수정 요청을 제출하시겠습니까?"
+        confirmText="제출하기"
+        onConfirmClick={() => {
           console.log("변경 시간 : ", getMergedApplyPayload(editPayload));
           console.log("변경 사유 : ", reason);
         }}
-        disabled={buttonDisabled}
+        cancelText="취소"
+        onCancelClick={handleCloseModal}
       >
-        신청하기
-      </Button>
+        현재 월 근무시간과 상이합니다. 해당 내용은 관리자에게 전달되며, 반려될
+        수 있습니다.
+      </Modal>
     </div>
   );
 }
