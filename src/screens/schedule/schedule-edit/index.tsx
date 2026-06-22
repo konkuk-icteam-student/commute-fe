@@ -268,7 +268,7 @@ export default function ScheduleEditScreen() {
         open={isApplyAlertOpen}
         title="수정 요청을 저장하시겠습니까?"
         message={
-          editPayload.addSlots.length !== editPayload.deleteSlots.length
+          addRequestHours !== deleteRequestHours
             ? "현재 월 근무시간과 상이합니다.\n해당 내용은 관리자에게 전달되며, 반려될 수 있습니다."
             : "승인 절차 완료 후 시간표에 반영됩니다."
         }
