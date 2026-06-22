@@ -202,6 +202,14 @@ export const mergeContinuousSlotTimes = (slots: ScheduleSlotTime[]) => {
 };
 
 // 신청 payload의 addSlots와 deleteSlots를 각각 이어진 시간 단위로 병합합니다.
+export const hasSlotTimesBelowMinSessionHours = (
+  slots: ScheduleSlotTime[],
+  minSessionHours: number,
+) =>
+  mergeContinuousSlotTimes(slots).some(
+    (slot) => getSlotTimesTotalHours([slot]) < minSessionHours,
+  );
+
 export const getMergedApplyPayload = (
   payload: ScheduleApplyPayload,
 ): ScheduleApplyPayload => ({
@@ -328,6 +336,14 @@ export const getApplySlotStatus = (
 };
 
 // 신청 변경 내역을 반영해 화면에 표시할 슬롯 인원을 계산합니다.
+export const getAppliedScheduleSlotTimes = (
+  slots: ScheduleSlot[],
+  payload: ScheduleApplyPayload,
+) =>
+  slots
+    .filter((slot) => getApplySlotStatus(slot, payload) === "MY_SCHEDULE")
+    .map(toSlotTime);
+
 export const getApplySlotCurrentCount = (
   slot: ScheduleSlot,
   payload: ScheduleApplyPayload,

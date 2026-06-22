@@ -194,3 +194,13 @@ export const DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[] = [
     ],
   },
 ];
+
+export const DUMMY_SCHEDULE_APPLY_RESPONSE = {
+  details: {
+    success: [
+      { start: "2026-04-06T13:00:00", end: "2026-04-06T14:30:00" },
+      { start: "2026-04-07T09:00:00", end: "2026-04-07T10:00:00" },
+    ],
+    failure: [{ start: "2026-04-07T09:00:00", end: "2026-04-07T10:00:00" }],
+  },
+};
