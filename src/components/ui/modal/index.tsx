@@ -71,7 +71,7 @@ export default function Modal({
         <button
           type="button"
           className={cn(
-            "flex h-14 min-h-14 w-full shrink-0 cursor-pointer items-center justify-center bg-[#2076FF] text-base leading-6 font-normal tracking-[0.24px] text-white",
+            "flex h-14 min-h-14 w-full shrink-0 cursor-pointer items-center justify-center bg-[#2076FF] text-sm leading-6 font-normal tracking-[0.24px] text-white",
             buttonClassName,
           )}
           onClick={onButtonClick}

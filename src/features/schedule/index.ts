@@ -31,6 +31,7 @@ export {
   getRequestEditSlotDisabled,
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
+  hasAppliedScheduleBelowMinSessionHours,
   hasSlotTimesBelowMinSessionHours,
   isBeforeDate,
   mergeContinuousSlotTimes,

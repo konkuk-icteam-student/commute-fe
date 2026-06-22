@@ -344,6 +344,16 @@ export const getAppliedScheduleSlotTimes = (
     .filter((slot) => getApplySlotStatus(slot, payload) === "MY_SCHEDULE")
     .map(toSlotTime);
 
+export const hasAppliedScheduleBelowMinSessionHours = (
+  slots: ScheduleSlot[],
+  payload: ScheduleApplyPayload,
+  minSessionHours: number,
+) =>
+  hasSlotTimesBelowMinSessionHours(
+    getAppliedScheduleSlotTimes(slots, payload),
+    minSessionHours,
+  );
+
 export const getApplySlotCurrentCount = (
   slot: ScheduleSlot,
   payload: ScheduleApplyPayload,

@@ -12,6 +12,7 @@ const {
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   getAppliedScheduleSlotTimes,
+  hasAppliedScheduleBelowMinSessionHours,
   hasSlotTimesBelowMinSessionHours,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,
@@ -359,6 +360,49 @@ describe("hasSlotTimesBelowMinSessionHours", () => {
         1,
       ),
       false,
+    );
+  });
+});
+
+describe("hasAppliedScheduleBelowMinSessionHours", () => {
+  it("returns true when edit changes leave any applied schedule session below the minimum", () => {
+    assert.equal(typeof hasAppliedScheduleBelowMinSessionHours, "function");
+    assert.equal(
+      hasAppliedScheduleBelowMinSessionHours(
+        [
+          {
+            date: "2026-04-09",
+            start: "13:30",
+            end: "14:00",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:00",
+            end: "14:30",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:30",
+            end: "15:00",
+            status: "EMPTY",
+            currentCount: 0,
+          },
+        ],
+        {
+          deleteSlots: [
+            { date: "2026-04-09", start: "14:00", end: "14:30" },
+          ],
+          addSlots: [
+            { date: "2026-04-09", start: "14:30", end: "15:00" },
+          ],
+        },
+        1,
+      ),
+      true,
     );
   });
 });
