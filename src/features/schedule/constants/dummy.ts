@@ -8,6 +8,7 @@ const WEEKDAYS = [
   "2026-05-22",
 ];
 const MAX_CONCURRENT_WORKERS = 5;
+const GET_SCHEDULE_MAX_CONCURRENT_WORKERS = 4;
 
 const TIME_SLOTS = Array.from({ length: 18 }, (_, index) => {
   const startMinutes = 9 * 60 + index * 30;
@@ -30,24 +31,29 @@ const isFixedUnavailableTime = (start: string, end: string) =>
   (start >= "11:30" && end <= "13:00") ||
   (start === "17:30" && end === "18:00");
 
-const getPreviewSlotStatus = (dateIndex: number, timeIndex: number) => {
-  if ((dateIndex + timeIndex) % 11 === 0) {
-    return "PENDING_DELETE";
-  }
+const GET_SCHEDULE_CURRENT_COUNTS_BY_TIME = [
+  2, 3, 3, 3, 3, 0, 0, 0, 4, 3, 3, 3, 3, 3, 3, 3, 4, 0,
+];
 
-  if ((dateIndex + timeIndex) % 9 === 0) {
-    return "PENDING_ADD";
+const GET_SCHEDULE_SLOT_OVERRIDES: Record<
+  string,
+  {
+    status: WeekScheduleData["slots"][number]["status"];
+    currentCount: number;
   }
-
-  if ((dateIndex + timeIndex) % 7 === 0) {
-    return "MY_SCHEDULE";
-  }
-
-  if ((dateIndex + timeIndex) % 5 === 0) {
-    return "UNAVAILABLE";
-  }
-
-  return "EMPTY";
+> = {
+  "2-2": { status: "PENDING_ADD", currentCount: 2 },
+  "2-3": { status: "PENDING_ADD", currentCount: 2 },
+  "2-4": { status: "PENDING_ADD", currentCount: 2 },
+  "0-8": { status: "PENDING_DELETE", currentCount: 2 },
+  "0-9": { status: "PENDING_DELETE", currentCount: 2 },
+  "0-10": { status: "PENDING_DELETE", currentCount: 2 },
+  "1-9": { status: "PENDING_ADD", currentCount: 3 },
+  "1-10": { status: "PENDING_ADD", currentCount: 4 },
+  "3-11": { status: "PENDING_DELETE", currentCount: 4 },
+  "3-12": { status: "PENDING_DELETE", currentCount: 2 },
+  "3-13": { status: "MY_SCHEDULE", currentCount: 2 },
+  "3-14": { status: "MY_SCHEDULE", currentCount: 2 },
 };
 
 const isSelectedSlotStatus = (status: string) =>
@@ -70,16 +76,19 @@ const getRandomWorkerCount = (date: string, start: string) => {
 };
 
 export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
-  maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
+  maxConcurrentWorkers: GET_SCHEDULE_MAX_CONCURRENT_WORKERS,
   slots: WEEKDAYS.flatMap((date, dateIndex) =>
     TIME_SLOTS.map(({ start, end }, timeIndex) => {
       const isUnavailable = isFixedUnavailableTime(start, end);
+      const override = GET_SCHEDULE_SLOT_OVERRIDES[`${dateIndex}-${timeIndex}`];
       const status = isUnavailable
         ? "UNAVAILABLE"
-        : getPreviewSlotStatus(dateIndex, timeIndex);
+        : (override?.status ?? "EMPTY");
       const currentCount = isUnavailable
         ? 0
-        : (dateIndex + timeIndex) % (MAX_CONCURRENT_WORKERS + 1);
+        : (override?.currentCount ??
+          GET_SCHEDULE_CURRENT_COUNTS_BY_TIME[timeIndex] ??
+          GET_SCHEDULE_MAX_CONCURRENT_WORKERS);
 
       return {
         date,
@@ -194,3 +203,13 @@ export const DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[] = [
     ],
   },
 ];
+
+export const DUMMY_SCHEDULE_APPLY_RESPONSE = {
+  details: {
+    success: [
+      { start: "2026-04-06T13:00:00", end: "2026-04-06T14:30:00" },
+      { start: "2026-04-07T09:00:00", end: "2026-04-07T10:00:00" },
+    ],
+    failure: [{ start: "2026-04-07T09:00:00", end: "2026-04-07T10:00:00" }],
+  },
+};

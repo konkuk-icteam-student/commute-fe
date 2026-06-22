@@ -44,20 +44,20 @@ export default function Modal({
     >
       <section
         className={cn(
-          "flex max-h-103 w-76.5 max-w-full flex-col overflow-hidden rounded-[10px] bg-white opacity-100 shadow-[0_4px_20px_0_#00000040]",
+          "flex max-h-103 w-3/5 min-w-76.5 flex-col overflow-hidden rounded-[10px] bg-white opacity-100 shadow-[0_4px_20px_0_#00000040]",
           panelClassName,
         )}
       >
         <div
           className={cn(
-            "modal-scrollbar mr-4 min-h-0 flex-1 overflow-y-auto px-6 py-7 text-[#000000]",
+            "modal-scrollbar flex min-h-0 flex-1 flex-col items-center justify-center gap-2 overflow-y-auto px-6 py-7 text-[#000000]",
             contentClassName,
           )}
         >
           {title ? (
             <h2
               className={cn(
-                "pl-6 text-center align-middle text-xl leading-none font-bold tracking-[0.21px]",
+                "text-center align-middle text-xl leading-none font-bold tracking-[0.21px]",
                 titleClassName,
               )}
             >
@@ -71,7 +71,7 @@ export default function Modal({
         <button
           type="button"
           className={cn(
-            "flex h-14 min-h-14 w-full shrink-0 cursor-pointer items-center justify-center bg-[#2076FF] text-base leading-6 font-normal tracking-[0.24px] text-white",
+            "flex h-14 min-h-14 w-full shrink-0 cursor-pointer items-center justify-center bg-[#2076FF] text-sm leading-6 font-normal tracking-[0.24px] text-white",
             buttonClassName,
           )}
           onClick={onButtonClick}

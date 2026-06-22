@@ -82,7 +82,7 @@ export default function Alert({
           <button
             type="button"
             className={cn(
-              "flex flex-1 cursor-pointer items-center justify-center bg-[#C6CBD4] text-base leading-6 font-normal tracking-[0.24px] text-white",
+              "flex flex-1 cursor-pointer items-center justify-center bg-[#C6CBD4] text-sm leading-6 font-normal tracking-[0.24px] text-white",
               cancelButtonClassName,
             )}
             onClick={onCancel}
@@ -92,7 +92,7 @@ export default function Alert({
           <button
             type="button"
             className={cn(
-              "flex flex-1 cursor-pointer items-center justify-center bg-[#2076FF] text-base leading-6 font-normal tracking-[0.24px] text-white",
+              "flex flex-1 cursor-pointer items-center justify-center bg-[#2076FF] text-sm leading-6 font-normal tracking-[0.24px] text-white",
               confirmButtonClassName,
             )}
             onClick={onConfirm}

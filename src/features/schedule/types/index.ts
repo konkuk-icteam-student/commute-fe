@@ -42,7 +42,7 @@ export type ScheduleChangeTypeCode = "CR01" | "CR02";
 export interface ScheduleChangeHistorySlot {
   start: string;
   end: string;
-  changeTypeCode: ScheduleChangeTypeCode;
+  changeTypeCode?: ScheduleChangeTypeCode;
 }
 
 export interface ScheduleChangeHistoryType {

@@ -11,6 +11,9 @@ const {
   getRequestEditSlotDisabled,
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
+  getAppliedScheduleSlotTimes,
+  hasAppliedScheduleBelowMinSessionHours,
+  hasSlotTimesBelowMinSessionHours,
   mergeContinuousSlotTimes,
   toggleRequestEditSlotChange,
   toggleApplySlotChange,
@@ -331,6 +334,79 @@ describe("getSlotTimesTotalHoursOnWeek", () => {
   });
 });
 
+describe("hasSlotTimesBelowMinSessionHours", () => {
+  it("returns true when any continuous session is shorter than the minimum", () => {
+    assert.equal(typeof hasSlotTimesBelowMinSessionHours, "function");
+    assert.equal(
+      hasSlotTimesBelowMinSessionHours(
+        [
+          { date: "2026-04-09", start: "13:30", end: "14:00" },
+          { date: "2026-04-09", start: "14:30", end: "15:00" },
+        ],
+        1,
+      ),
+      true,
+    );
+  });
+
+  it("returns false when adjacent slots meet the minimum session length", () => {
+    assert.equal(typeof hasSlotTimesBelowMinSessionHours, "function");
+    assert.equal(
+      hasSlotTimesBelowMinSessionHours(
+        [
+          { date: "2026-04-09", start: "13:30", end: "14:00" },
+          { date: "2026-04-09", start: "14:00", end: "14:30" },
+        ],
+        1,
+      ),
+      false,
+    );
+  });
+});
+
+describe("hasAppliedScheduleBelowMinSessionHours", () => {
+  it("returns true when edit changes leave any applied schedule session below the minimum", () => {
+    assert.equal(typeof hasAppliedScheduleBelowMinSessionHours, "function");
+    assert.equal(
+      hasAppliedScheduleBelowMinSessionHours(
+        [
+          {
+            date: "2026-04-09",
+            start: "13:30",
+            end: "14:00",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:00",
+            end: "14:30",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:30",
+            end: "15:00",
+            status: "EMPTY",
+            currentCount: 0,
+          },
+        ],
+        {
+          deleteSlots: [
+            { date: "2026-04-09", start: "14:00", end: "14:30" },
+          ],
+          addSlots: [
+            { date: "2026-04-09", start: "14:30", end: "15:00" },
+          ],
+        },
+        1,
+      ),
+      true,
+    );
+  });
+});
+
 describe("mergeContinuousSlotTimes", () => {
   it("merges two adjacent slots on the same date", () => {
     assert.deepEqual(
@@ -364,6 +440,51 @@ describe("mergeContinuousSlotTimes", () => {
         { date: "2026-04-09", start: "13:30", end: "14:00" },
         { date: "2026-04-09", start: "14:30", end: "15:00" },
         { date: "2026-04-10", start: "14:00", end: "14:30" },
+      ],
+    );
+  });
+});
+
+describe("getAppliedScheduleSlotTimes", () => {
+  it("returns schedule slots after add and delete changes are applied", () => {
+    assert.equal(typeof getAppliedScheduleSlotTimes, "function");
+    assert.deepEqual(
+      getAppliedScheduleSlotTimes(
+        [
+          {
+            date: "2026-04-09",
+            start: "13:30",
+            end: "14:00",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:00",
+            end: "14:30",
+            status: "MY_SCHEDULE",
+            currentCount: 1,
+          },
+          {
+            date: "2026-04-09",
+            start: "14:30",
+            end: "15:00",
+            status: "EMPTY",
+            currentCount: 0,
+          },
+        ],
+        {
+          deleteSlots: [
+            { date: "2026-04-09", start: "14:00", end: "14:30" },
+          ],
+          addSlots: [
+            { date: "2026-04-09", start: "14:30", end: "15:00" },
+          ],
+        },
+      ),
+      [
+        { date: "2026-04-09", start: "13:30", end: "14:00" },
+        { date: "2026-04-09", start: "14:30", end: "15:00" },
       ],
     );
   });

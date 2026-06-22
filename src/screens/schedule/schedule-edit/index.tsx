@@ -3,9 +3,11 @@
 import { useState } from "react";
 
 import {
+  chunkScheduleSlots,
   DUMMY_GET_SCHEDULE,
   getRequestEditSlotStatus,
   getRequestEditSlotDisabled,
+  getDateStringFromDateLabel,
   type ScheduleApplyPayload,
   type ScheduleSlot,
   ScheduleHeader,
@@ -16,10 +18,17 @@ import {
   ScheduleStatusLegend,
   WorkingHoursCard,
   ScheduleChangeList,
+  hasAppliedScheduleBelowMinSessionHours,
+  isBeforeDate,
+  SLOTS_PER_DAY,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
-import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
-import { Button } from "@/components/ui";
+import {
+  getMonthWeekOfDate,
+  getWeekdaysOfMonthWeek,
+  shiftDateByWeeks,
+} from "@/lib/date-formatter";
+import { Button, Modal, Alert } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
 const MIN_SESSION_HOURS = 1;
@@ -40,6 +49,8 @@ export default function ScheduleEditScreen() {
     addSlots: [],
   });
   const [reason, setReason] = useState("");
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const currentMonthWeek = getMonthWeekOfDate(today);
@@ -56,6 +67,30 @@ export default function ScheduleEditScreen() {
   const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
   const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
   const ableToAddHours = getAbleToAddHours(deleteRequestHours);
+  const currentWeekdays = getWeekdaysOfMonthWeek(year, month, week);
+  const currentWeekScheduleSlots = chunkScheduleSlots(
+    DUMMY_GET_SCHEDULE.slots,
+    SLOTS_PER_DAY,
+  ).flatMap((slots, index) => {
+    const currentWeekday = currentWeekdays[index];
+
+    if (currentWeekday === undefined) {
+      return [];
+    }
+
+    const date = getDateStringFromDateLabel(year, currentWeekday.date);
+
+    return slots.map((slot) => ({
+      ...slot,
+      date,
+      status: isBeforeDate(date, today) ? "UNAVAILABLE" : slot.status,
+    }));
+  });
+  const isBelowMinSessionHours = hasAppliedScheduleBelowMinSessionHours(
+    currentWeekScheduleSlots,
+    editPayload,
+    MIN_SESSION_HOURS,
+  );
 
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
@@ -105,6 +140,21 @@ export default function ScheduleEditScreen() {
         getAbleToAddHours(getSlotTimesTotalHours(currentPayload.deleteSlots)),
       ),
     );
+  };
+
+  const handleClickButton = () => {
+    if (isBelowMinSessionHours) {
+      setIsWarningOpen(true);
+      return;
+    }
+
+    setIsApplyAlertOpen(true);
+  };
+
+  const handleApply = () => {
+    console.log("제출 변경 시간 : ", getMergedApplyPayload(editPayload));
+    console.log("제출 변경 사유 : ", reason);
+    setIsApplyAlertOpen(false);
   };
 
   return (
@@ -197,17 +247,35 @@ export default function ScheduleEditScreen() {
         </section>
       </div>
 
-      {/* TODO: 서버 연동 시 요청 바디 고려 */}
-      <Button
-        size="lg"
-        onClick={() => {
-          console.log("변경 시간 : ", getMergedApplyPayload(editPayload));
-          console.log("변경 사유 : ", reason);
-        }}
-        disabled={buttonDisabled}
-      >
+      <Button size="lg" onClick={handleClickButton} disabled={buttonDisabled}>
         신청하기
       </Button>
+
+      <Modal
+        open={isWarningOpen}
+        title="알림"
+        onButtonClick={() => setIsWarningOpen(false)}
+      >
+        <span className="text-center text-sm font-medium">
+          조건을 충족하지 않는 신청이 존재합니다.
+          <br />
+          (최소근무시간 미충족)
+          <br />
+          시간표 수정 후 다시 시도해주세요.
+        </span>
+      </Modal>
+      <Alert
+        open={isApplyAlertOpen}
+        title="수정 요청을 저장하시겠습니까?"
+        message={
+          addRequestHours !== deleteRequestHours
+            ? "현재 월 근무시간과 상이합니다.\n해당 내용은 관리자에게 전달되며, 반려될 수 있습니다."
+            : "승인 절차 완료 후 시간표에 반영됩니다."
+        }
+        confirmText="제출하기"
+        onCancel={() => setIsApplyAlertOpen(false)}
+        onConfirm={handleApply}
+      />
     </div>
   );
 }
