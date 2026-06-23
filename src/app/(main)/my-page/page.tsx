@@ -1,3 +1,9 @@
+import MyPageScreen from "@/screens/my-page";
+
 export default function MyPage() {
-  return <main className="flex min-h-screen w-full bg-blue-200">my page</main>;
+  return (
+    <main className="min-h-screen w-full bg-white">
+      <MyPageScreen />
+    </main>
+  );
 }
