@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import kuLogo from "@/assets/icons/admin-nav/ic-KU-logo.svg";
+import kuLogo from "@/assets/icons/admin-nav/ic_KU_logo.svg";
 import { ADMIN_NAVIGATION_ITEMS } from "@/constants/navigation";
 import { isPathActive } from "@/lib/route-match";
 import AdminNavLink from "../admin-nav-link";

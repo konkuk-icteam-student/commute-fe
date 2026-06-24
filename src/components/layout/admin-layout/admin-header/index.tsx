@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import profileIcon from "@/assets/icons/admin-nav/ic-profile.svg";
+import profileIcon from "@/assets/icons/admin-nav/ic_profile.svg";
 import backIcon from "@/assets/icons/common/ic_left.svg";
 
 // 1728px 이상에서는 Figma 데스크톱 기준 치수를 사용합니다.

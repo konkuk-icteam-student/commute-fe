@@ -62,7 +62,7 @@ export default function MenuCard() {
   return (
     <section className="overflow-hidden rounded-[20px] border-[0.5px] border-[#DDE3EF] bg-white shadow-[0_2px_8px_0_#F3F2F2]">
       <MenuItem
-        href="/schedule-apply"
+        href="/my-page/worktime-history"
         iconSrc={worktimeHistoryIcon}
         label="근무시간 신청기록"
       />

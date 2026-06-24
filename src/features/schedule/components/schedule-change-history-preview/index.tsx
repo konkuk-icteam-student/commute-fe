@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import chevronRightIcon from "@/assets/icons/common/ic_chevron-right.svg";
+import chevronRightIcon from "@/assets/icons/common/ic_chevron_right.svg";
 import plusIcon from "@/assets/icons/common/ic_plus_filled.svg";
 import minusIcon from "@/assets/icons/common/ic_minus_filled.svg";
 
