@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import attendanceCompleteIcon from "@/assets/icons/attendance-complete-icon.svg";
-import attendancePendingIcon from "@/assets/icons/attendance-pending-icon.svg";
+import attendanceCompleteIcon from "@/assets/icons/home/ic_attendance_complete.svg";
+import attendancePendingIcon from "@/assets/icons/home/ic_attendance_pending.svg";
 
 export type AttendanceStatus = "completed" | "scheduled";
 

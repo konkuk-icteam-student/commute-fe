@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import notificationIcon from "@/assets/icons/notification-icon.svg";
+import notificationIcon from "@/assets/icons/home/ic_notification.svg";
 
 type HomeHeaderProps = {
   newNotificationCount: number;

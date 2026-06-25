@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 
-import chevronRightIcon from "@/assets/icons/common/ic_chevron-right.svg";
+import chevronRightIcon from "@/assets/icons/common/ic_chevron_right.svg";
 import plusIcon from "@/assets/icons/common/ic_plus_filled.svg";
 import minusIcon from "@/assets/icons/common/ic_minus_filled.svg";
 
@@ -44,12 +45,9 @@ export default function ScheduleChangeHistoryPreview({
         <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
           처리 내역
         </span>
-        <button
-          type="button"
-          onClick={() => console.log("처리내역 자세히 보기")}
-        >
+        <Link href="/my-page/worktime-history">
           <Image alt="처리내역 자세히보기" src={chevronRightIcon} />
-        </button>
+        </Link>
       </div>
       {histories.length === 0 ? (
         <div className="flex w-full items-center justify-center pb-3">

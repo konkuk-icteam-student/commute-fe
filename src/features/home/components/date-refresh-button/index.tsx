@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import homeRefreshIcon from "@/assets/icons/home-refresh-icon.svg";
+import homeRefreshIcon from "@/assets/icons/home/ic_home_refresh.svg";
 
 type DateRefreshButtonProps = {
   currentDateTime: string;

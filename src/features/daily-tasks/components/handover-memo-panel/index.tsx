@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import closeIcon from "@/assets/icons/close-icon.svg";
+import closeIcon from "@/assets/icons/daily-tasks/ic_close.svg";
 import { cn } from "@/lib/utils";
 
 import type { HandoverMemo } from "../../types";

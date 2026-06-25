@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import addTimeIcon from "@/assets/icons/add-time-icon.svg";
+import addTimeIcon from "@/assets/icons/common/ic_plus_filled.svg";
 import icLeft from "@/assets/icons/common/ic_left.svg";
-import emptyNotificationIcon from "@/assets/icons/empty-notification-icon.svg";
+import emptyNotificationIcon from "@/assets/icons/home/ic_empty_notification.svg";
 import {
   formatNotificationCreatedAt,
   getNotificationDateTime,

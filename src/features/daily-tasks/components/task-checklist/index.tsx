@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import checkIcon from "@/assets/icons/check-icon.svg";
+import checkIcon from "@/assets/icons/daily-tasks/ic_check.svg";
 import { cn } from "@/lib/utils";
 
 import type { DailyTaskItem } from "../../types";
