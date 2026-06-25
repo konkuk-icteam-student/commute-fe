@@ -9,9 +9,14 @@ interface MenuItemProps {
   href?: string;
   iconSrc: string;
   label: string;
+  onClick?: () => void;
 }
 
-function MenuItem({ href, iconSrc, label }: MenuItemProps) {
+interface MenuCardProps {
+  onLogout?: () => void;
+}
+
+function MenuItem({ href, iconSrc, label, onClick }: MenuItemProps) {
   const content = (
     <>
       <span className="flex min-w-0 items-center gap-2">
@@ -52,13 +57,13 @@ function MenuItem({ href, iconSrc, label }: MenuItemProps) {
   }
 
   return (
-    <button className={className} type="button">
+    <button className={className} type="button" onClick={onClick}>
       {content}
     </button>
   );
 }
 
-export default function MenuCard() {
+export default function MenuCard({ onLogout }: MenuCardProps) {
   return (
     <section className="overflow-hidden rounded-[20px] border-[0.5px] border-[#DDE3EF] bg-white shadow-[0_2px_8px_0_#F3F2F2]">
       <MenuItem
@@ -67,7 +72,7 @@ export default function MenuCard() {
         label="근무시간 신청기록"
       />
       <div className="border-t-[0.5px] border-[#DDE3EF]" />
-      <MenuItem iconSrc={logoutIcon} label="로그아웃" />
+      <MenuItem iconSrc={logoutIcon} label="로그아웃" onClick={onLogout} />
     </section>
   );
 }
