@@ -63,20 +63,20 @@ export default function WorktimeHistoryList({
               </div>
 
               <ul className="mt-3 flex flex-col gap-1">
-                {getHistorySlots(history).map((change, changeIndex) => (
-                  <li
-                    className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
-                    key={`${change.changeTypeCode}-${change.start}-${change.end}-${changeIndex}`}
-                  >
-                    <Image
-                      alt=""
-                      aria-hidden="true"
-                      className="shrink-0"
-                      height={5}
-                      src={changeTypeIcons[change.changeTypeCode]}
-                      unoptimized
-                      width={5}
-                    />
+              {getHistorySlots(history).map((change, changeIndex) => (
+                <li
+                  className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
+                  key={`${change.changeTypeCode ?? "CR01"}-${change.start}-${change.end}-${changeIndex}`}
+                >
+                  <Image
+                    alt=""
+                    aria-hidden="true"
+                    className="shrink-0"
+                    height={5}
+                    src={changeTypeIcons[change.changeTypeCode ?? "CR01"]}
+                    unoptimized
+                    width={5}
+                  />
                     <span>{formatScheduleChangeHistorySlot(change)}</span>
                   </li>
                 ))}
