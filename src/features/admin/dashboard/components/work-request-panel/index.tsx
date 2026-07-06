@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 
 import rightGrayIcon from "@/assets/icons/admin-common/ic_chevron_right_gray.svg";
 import minusFilledIcon from "@/assets/icons/common/ic_minus_filled.svg";
@@ -18,22 +21,22 @@ export default function WorkRequestPanel({
         arrowHref="/admin/worktime/review"
       />
       <div className="grid grid-cols-2 gap-2 px-4 pt-0 pb-4 min-[1728px]:gap-4 min-[1728px]:px-5.25 min-[1728px]:pb-5">
-        {requests.map((request, index) => (
+        {requests.map((request) => (
           <article
-            key={`${request.name}-${index}`}
+            key={request.id}
             className="rounded-xl border border-[#DDE3EF] bg-white px-4 pt-2.75 pb-3.25 shadow-[0_1px_2px_0_rgba(20,24,33,0.04)]"
           >
             <div className="flex items-center justify-between">
               <p className="text-[16px] font-bold text-[#1A2236]">
                 {request.name}
               </p>
-              <Image
-                src={rightGrayIcon}
-                alt=""
-                width={16}
-                height={16}
-                className="cursor-pointer"
-              />
+              <Link
+                href={`/admin/worktime/review?requestId=${request.id}`}
+                className="flex h-6 w-6 cursor-pointer items-center justify-center"
+                aria-label={`${request.name} 수정요청 검토`}
+              >
+                <Image src={rightGrayIcon} alt="" width={16} height={16} />
+              </Link>
             </div>
             <ul className="mt-2.75 space-y-2">
               {request.changes.map((change, changeIndex) => (
@@ -57,12 +60,18 @@ export default function WorkRequestPanel({
               <button
                 type="button"
                 className="h-6.75 w-15 cursor-pointer rounded-md border border-[#DDE3EF] bg-white text-[16px] text-[#1E2124]"
+                onClick={() =>
+                  console.log("반려 버튼 클릭", { requestId: request.id })
+                }
               >
                 반려
               </button>
               <button
                 type="button"
                 className="h-6.75 w-15 cursor-pointer rounded-md bg-[#2076FF] text-[16px] text-white"
+                onClick={() =>
+                  console.log("승인 버튼 클릭", { requestId: request.id })
+                }
               >
                 승인
               </button>

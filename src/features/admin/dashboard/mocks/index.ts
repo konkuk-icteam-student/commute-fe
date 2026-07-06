@@ -35,32 +35,81 @@ const { studentA, studentB, studentC, studentD, studentE, studentF, studentG } =
   dashboardWorkers;
 
 export const dashboardTimeRows: DashboardTimeRow[] = [
-  { time: "09:00 ~ 09:30", workers: [studentA, studentB] },
-  { time: "09:30 ~ 10:00", workers: [studentA, studentB, studentC] },
-  { time: "10:00 ~ 10:30", workers: [studentA, studentB, studentC] },
   {
-    time: "10:30 ~ 11:00",
+    id: 1,
+    periodCode: "MORNING",
+    start: "09:00",
+    end: "09:30",
+    workers: [studentA, studentB],
+  },
+  {
+    id: 2,
+    periodCode: "MORNING",
+    start: "09:30",
+    end: "10:00",
+    workers: [studentA, studentB, studentC],
+  },
+  {
+    id: 3,
+    periodCode: "MORNING",
+    start: "10:00",
+    end: "10:30",
+    workers: [studentA, studentB, studentC],
+  },
+  {
+    id: 4,
+    periodCode: "MORNING",
+    start: "10:30",
+    end: "11:00",
     workers: [studentA, studentB, studentC, studentD],
   },
   {
-    time: "11:00 ~ 11:30",
+    id: 5,
+    periodCode: "MORNING",
+    start: "11:00",
+    end: "11:30",
     workers: [studentD, studentE, studentF, studentG],
   },
-  { time: "09:00 ~ 09:30", workers: [studentA, studentB] },
-  { time: "09:30 ~ 10:00", workers: [studentA, studentB, studentC] },
-  { time: "10:00 ~ 10:30", workers: [studentA, studentB, studentC] },
   {
-    time: "10:30 ~ 11:00",
+    id: 6,
+    periodCode: "AFTERNOON",
+    start: "09:00",
+    end: "09:30",
+    workers: [studentA, studentB],
+  },
+  {
+    id: 7,
+    periodCode: "AFTERNOON",
+    start: "09:30",
+    end: "10:00",
+    workers: [studentA, studentB, studentC],
+  },
+  {
+    id: 8,
+    periodCode: "AFTERNOON",
+    start: "10:00",
+    end: "10:30",
+    workers: [studentA, studentB, studentC],
+  },
+  {
+    id: 9,
+    periodCode: "AFTERNOON",
+    start: "10:30",
+    end: "11:00",
     workers: [studentA, studentB, studentC, studentD],
   },
   {
-    time: "11:00 ~ 11:30",
+    id: 10,
+    periodCode: "AFTERNOON",
+    start: "11:00",
+    end: "11:30",
     workers: [studentD, studentE, studentF, studentG],
   },
 ];
 
 export const dashboardWorkRequests: DashboardWorkRequest[] = [
   {
+    id: 1,
     name: "박길동",
     changes: [
       { type: "remove", text: "4월 9일 14:30-15:30 (1h)" },
@@ -69,6 +118,7 @@ export const dashboardWorkRequests: DashboardWorkRequest[] = [
     ],
   },
   {
+    id: 2,
     name: "박길동",
     changes: [
       { type: "remove", text: "4월 9일 14:30-15:30 (1h)" },
@@ -82,7 +132,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 1,
     name: "김길동",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "컴퓨터공학부 · 202311303",
     late: "1회 (8분)",
     week: "0시간 0분 / 9시간",
@@ -93,7 +143,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 2,
     name: "이영희",
-    status: "출근예정",
+    statusCode: "SCHEDULED",
     meta: "경영학부 · 202311304",
     late: "0회 (0분)",
     week: "0시간 0분 / 9시간",
@@ -104,7 +154,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 3,
     name: "박철수",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "전자공학부 · 202311305",
     late: "2회 (15분)",
     week: "6시간 0분 / 9시간",
@@ -115,7 +165,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 4,
     name: "최지훈",
-    status: "출근예정",
+    statusCode: "SCHEDULED",
     meta: "정보보호학부 · 202311306",
     late: "1회 (5분)",
     week: "3시간 15분 / 9시간",
@@ -126,7 +176,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 5,
     name: "최지훈",
-    status: "지각",
+    statusCode: "LATE",
     meta: "정보보호학부 · 202311306",
     late: "1회 (5분)",
     week: "3시간 15분 / 9시간",
@@ -137,7 +187,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 6,
     name: "정수민",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "시각디자인학과 · 202311307",
     late: "0회 (0분)",
     week: "5시간 0분 / 9시간",
@@ -148,7 +198,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 7,
     name: "한지우",
-    status: "출근예정",
+    statusCode: "SCHEDULED",
     meta: "산업디자인학과 · 202311308",
     late: "1회 (3분)",
     week: "2시간 30분 / 9시간",
@@ -159,7 +209,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 8,
     name: "윤서준",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "기계공학부 · 202311309",
     late: "0회 (0분)",
     week: "7시간 0분 / 9시간",
@@ -170,7 +220,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 9,
     name: "임하은",
-    status: "지각",
+    statusCode: "LATE",
     meta: "화학공학부 · 202311310",
     late: "3회 (22분)",
     week: "4시간 0분 / 9시간",
@@ -181,7 +231,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 10,
     name: "송민재",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "건축학부 · 202311311",
     late: "1회 (7분)",
     week: "6시간 30분 / 9시간",
@@ -192,7 +242,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 11,
     name: "오예린",
-    status: "출근예정",
+    statusCode: "SCHEDULED",
     meta: "경제학과 · 202311312",
     late: "0회 (0분)",
     week: "1시간 30분 / 9시간",
@@ -203,7 +253,7 @@ export const dashboardMemberRows: DashboardMemberAttendance[] = [
   {
     id: 12,
     name: "김태윤",
-    status: "근무중",
+    statusCode: "WORKING",
     meta: "전기전자공학부 · 202311313",
     late: "2회 (11분)",
     week: "8시간 0분 / 9시간",

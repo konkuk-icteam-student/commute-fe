@@ -13,9 +13,16 @@ export default function DateNavigator({
   dateLabels: string[];
   initialIndex?: number;
 }) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const isFirstDate = currentIndex === 0;
-  const isLastDate = currentIndex === dateLabels.length - 1;
+  const [selectedIndex, setSelectedIndex] = useState(() =>
+    Math.min(Math.max(initialIndex, 0), Math.max(dateLabels.length - 1, 0)),
+  );
+  const hasDates = dateLabels.length > 0;
+  const currentIndex = Math.min(
+    Math.max(selectedIndex, 0),
+    Math.max(dateLabels.length - 1, 0),
+  );
+  const isFirstDate = !hasDates || currentIndex === 0;
+  const isLastDate = !hasDates || currentIndex === dateLabels.length - 1;
 
   return (
     <div className="flex h-14 items-center justify-center gap-3 min-[1728px]:gap-7.5">
@@ -24,7 +31,7 @@ export default function DateNavigator({
         className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
         aria-label="이전 날짜"
         disabled={isFirstDate}
-        onClick={() => setCurrentIndex((index) => index - 1)}
+        onClick={() => setSelectedIndex(currentIndex - 1)}
       >
         <Image
           src={
@@ -39,14 +46,14 @@ export default function DateNavigator({
         />
       </button>
       <p className="mt-1 flex h-14 items-center text-[32px] font-bold text-[#17191A] min-[1728px]:text-[40px]">
-        {dateLabels[currentIndex]}
+        {hasDates ? dateLabels[currentIndex] : "표시할 날짜가 없습니다"}
       </p>
       <button
         type="button"
         className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
         aria-label="다음 날짜"
         disabled={isLastDate}
-        onClick={() => setCurrentIndex((index) => index + 1)}
+        onClick={() => setSelectedIndex(currentIndex + 1)}
       >
         <Image
           src={

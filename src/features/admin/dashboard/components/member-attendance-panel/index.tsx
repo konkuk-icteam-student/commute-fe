@@ -9,25 +9,31 @@ import searchIcon from "@/assets/icons/admin-dashboard/ic_search.svg";
 import DashboardSectionHeader from "../dashboard-section-header";
 import type {
   DashboardMemberAttendance,
-  DashboardMemberStatus,
+  DashboardMemberStatusCode,
 } from "../../types";
 
 const statusStyles: Record<
-  DashboardMemberStatus,
+  DashboardMemberStatusCode,
   { badge: string; dot: string }
 > = {
-  근무중: {
+  WORKING: {
     badge: "bg-[#DCFCE7] text-[#008236]",
     dot: "text-[#00C950]",
   },
-  출근예정: {
+  SCHEDULED: {
     badge: "bg-[#F0F2F8] text-[#8892A6]",
     dot: "text-[#8E8E93]",
   },
-  지각: {
+  LATE: {
     badge: "bg-[#FEE2E2] text-[#B91C1C]",
     dot: "text-[#E31B23]",
   },
+};
+
+const statusLabels: Record<DashboardMemberStatusCode, string> = {
+  WORKING: "근무중",
+  SCHEDULED: "출근예정",
+  LATE: "지각",
 };
 
 const PAGE_SIZE = 5;
@@ -37,13 +43,14 @@ export default function MemberAttendancePanel({
 }: {
   members: DashboardMemberAttendance[];
 }) {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedPage, setSelectedPage] = useState(0);
   const [query, setQuery] = useState("");
   const filteredMembers = useMemo(
     () => members.filter((member) => member.name.includes(query.trim())),
     [members, query],
   );
   const pageCount = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
+  const currentPage = Math.min(selectedPage, pageCount - 1);
   const visibleMembers = filteredMembers.slice(
     currentPage * PAGE_SIZE,
     (currentPage + 1) * PAGE_SIZE,
@@ -68,7 +75,7 @@ export default function MemberAttendancePanel({
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
-                setCurrentPage(0);
+                setSelectedPage(0);
               }}
             />
           </label>
@@ -79,7 +86,7 @@ export default function MemberAttendancePanel({
               className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
               aria-label="이전 페이지"
               disabled={isFirstPage}
-              onClick={() => setCurrentPage((page) => page - 1)}
+              onClick={() => setSelectedPage(currentPage - 1)}
             >
               <Image
                 src={isFirstPage ? rightCircleDisabledIcon : rightCircleIcon}
@@ -98,7 +105,7 @@ export default function MemberAttendancePanel({
               className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
               aria-label="다음 페이지"
               disabled={isLastPage}
-              onClick={() => setCurrentPage((page) => page + 1)}
+              onClick={() => setSelectedPage(currentPage + 1)}
             >
               <Image
                 src={isLastPage ? rightCircleDisabledIcon : rightCircleIcon}
@@ -123,7 +130,7 @@ export default function MemberAttendancePanel({
 }
 
 function MemberRow({ member }: { member: DashboardMemberAttendance }) {
-  const statusStyle = statusStyles[member.status];
+  const statusStyle = statusStyles[member.statusCode];
 
   return (
     <article className="grid min-h-17 grid-cols-[200px_minmax(0,1fr)] items-center">
@@ -134,7 +141,7 @@ function MemberRow({ member }: { member: DashboardMemberAttendance }) {
             className={`rounded-full px-2 py-px text-[10px] font-bold ${statusStyle.badge}`}
           >
             <span className={statusStyle.dot}>●</span>
-            <span className="ml-1">{member.status}</span>
+            <span className="ml-1">{statusLabels[member.statusCode]}</span>
           </span>
         </div>
         <p className="mt-0.5 text-[11px] leading-[16.5px] text-[#6B7280]">

@@ -17,6 +17,9 @@ function getWorkerColor(workerId: number) {
 }
 
 export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
+  const morningRows = rows.filter((row) => row.periodCode === "MORNING");
+  const afternoonRows = rows.filter((row) => row.periodCode === "AFTERNOON");
+
   return (
     <section className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]">
       <DashboardSectionHeader
@@ -28,8 +31,8 @@ export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
           오전
         </p>
         <div>
-          {rows.slice(0, 5).map((row) => (
-            <TimeTableRow key={row.time} period="morning" row={row} />
+          {morningRows.map((row) => (
+            <TimeTableRow key={row.id} row={row} />
           ))}
         </div>
 
@@ -37,8 +40,8 @@ export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
           오후
         </p>
         <div>
-          {rows.slice(5).map((row) => (
-            <TimeTableRow key={row.time} period="afternoon" row={row} />
+          {afternoonRows.map((row) => (
+            <TimeTableRow key={row.id} row={row} />
           ))}
         </div>
       </div>
@@ -46,27 +49,19 @@ export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
   );
 }
 
-function TimeTableRow({
-  period,
-  row,
-}: {
-  period: "morning" | "afternoon";
-  row: DashboardTimeRow;
-}) {
-  const startTime = row.time.split(" ~ ")[0];
-
+function TimeTableRow({ row }: { row: DashboardTimeRow }) {
   return (
     <div className="grid min-h-10 grid-cols-[minmax(0,1fr)_28px] items-start border-b-[0.3px] border-[#DDE3EF] p-2 last:border-b-0">
       <div className="flex min-w-0 items-start gap-5">
         <span className="w-9.75 shrink-0 text-[15px] font-medium text-[#000000]">
-          {startTime}
+          {row.start}
         </span>
         <div className="flex min-w-0 flex-wrap gap-x-2 gap-y-1.5">
           {row.workers.map((worker) => (
             <span
-              key={`${row.time}-${worker.id}`}
+              key={`${row.id}-${worker.id}`}
               className={`flex h-6 min-w-12.75 items-center justify-center px-2 text-[12px] font-bold whitespace-nowrap ${
-                period === "morning" ? "rounded-lg" : "rounded-2xl"
+                row.periodCode === "MORNING" ? "rounded-lg" : "rounded-2xl"
               } ${getWorkerColor(worker.id)}`}
             >
               {worker.name}

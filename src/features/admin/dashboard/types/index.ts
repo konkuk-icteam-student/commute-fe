@@ -8,8 +8,13 @@ export type DashboardWorker = {
   name: string;
 };
 
+export type DashboardTimePeriodCode = "MORNING" | "AFTERNOON";
+
 export type DashboardTimeRow = {
-  time: string;
+  id: number;
+  periodCode: DashboardTimePeriodCode;
+  start: string;
+  end: string;
   workers: DashboardWorker[];
 };
 
@@ -19,16 +24,17 @@ export type DashboardWorkRequestChange = {
 };
 
 export type DashboardWorkRequest = {
+  id: number;
   name: string;
   changes: DashboardWorkRequestChange[];
 };
 
-export type DashboardMemberStatus = "근무중" | "출근예정" | "지각";
+export type DashboardMemberStatusCode = "WORKING" | "SCHEDULED" | "LATE";
 
 export type DashboardMemberAttendance = {
   id: number;
   name: string;
-  status: DashboardMemberStatus;
+  statusCode: DashboardMemberStatusCode;
   meta: string;
   late: string;
   week: string;
