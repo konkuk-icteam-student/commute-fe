@@ -38,13 +38,13 @@ export default function AdminLayout({
   const shouldShowBackButton = showBackButton || !!routeMeta?.showBackButton;
 
   return (
-    <main className="min-h-screen w-full overflow-x-auto bg-[#F5F5F5]">
+    <main className="min-h-screen w-full overflow-x-auto bg-white">
       <div className="flex min-h-screen min-w-0">
         {variant === "with-sidebar" ? (
           <AdminSidebar pathname={pathname} />
         ) : null}
 
-        <section className="relative z-10 flex min-w-0 flex-1 flex-col">
+        <section className="@container/dashboard relative z-10 flex min-w-0 flex-1 flex-col">
           <AdminHeader
             adminUser={adminUser}
             showBackButton={shouldShowBackButton}

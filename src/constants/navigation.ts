@@ -71,7 +71,7 @@ export const ADMIN_NAVIGATION_ITEMS = [
     iconSize: { width: 32, height: 32 },
   },
   {
-    label: "근로신청 관리",
+    label: "근로시간 관리",
     href: "/admin/work-request",
     icon: assetSrc(workRequestIcon),
     activeIcon: assetSrc(workRequestActiveIcon),
@@ -105,8 +105,8 @@ export const ADMIN_ROUTE_META = [
     showBackButton: true,
   },
   {
-    href: "/admin/work-request/review",
-    label: "근로신청 관리 - 근로시간 수정요청",
+    href: "/admin/worktime/review",
+    label: "근로시간 관리 - 근로시간 수정요청",
     showBackButton: true,
   },
 ] as const;
