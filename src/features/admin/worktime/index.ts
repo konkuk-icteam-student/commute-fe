@@ -3,4 +3,5 @@ export {
   WorktimeEditRequestSection,
   WorktimeScheduleHeader,
   WorktimeScheduleTable,
+  WorktimeEditRequestHeader,
 } from "./components";

@@ -9,12 +9,23 @@ import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
 import WorktimeScheduleTable from "../worktime-schedule-table";
 import WorktimeScheduleHeader from "../worktime-schedule-header";
 
-export default function WorktimeScheduleSection() {
+interface WorktimeScheduleSectionProps {
+  searchText: string;
+  userResult: string;
+  handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleSearch: () => void;
+  handleReset: () => void;
+}
+
+export default function WorktimeScheduleSection({
+  searchText,
+  userResult,
+  handleChangeText,
+  handleSearch,
+  handleReset,
+}: WorktimeScheduleSectionProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
-
-  const [searchText, setSearchText] = useState("");
-  const [userResult, setUserResult] = useState("");
 
   const handlePrevWeek = () => {
     setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, -1));
@@ -22,22 +33,6 @@ export default function WorktimeScheduleSection() {
 
   const handleNextWeek = () => {
     setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, 1));
-  };
-
-  const handleChangeText = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-  };
-  // TODO: 서버에 검색어 조회 요청
-  const handleSearch = () => {
-    console.log(searchText, "검색");
-    setSearchText("");
-    setUserResult(searchText);
-  };
-
-  const handleReset = () => {
-    setSearchText("");
-    setUserResult("");
-    console.log("서버에 빈 스트링으로 요청");
   };
 
   return (
