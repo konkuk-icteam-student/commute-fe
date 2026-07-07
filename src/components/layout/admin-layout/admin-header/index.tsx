@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import backIcon from "@/assets/icons/admin-common/ic_chevron_right_bold.svg";
+import chevronLeftIcon from "@/assets/icons/admin-common/ic_chevron_right_bold.svg";
 import profileIcon from "@/assets/icons/admin-nav/ic_profile.svg";
 
 // 1728px 이상에서는 Figma 데스크톱 기준 치수를 사용합니다.
@@ -35,7 +35,7 @@ export default function AdminHeader({
             onClick={() => router.back()}
           >
             <Image
-              src={backIcon}
+              src={chevronLeftIcon}
               alt=""
               width={40}
               height={40}

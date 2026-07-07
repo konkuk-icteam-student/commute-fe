@@ -13,6 +13,22 @@ export default function DateNavigator({
   dateLabels: string[];
   initialIndex?: number;
 }) {
+  return (
+    <DateNavigatorContent
+      key={`${initialIndex}-${dateLabels.join("|")}`}
+      dateLabels={dateLabels}
+      initialIndex={initialIndex}
+    />
+  );
+}
+
+function DateNavigatorContent({
+  dateLabels,
+  initialIndex,
+}: {
+  dateLabels: string[];
+  initialIndex: number;
+}) {
   const [selectedIndex, setSelectedIndex] = useState(() =>
     Math.min(Math.max(initialIndex, 0), Math.max(dateLabels.length - 1, 0)),
   );

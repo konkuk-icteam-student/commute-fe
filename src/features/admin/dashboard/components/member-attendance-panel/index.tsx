@@ -16,24 +16,24 @@ const statusStyles: Record<
   DashboardMemberStatusCode,
   { badge: string; dot: string }
 > = {
-  WORKING: {
+  AT01: {
     badge: "bg-[#DCFCE7] text-[#008236]",
     dot: "text-[#00C950]",
   },
-  SCHEDULED: {
+  AT02: {
     badge: "bg-[#F0F2F8] text-[#8892A6]",
     dot: "text-[#8E8E93]",
   },
-  LATE: {
+  AT03: {
     badge: "bg-[#FEE2E2] text-[#B91C1C]",
     dot: "text-[#E31B23]",
   },
 };
 
 const statusLabels: Record<DashboardMemberStatusCode, string> = {
-  WORKING: "근무중",
-  SCHEDULED: "출근예정",
-  LATE: "지각",
+  AT01: "근무중",
+  AT02: "출근예정",
+  AT03: "지각",
 };
 
 const PAGE_SIZE = 5;
@@ -69,6 +69,7 @@ export default function MemberAttendancePanel({
           <label className="flex h-9.75 w-53.5 items-center gap-2 rounded-lg border border-[#DDE3EF] bg-[rgba(244,245,247,0.57)] p-3">
             <Image src={searchIcon} alt="" width={15} height={15} />
             <input
+              aria-label="이름 검색"
               className="mt-0.5 min-w-0 flex-1 text-[14px] outline-none placeholder:text-[#8892A6]"
               placeholder="이름을 검색하세요."
               type="text"

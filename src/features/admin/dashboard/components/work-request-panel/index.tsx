@@ -14,6 +14,16 @@ export default function WorkRequestPanel({
 }: {
   requests: DashboardWorkRequest[];
 }) {
+  const handleReject = (requestId: number) => {
+    // TODO: 근로 시간 수정요청 반려 API 연동 시 실제 action으로 교체합니다.
+    console.log("반려 버튼 클릭", { requestId });
+  };
+
+  const handleApprove = (requestId: number) => {
+    // TODO: 근로 시간 수정요청 승인 API 연동 시 실제 action으로 교체합니다.
+    console.log("승인 버튼 클릭", { requestId });
+  };
+
   return (
     <section className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]">
       <DashboardSectionHeader
@@ -60,18 +70,14 @@ export default function WorkRequestPanel({
               <button
                 type="button"
                 className="h-6.75 w-15 cursor-pointer rounded-md border border-[#DDE3EF] bg-white text-[16px] text-[#1E2124]"
-                onClick={() =>
-                  console.log("반려 버튼 클릭", { requestId: request.id })
-                }
+                onClick={() => handleReject(request.id)}
               >
                 반려
               </button>
               <button
                 type="button"
                 className="h-6.75 w-15 cursor-pointer rounded-md bg-[#2076FF] text-[16px] text-white"
-                onClick={() =>
-                  console.log("승인 버튼 클릭", { requestId: request.id })
-                }
+                onClick={() => handleApprove(request.id)}
               >
                 승인
               </button>

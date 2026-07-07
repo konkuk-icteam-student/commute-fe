@@ -21,7 +21,7 @@ export default function SummaryPanel({
             </p>
             <p
               className={`mt-2 text-[28px] font-bold min-[1728px]:text-[32px] ${
-                item.label === "지각자" ? "text-[#FD7171]" : "text-[#1E2124]"
+                item.variant === "warning" ? "text-[#FD7171]" : "text-[#1E2124]"
               }`}
             >
               {item.value}

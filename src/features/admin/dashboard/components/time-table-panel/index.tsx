@@ -1,19 +1,14 @@
 import DashboardSectionHeader from "../dashboard-section-header";
+import { dashboardWorkerColors } from "../../constants";
 import type { DashboardTimeRow } from "../../types";
 
-const nameColors = [
-  "bg-[#DBEAFE] text-[#5A7BC8]",
-  "bg-[#D7FAE3] text-[#66C185]",
-  "bg-[#FFE4E4] text-[#FD7171]",
-  "bg-[#FFE8C7] text-[#D79430]",
-  "bg-[#D5EEF1] text-[#50A8B1]",
-  "bg-[#FBDDEA] text-[#D8679B]",
-  "bg-[#E6DDF5] text-[#8266C3]",
-] as const;
-
-function getWorkerColor(workerId: number) {
-  const colorIndex = Math.abs(workerId - 1) % nameColors.length;
-  return nameColors[colorIndex];
+function getWorkerColor(workerId: string) {
+  const colorSeed = Array.from(workerId).reduce(
+    (sum, character) => sum + character.charCodeAt(0),
+    0,
+  );
+  const colorIndex = colorSeed % dashboardWorkerColors.length;
+  return dashboardWorkerColors[colorIndex];
 }
 
 export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
@@ -70,7 +65,7 @@ function TimeTableRow({ row }: { row: DashboardTimeRow }) {
         </div>
       </div>
       <p className="pt-1 text-right text-[12px] font-medium text-[#C2C4C6]">
-        {row.workers.length}명
+        {row.currentCount}명
       </p>
     </div>
   );
