@@ -1,4 +1,4 @@
-export default function WorkRequestReviewPage() {
+export default function WorktimeReviewPage() {
   return (
     <div className="flex flex-1 items-center justify-center px-10 py-8">
       <section className="rounded-lg border border-[#DDE3EF] bg-white px-8 py-6 text-center">

@@ -11,7 +11,7 @@ export default function WorktimePage() {
           시간표 자세히 보기
         </Link>
         <Link
-          href="/admin/work-request/review"
+          href="/admin/worktime/review"
           className="flex h-10 items-center justify-center rounded-md border border-[#2874F0] bg-white px-5 text-sm font-bold text-[#2874F0]"
         >
           근로시간 수정요청

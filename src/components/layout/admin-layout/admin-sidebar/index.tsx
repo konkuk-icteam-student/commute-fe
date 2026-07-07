@@ -8,7 +8,7 @@ import AdminNavLink from "../admin-nav-link";
 // 1728px 이상에서는 Figma 데스크톱 기준 치수를 사용합니다.
 export default function AdminSidebar({ pathname }: { pathname: string }) {
   return (
-    <aside className="relative z-0 w-65 shrink-0 border-r border-[#F2F2F2] bg-white px-8 pt-16 shadow-[0_4px_5px_rgba(0,0,0,0.25)] [border-right-width:0.5px] min-[1728px]:w-77 min-[1728px]:px-10.75 min-[1728px]:pt-20">
+    <aside className="relative z-0 w-65 shrink-0 border-r-[0.5px] [border-right-width:0.5px] border-[#DDE3EF] bg-white px-8 pt-6.5 shadow-[0_1px_2px_0_rgba(0,0,0,0.25)] min-[1728px]:w-77 min-[1728px]:px-10.75 min-[1728px]:pt-20">
       <div className="flex h-15 w-48 items-center gap-3 min-[1728px]:h-16.5 min-[1728px]:w-55.5">
         <Image
           src={kuLogo}
