@@ -2,12 +2,18 @@ import type { MouseEvent } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { WorktimeChangeRequestType } from "../../types";
+import {
+  formatWorktimeRequestDateTime,
+  formatWorktimeRequestSlot,
+} from "../../utils";
+
 interface WorktimeEditRequestItemProps {
   requestId: string;
   requestedAt: string;
   name: string;
-  deleteSlots: { start: string; end: string }[];
-  addSlots: { start: string; end: string }[];
+  deleteSlots: WorktimeChangeRequestType[];
+  addSlots: WorktimeChangeRequestType[];
   reason: string;
   userResult: string;
   handleClickRequestCard: (name: string) => void;
@@ -47,7 +53,9 @@ export default function WorktimeEditRequestItem({
     >
       <div className="flex flex-row items-center justify-between">
         <h3 className="text-lg font-bold">{name}</h3>
-        <span className="text-sm text-[#6B7280]">{requestedAt}</span>
+        <span className="text-sm text-[#6B7280]">
+          {formatWorktimeRequestDateTime(requestedAt)}
+        </span>
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-base font-bold text-[#FD7171]">삭제</span>
@@ -56,7 +64,7 @@ export default function WorktimeEditRequestItem({
             key={`${item.start}-${item.end} / ${index}`}
             className="text-base text-[#464C53]"
           >
-            {item.start}~{item.end}
+            {formatWorktimeRequestSlot(item)}
           </span>
         ))}
       </div>
@@ -67,7 +75,7 @@ export default function WorktimeEditRequestItem({
             key={`${item.start}-${item.end} / ${index}`}
             className="text-base text-[#464C53]"
           >
-            {item.start}~{item.end}
+            {formatWorktimeRequestSlot(item)}
           </span>
         ))}
       </div>

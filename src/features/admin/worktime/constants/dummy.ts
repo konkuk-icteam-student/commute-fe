@@ -6,18 +6,24 @@ export const DUMMY_WORKTIME_EDIT_REQUEST = [
     reason: "개인 일정으로 오후 근무를 오전으로 변경합니다.",
     deleteSlots: [
       {
-        start: "2026-04-10T15:00:00",
-        end: "2026-04-10T16:30:00",
+        date: "2026-06-15",
+        start: "09:00",
+        end: "11:00",
+        changeTypeCode: "CR02",
       },
       {
-        start: "2026-04-11T11:00:00",
-        end: "2026-04-11T12:30:00",
+        date: "2026-06-16",
+        start: "15:00",
+        end: "16:00",
+        changeTypeCode: "CR02",
       },
     ],
     addSlots: [
       {
-        start: "2026-04-10T10:00:00",
-        end: "2026-04-10T11:30:00",
+        date: "2026-06-17",
+        start: "13:00",
+        end: "15:00",
+        changeTypeCode: "CR01",
       },
     ],
   },
@@ -28,14 +34,18 @@ export const DUMMY_WORKTIME_EDIT_REQUEST = [
     reason: "동아리 행사 참석으로 근무 시간을 변경합니다.",
     deleteSlots: [
       {
-        start: "2026-04-13T09:00:00",
-        end: "2026-04-13T10:30:00",
+        date: "2026-06-15",
+        start: "09:00",
+        end: "11:00",
+        changeTypeCode: "CR02",
       },
     ],
     addSlots: [
       {
-        start: "2026-04-13T16:00:00",
-        end: "2026-04-13T17:30:00",
+        date: "2026-06-17",
+        start: "13:00",
+        end: "15:00",
+        changeTypeCode: "CR01",
       },
     ],
   },
