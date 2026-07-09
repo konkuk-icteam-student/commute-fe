@@ -50,3 +50,28 @@ export const DUMMY_WORKTIME_EDIT_REQUEST = [
     ],
   },
 ];
+
+export const DUMMY_WORKTIME_COMPLETE_EDTI_REQUEST = [
+  {
+    requestId: "c76e05b4-cd1c-4c69-b51e-1c62e684b7aa",
+    requestedAt: "2026-04-05T18:45:00",
+    name: "작성자2",
+    reason: "동아리 행사 참석으로 근무 시간을 변경합니다.",
+    deleteSlots: [
+      {
+        date: "2026-06-15",
+        start: "09:00",
+        end: "11:00",
+        changeTypeCode: "CR02",
+      },
+    ],
+    addSlots: [
+      {
+        date: "2026-06-17",
+        start: "13:00",
+        end: "15:00",
+        changeTypeCode: "CR01",
+      },
+    ],
+  },
+];

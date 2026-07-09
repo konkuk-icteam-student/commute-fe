@@ -31,7 +31,7 @@ export default function WorktimeEditRequestHeader() {
   };
 
   return (
-    <header className="flex flex-col gap-3">
+    <header className="flex w-100 flex-col gap-3">
       <div className="flex flex-row items-center justify-between">
         <Link
           href="/admin/worktime/review"

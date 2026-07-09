@@ -9,17 +9,19 @@ import {
 } from "../../utils";
 
 interface WorktimeEditRequestItemProps {
+  type: "CARD" | "LIST";
   requestId: string;
   requestedAt: string;
   name: string;
   deleteSlots: WorktimeChangeRequestType[];
   addSlots: WorktimeChangeRequestType[];
   reason: string;
-  userResult: string;
-  handleClickRequestCard: (name: string) => void;
+  userResult?: string;
+  handleClickRequestCard?: (name: string) => void;
 }
 
 export default function WorktimeEditRequestItem({
+  type = "CARD",
   requestId,
   requestedAt,
   name,
@@ -44,12 +46,14 @@ export default function WorktimeEditRequestItem({
     <div
       role="button"
       className={cn(
-        "flex w-100 flex-col gap-3 rounded-xl bg-white p-6",
-        userResult === name
-          ? "border-2 border-[#256EF4]"
-          : "border border-[#B1B8BE]",
+        "flex w-full flex-col gap-3 rounded-xl bg-white p-6",
+        type === "CARD"
+          ? userResult === name
+            ? "border-2 border-[#256EF4]"
+            : "border border-[#B1B8BE]"
+          : "",
       )}
-      onClick={() => handleClickRequestCard(name)}
+      onClick={() => handleClickRequestCard && handleClickRequestCard(name)}
     >
       <div className="flex flex-row items-center justify-between">
         <h3 className="text-lg font-bold">{name}</h3>

@@ -17,6 +17,7 @@ export default function WorktimeEditRequestSection({
       {DUMMY_WORKTIME_EDIT_REQUEST.map((item) => (
         <WorktimeEditRequestItem
           key={item.requestId}
+          type="CARD"
           {...item}
           userResult={userResult}
           handleClickRequestCard={handleClickRequestCard}
