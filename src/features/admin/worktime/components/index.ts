@@ -4,3 +4,7 @@ export { default as WorktimeScheduleTable } from "./worktime-schedule-table";
 export { default as WorktimeScheduleHeader } from "./worktime-schedule-header";
 export { default as WorktimeEditRequestHeader } from "./worktime-edit-request-header";
 export { default as WorktimeEditRequestItem } from "./worktime-edit-request-item";
+export { default as WorktimeDetailHeader } from "./worktime-detail-header";
+export { default as WorktimeDetailTable } from "./worktime-detail-table";
+export { default as WorktimeDetailSection } from "./worktime-detail-section";
+export { default as WorktimeDetailQuickSearch } from "./worktime-detail-quick-search";
