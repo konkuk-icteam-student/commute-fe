@@ -44,7 +44,7 @@ export default function AdminLayout({
           <AdminSidebar pathname={pathname} />
         ) : null}
 
-        <section className="relative z-10 flex min-w-0 flex-1 flex-col">
+        <section className="@container/dashboard relative z-10 flex min-w-0 flex-1 flex-col">
           <AdminHeader
             adminUser={adminUser}
             showBackButton={shouldShowBackButton}
