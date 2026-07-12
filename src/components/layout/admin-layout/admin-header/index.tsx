@@ -25,7 +25,7 @@ export default function AdminHeader({
     : (adminUser?.name ?? "관리자");
 
   return (
-    <header className="flex h-22 shrink-0 items-center justify-between border-b [border-bottom-width:0.5px] border-l [border-left-width:0.5px] border-[#D1D1D1] bg-white pr-10 pl-9 min-[1728px]:h-25 min-[1728px]:pr-14.5 min-[1728px]:pl-10">
+    <header className="sticky top-0 z-20 flex h-22 shrink-0 items-center justify-between border-b [border-bottom-width:0.5px] border-l [border-left-width:0.5px] border-[#D1D1D1] bg-white pr-10 pl-9 min-[1728px]:h-25 min-[1728px]:pr-14.5 min-[1728px]:pl-10">
       <div className="flex items-center gap-4">
         {showBackButton ? (
           <button
