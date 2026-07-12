@@ -41,7 +41,7 @@ export default function AdminLayout({
     <main className="flex h-screen w-full min-w-0 overflow-hidden bg-white">
       {variant === "with-sidebar" ? <AdminSidebar pathname={pathname} /> : null}
 
-      <div className="h-screen min-w-0 flex-1 overflow-x-scroll overflow-y-auto">
+      <div className="h-screen min-w-0 flex-1 overflow-x-auto overflow-y-auto">
         <section className="@container/dashboard relative z-10 flex min-h-full min-w-300 flex-col">
           <AdminHeader
             adminUser={adminUser}
