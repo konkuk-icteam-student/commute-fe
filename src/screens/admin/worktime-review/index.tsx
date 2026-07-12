@@ -39,7 +39,7 @@ export default function WorktimeReviewScreen() {
           <Image
             className="h-9 w-9 rotate-180"
             src={icRightButton}
-            alt="이전주차"
+            alt="이전 달"
           />
         </button>
         <h2 className="text-4xl font-bold">
@@ -50,7 +50,7 @@ export default function WorktimeReviewScreen() {
           type="button"
           onClick={handleNextMonth}
         >
-          <Image className="h-9 w-9" src={icRightButton} alt="다음주차" />
+          <Image className="h-9 w-9" src={icRightButton} alt="다음 달" />
         </button>
       </div>
       <EditRequestStatus year={selectedYear} month={selectedMonth} />

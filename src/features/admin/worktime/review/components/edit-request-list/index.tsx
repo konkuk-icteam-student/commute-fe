@@ -2,8 +2,10 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { DUMMY_WORKTIME_EDIT_REQUEST } from "../../../constants";
-import { DUMMY_WORKTIME_COMPLETE_EDTI_REQUEST } from "../../../constants/dummy";
+import {
+  DUMMY_WORKTIME_EDIT_REQUEST,
+  DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST,
+} from "../../../constants";
 import { WorktimeEditRequestItem } from "../../../components";
 
 interface EditRequestListProps {
@@ -19,7 +21,7 @@ export default function EditRequestList({ year, month }: EditRequestListProps) {
   const editRequestList =
     tabType === "PENDING"
       ? DUMMY_WORKTIME_EDIT_REQUEST
-      : DUMMY_WORKTIME_COMPLETE_EDTI_REQUEST;
+      : DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST;
 
   return (
     <div className="flex w-full max-w-250 flex-col items-center gap-4 rounded-xl bg-white shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">

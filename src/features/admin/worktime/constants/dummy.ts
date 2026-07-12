@@ -51,7 +51,7 @@ export const DUMMY_WORKTIME_EDIT_REQUEST = [
   },
 ];
 
-export const DUMMY_WORKTIME_COMPLETE_EDTI_REQUEST = [
+export const DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST = [
   {
     requestId: "c76e05b4-cd1c-4c69-b51e-1c62e684b7aa",
     requestedAt: "2026-04-05T18:45:00",

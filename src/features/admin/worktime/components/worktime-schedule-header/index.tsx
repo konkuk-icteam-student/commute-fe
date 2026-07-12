@@ -68,7 +68,14 @@ export default function WorktimeScheduleHeader({
             placeholder="이름을 검색하세요."
             onKeyDown={handleKeyDown}
           />
-          <Image src={icSearch} alt="검색아이콘" onClick={handleSearch} />
+          <button
+            type="button"
+            className="cursor-pointer"
+            onClick={handleSearch}
+            aria-label="검색"
+          >
+            <Image src={icSearch} alt="" aria-hidden="true" />
+          </button>
         </div>
         <button
           className="cursor-pointer rounded-md bg-[#256EF4] px-4 py-2 text-base text-white"

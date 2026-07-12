@@ -1,1 +1,4 @@
-export { DUMMY_WORKTIME_EDIT_REQUEST } from "./dummy";
+export {
+  DUMMY_WORKTIME_EDIT_REQUEST,
+  DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST,
+} from "./dummy";
