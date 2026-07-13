@@ -23,7 +23,7 @@ export default function WorktimeDetailSection() {
   };
 
   return (
-    <div className="flex w-full min-w-300 flex-col gap-8 bg-white p-8 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+    <div className="flex w-full min-w-240 flex-col gap-8 bg-white p-8 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
       <WorktimeDetailHeader
         year={year}
         month={month}

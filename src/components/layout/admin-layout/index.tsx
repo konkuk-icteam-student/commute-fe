@@ -42,7 +42,7 @@ export default function AdminLayout({
       {variant === "with-sidebar" ? <AdminSidebar pathname={pathname} /> : null}
 
       <div className="h-screen min-w-0 flex-1 overflow-x-auto overflow-y-auto">
-        <section className="@container/dashboard relative z-10 flex min-h-full min-w-300 flex-col">
+        <section className="@container/dashboard relative z-10 flex min-h-full min-w-7xl flex-col">
           <AdminHeader
             adminUser={adminUser}
             showBackButton={shouldShowBackButton}

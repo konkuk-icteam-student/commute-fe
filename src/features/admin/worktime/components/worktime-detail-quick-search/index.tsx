@@ -13,8 +13,8 @@ export default function WorktimeDetailQuickSearch() {
   const trimmedSearchText = searchText.trim();
 
   return (
-    <div className="relative w-106">
-      <div className="fixed mx-1.5 mt-25 flex h-fit w-80 flex-col gap-3 rounded-2xl border border-[#E5E5EA] bg-white p-7 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+    <div className="relative min-w-73 bg-[#F4F5F6]">
+      <div className="sticky top-50 right-3 mx-1.5 flex h-fit w-70 flex-col gap-3 rounded-2xl border border-[#E5E5EA] bg-white p-7 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
         <h3 className="mb-3 text-lg font-bold">🔍 빠른 찾기</h3>
         <input
           type="search"
