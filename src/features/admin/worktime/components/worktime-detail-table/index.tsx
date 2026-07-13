@@ -5,7 +5,13 @@ import WorktimeDetailTableCell from "../worktime-detail-table-cell";
 
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
-export default function WorktimeDetailTable() {
+interface WorktimeDetailTableProps {
+  isEditMode: boolean;
+}
+
+export default function WorktimeDetailTable({
+  isEditMode,
+}: WorktimeDetailTableProps) {
   const { maxConcurrentWorkers, slots } =
     DUMMY_WORKTIME_DETAIL_SCHEDULE.details;
   const slotsByTime =
@@ -43,6 +49,7 @@ export default function WorktimeDetailTable() {
               key={`${slot.date}-${slot.start}`}
               slot={slot}
               maxConcurrentWorkers={maxConcurrentWorkers}
+              isEditMode={isEditMode}
             />
           ))}
         </Fragment>

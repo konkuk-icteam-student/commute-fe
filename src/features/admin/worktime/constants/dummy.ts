@@ -234,3 +234,18 @@ export const DUMMY_WORKTIME_DETAIL_SCHEDULE = {
     ],
   },
 };
+
+export const DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD = [
+  {
+    userId: 1,
+    name: "홍길동",
+  },
+  {
+    userId: 2,
+    name: "철수",
+  },
+  {
+    userId: 3,
+    name: "영희",
+  },
+];
