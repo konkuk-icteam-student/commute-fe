@@ -1,4 +1,8 @@
-import { WorktimeChangeRequestType } from "../types";
+export interface WorktimeType {
+  date: string;
+  start: string;
+  end: string;
+}
 
 function formatMonthDay(date: string) {
   const [, month, day] = date.split("-");
@@ -25,11 +29,7 @@ export function formatWorktimeRequestDateTime(dateTime: string) {
   return `${formatMonthDay(date)} ${time.slice(0, 5)}`;
 }
 
-// WorktimeChangeRequestType 의 객체를 4월 6일 13:00-14:30 (0.5h) 형식으로 포맷
-export function formatWorktimeRequestSlot({
-  date,
-  start,
-  end,
-}: WorktimeChangeRequestType) {
+// WorktimeType 의 객체를 4월 6일 13:00-14:30 (0.5h) 형식으로 포맷
+export function formatWorktimeRequestSlot({ date, start, end }: WorktimeType) {
   return `${formatMonthDay(date)} ${start}-${end} (${formatDurationHour(start, end)}h)`;
 }
