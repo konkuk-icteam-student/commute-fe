@@ -18,6 +18,7 @@ export default function WorktimeDetailQuickSearch() {
         <h3 className="mb-3 text-lg font-bold">🔍 빠른 찾기</h3>
         <input
           type="search"
+          aria-label="빠른 찾기 이름 검색"
           className="rounded-xl border border-[#E5E5EA] bg-[#F2F2F7] px-4 py-3.5"
           value={searchText}
           onChange={handleChangeSearchText}

@@ -37,8 +37,9 @@ export default function WorktimeDetailTableCell({
     };
   }, [isOpenSearch]);
 
-  const handleAdd = (userId: string) => {
-    console.log(userId, " 추가");
+  // TODO: 추후 파라미터 수정
+  const handleAdd = (name: string) => {
+    console.log(name, " 추가");
     setIsOpenSearch(false);
   };
 
