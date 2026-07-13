@@ -14,15 +14,17 @@ export default function WorktimeEditRequestSection({
   return (
     <div className="flex flex-col gap-4 rounded-xl bg-[#F4F5F6] p-6">
       <WorktimeEditRequestHeader />
-      {DUMMY_WORKTIME_EDIT_REQUEST.map((item) => (
-        <WorktimeEditRequestItem
-          key={item.requestId}
-          type="CARD"
-          {...item}
-          userResult={userResult}
-          handleClickRequestCard={handleClickRequestCard}
-        />
-      ))}
+      <div className="flex max-h-200 flex-col gap-4 overflow-auto">
+        {DUMMY_WORKTIME_EDIT_REQUEST.map((item) => (
+          <WorktimeEditRequestItem
+            key={item.requestId}
+            type="CARD"
+            {...item}
+            userResult={userResult}
+            handleClickRequestCard={handleClickRequestCard}
+          />
+        ))}
+      </div>
     </div>
   );
 }

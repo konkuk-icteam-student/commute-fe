@@ -119,7 +119,7 @@ export default function MemberAttendancePanel({
         </div>
 
         <div className="overflow-x-auto">
-          <div className="min-w-[585px]">
+          <div className="min-w-146.25">
             {visibleMembers.map((member) => (
               <MemberRow key={member.id} member={member} />
             ))}

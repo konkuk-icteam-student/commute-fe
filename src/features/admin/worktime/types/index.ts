@@ -6,3 +6,16 @@ export interface WorktimeChangeRequestType {
   end: string;
   changeTypeCode: string;
 }
+
+export interface WorktimeDetailTableCellType {
+  date: string;
+  start: string;
+  end: string;
+  currentCount: number;
+  isOverLimit: boolean;
+  isUnavailable: boolean;
+  users: {
+    userId: string;
+    userName: string;
+  }[];
+}
