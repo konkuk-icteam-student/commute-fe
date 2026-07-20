@@ -1,1 +1,8 @@
-export { MembersInfo, MembersInfoHeader, MembersInfoTable } from "./components";
+export {
+  MembersInfo,
+  MembersInfoHeader,
+  MembersInfoTable,
+  MemberDetailInfo,
+} from "./components";
+
+export { DUMMY_MEMBER_LIST } from "./constants";
