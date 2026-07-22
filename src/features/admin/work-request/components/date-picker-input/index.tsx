@@ -25,6 +25,22 @@ function formatDisplayValue(value: string) {
   return `${match[1]}.${match[2]}`;
 }
 
+function getInitialViewDate({
+  target,
+  value,
+}: {
+  target: { month: number; year: number };
+  value: string;
+}) {
+  const match = value.match(/^(\d{4})-(\d{2})-\d{2}$/);
+
+  if (match) {
+    return new Date(Number(match[1]), Number(match[2]) - 1, 1);
+  }
+
+  return new Date(target.year, target.month - 1, 1);
+}
+
 export default function DatePickerInput({
   disabled = false,
   isOpen,
@@ -44,8 +60,8 @@ export default function DatePickerInput({
   value: string;
   widthClassName?: string;
 }) {
-  const [viewDate, setViewDate] = useState(
-    () => new Date(target.year, target.month - 1, 1),
+  const [viewDate, setViewDate] = useState(() =>
+    getInitialViewDate({ target, value }),
   );
 
   const viewYear = viewDate.getFullYear();
@@ -76,7 +92,13 @@ export default function DatePickerInput({
           disabled ? "cursor-default" : "cursor-pointer",
         )}
         disabled={disabled}
-        onClick={() => onOpenChange(!isOpen)}
+        onClick={() => {
+          if (!isOpen) {
+            setViewDate(getInitialViewDate({ target, value }));
+          }
+
+          onOpenChange(!isOpen);
+        }}
       >
         <span
           className={cn(

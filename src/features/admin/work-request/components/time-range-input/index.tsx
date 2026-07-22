@@ -20,6 +20,7 @@ export default function TimeRangeInput({
       <p className="mb-2 text-[15px] font-semibold text-[#1A2236]">{label}</p>
       <div className="flex items-center gap-0.5">
         <TextInput
+          ariaLabel={`${label} 최소 시간`}
           disabled={disabled}
           icon="none"
           onChange={onStartChange}
@@ -31,6 +32,7 @@ export default function TimeRangeInput({
         />
         <span className="text-[19px] text-[#1A2236]">~</span>
         <TextInput
+          ariaLabel={`${label} 최대 시간`}
           disabled={disabled}
           icon="none"
           onChange={onEndChange}

@@ -1,4 +1,5 @@
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+
 import type { WorkRequestTimeRange } from "../../types";
 import SummaryTable from "../summary-table";
 import UnavailableSummaryPanel from "../unavailable-summary-panel";
@@ -22,17 +23,22 @@ export default function SummaryPanel({
     <section className="relative mt-12.75 min-h-109.5 rounded-xl border border-[#DDE3EF] bg-white pt-8 pr-10 pb-6.75 pl-8">
       <div className="mb-5.5 flex items-center justify-between">
         <h2 className="text-[24px] font-bold text-[#1A2236]">근로신청 요약</h2>
-        <button
-          type="button"
-          className={cn(
-            "h-11.5 w-51.5 rounded-md text-base font-semibold",
-            isActive
-              ? "cursor-pointer bg-[#2076FF] text-white"
-              : "bg-[#EFEFF1] text-[#6D7882]",
-          )}
-        >
-          시간표 자세히보기
-        </button>
+        {isActive ? (
+          <Link
+            href="/admin/worktime/detail"
+            className="flex h-11.5 w-51.5 cursor-pointer items-center justify-center rounded-md bg-[#2076FF] text-base font-semibold text-white"
+          >
+            시간표 자세히보기
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="h-11.5 w-51.5 rounded-md bg-[#EFEFF1] text-base font-semibold text-[#6D7882]"
+            disabled
+          >
+            시간표 자세히보기
+          </button>
+        )}
       </div>
 
       <div className="grid min-h-75 grid-cols-[minmax(0,1fr)_max-content] gap-11">

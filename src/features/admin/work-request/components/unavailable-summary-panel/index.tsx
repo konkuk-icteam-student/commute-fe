@@ -113,6 +113,8 @@ function InfoGroup({
   title: string;
   values: { id: string; label: string; onRemove: () => void }[];
 }) {
+  const columnCount = Math.min(Math.max(values.length, 1), 2);
+
   return (
     <div className={className}>
       <h3 className="mb-3.5 text-base font-bold whitespace-nowrap text-[#1A2236]">
@@ -121,7 +123,7 @@ function InfoGroup({
       <div
         className="grid gap-2"
         style={{
-          gridTemplateColumns: `repeat(2, ${itemWidth}px)`,
+          gridTemplateColumns: `repeat(${columnCount}, ${itemWidth}px)`,
         }}
       >
         {values.map((value) => (

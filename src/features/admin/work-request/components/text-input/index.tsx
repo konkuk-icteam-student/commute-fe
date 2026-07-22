@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 export default function TextInput({
   disabled = false,
   icon = "calendar",
+  ariaLabel,
   onChange,
   placeholder,
   suffix,
@@ -16,6 +17,7 @@ export default function TextInput({
 }: {
   disabled?: boolean;
   icon?: "calendar" | "clock" | "none";
+  ariaLabel?: string;
   onChange?: (value: string) => void;
   placeholder: string;
   suffix?: string;
@@ -34,6 +36,7 @@ export default function TextInput({
       )}
     >
       <input
+        aria-label={ariaLabel}
         disabled={disabled}
         className={cn(
           "mt-0.5 min-w-0 flex-1 bg-transparent text-[15px] text-[#1A2236] outline-none placeholder:text-[#8A949E]",

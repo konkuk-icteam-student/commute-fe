@@ -44,10 +44,12 @@ const actionAlertContent: Record<
   },
 };
 
-const completionMessage: Partial<Record<WorkRequestAction, string>> = {
+const completionMessage: Record<WorkRequestAction, string> = {
   end: "신청이 종료되었습니다.",
+  start: "근로신청을 시작했습니다.",
   update: "수정이 완료되었습니다.",
 };
+const failureMessage = "요청 처리에 실패했습니다.";
 
 export default function AdminWorkRequestScreen() {
   const [pendingAction, setPendingAction] = useState<WorkRequestAction | null>(
@@ -55,8 +57,7 @@ export default function AdminWorkRequestScreen() {
   );
   const [processingAction, setProcessingAction] =
     useState<WorkRequestAction | null>(null);
-  const [completedAction, setCompletedAction] =
-    useState<WorkRequestAction | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState("");
   const {
     addUnavailableDate,
     addUnavailableTimeRange,
@@ -86,27 +87,28 @@ export default function AdminWorkRequestScreen() {
     setPendingAction(null);
     setProcessingAction(action);
 
-    const didSucceed =
-      action === "start"
-        ? await startRequest()
-        : action === "update"
-          ? await updateRequest()
-          : (endRequest(), true);
+    let didSucceed = false;
+
+    try {
+      didSucceed =
+        action === "start"
+          ? await startRequest()
+          : action === "update"
+            ? await updateRequest()
+            : (endRequest(), true);
+    } catch {
+      didSucceed = false;
+    }
 
     window.setTimeout(() => {
       setProcessingAction(null);
-
-      if (didSucceed && completionMessage[action]) {
-        setCompletedAction(action);
-      }
+      setNotificationMessage(
+        didSucceed ? completionMessage[action] : failureMessage,
+      );
     }, 450);
   };
 
   const alertContent = pendingAction ? actionAlertContent[pendingAction] : null;
-  const completedMessage = completedAction
-    ? completionMessage[completedAction]
-    : "";
-
   return (
     <div className="flex-1 bg-[#F4F5F7] px-10 py-11.5">
       <div className="mx-auto w-full max-w-373.5">
@@ -162,17 +164,17 @@ export default function AdminWorkRequestScreen() {
       />
 
       <Modal
-        open={completedAction !== null}
+        open={notificationMessage.length > 0}
         title="알림"
         buttonText="확인"
-        onButtonClick={() => setCompletedAction(null)}
+        onButtonClick={() => setNotificationMessage("")}
         panelClassName="w-82.5 min-w-0"
         titleClassName="text-base"
         contentClassName="min-h-29.25"
         buttonClassName="h-10 min-h-10"
       >
         <p className="text-center text-sm leading-none font-medium">
-          {completedMessage}
+          {notificationMessage}
         </p>
       </Modal>
     </div>

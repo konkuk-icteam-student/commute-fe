@@ -32,8 +32,8 @@ export default function useWorkRequestState() {
     [formValues, savedValues],
   );
   const isStartReady = useMemo(
-    () => isWorkRequestStartReady(formValues),
-    [formValues],
+    () => isWorkRequestStartReady({ formValues, target: targetMonth }),
+    [formValues, targetMonth],
   );
 
   const updateField = <Key extends keyof WorkRequestFormValues>(
@@ -105,6 +105,11 @@ export default function useWorkRequestState() {
       formValues,
       target: targetMonth,
     });
+
+    if (!payload) {
+      setIsSaving(false);
+      return false;
+    }
 
     try {
       const result = await saveWorkRequestSettings({

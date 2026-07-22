@@ -109,6 +109,7 @@ function UnavailableTimeRangeField({
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-0.5">
           <TextInput
+            ariaLabel="신청 불가 시작 시간"
             disabled={!isEditable}
             icon="none"
             onChange={(value) =>
@@ -120,6 +121,7 @@ function UnavailableTimeRangeField({
           />
           <span className="text-[19px] text-[#1A2236]">~</span>
           <TextInput
+            ariaLabel="신청 불가 종료 시간"
             disabled={!isEditable}
             icon="none"
             onChange={(value) =>

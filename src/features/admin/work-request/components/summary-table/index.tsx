@@ -74,7 +74,9 @@ function PaginationIndicator() {
     <div className="mb-5 flex items-center gap-1.5">
       <button
         type="button"
-        className="flex h-5 w-5 items-center justify-center"
+        className="flex h-5 w-5 items-center justify-center disabled:cursor-default"
+        aria-label="이전 페이지"
+        disabled
       >
         <Image
           src={chevronLeftCircleIcon}
@@ -87,7 +89,9 @@ function PaginationIndicator() {
       <span className="text-[15px] font-bold text-[#1A2236]">1/3</span>
       <button
         type="button"
-        className="flex h-5 w-5 items-center justify-center"
+        className="flex h-5 w-5 items-center justify-center disabled:cursor-default"
+        aria-label="다음 페이지"
+        disabled
       >
         <Image
           src={chevronLeftCircleIcon}
