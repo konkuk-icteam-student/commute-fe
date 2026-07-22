@@ -26,7 +26,7 @@ export default function SummaryPanel({
         {isActive ? (
           <Link
             href="/admin/worktime/detail"
-            className="flex h-11.5 w-51.5 cursor-pointer items-center justify-center rounded-md bg-[#2076FF] text-base font-semibold text-white"
+            className="flex h-11.5 w-51.5 cursor-pointer items-center justify-center rounded-md bg-[#2076FF] text-base font-semibold !text-white"
           >
             시간표 자세히보기
           </Link>
