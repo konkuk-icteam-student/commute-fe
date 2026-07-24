@@ -44,7 +44,7 @@ export default function Alert({
     <div
       {...props}
       className={cn(
-        "fixed inset-y-0 left-1/2 z-60 flex w-full max-w-150 -translate-x-1/2 items-center justify-center bg-[#444444]/30 px-5",
+        "fixed inset-0 z-60 flex w-full items-center justify-center bg-[#444444]/30 px-5",
         className,
       )}
       role="alertdialog"
