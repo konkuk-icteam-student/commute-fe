@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import rightGrayIcon from "@/assets/icons/admin-common/ic_chevron_right_gray.svg";
-import checkCircleIcon from "@/assets/icons/admin-dashboard/ic_check_circle.svg";
+import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
 
 export default function DashboardSectionHeader({
   arrowHref,

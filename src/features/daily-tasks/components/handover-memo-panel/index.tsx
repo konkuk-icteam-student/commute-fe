@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import infoCircleIcon from "@/assets/icons/common/ic_info_circle.svg";
 import closeIcon from "@/assets/icons/daily-tasks/ic_close.svg";
 import { cn } from "@/lib/utils";
 
@@ -114,8 +115,15 @@ export default function HandoverMemoPanel({
           onChange={(event) => onChangeMemo(event.target.value)}
         />
         <div className="flex items-center justify-between">
-          <p className="ml-1 text-[8px] leading-2.75 text-[#8892A6]">
-            ⓘ 모든 근무자에게 공개, 3일 뒤 자동으로 삭제
+          <p className="ml-1 flex items-center gap-1 text-[8px] leading-2.75 text-[#8892A6]">
+            <Image
+              src={infoCircleIcon}
+              alt=""
+              width={8}
+              height={8}
+              className="mb-0.5"
+            />
+            모든 근무자에게 공개, 3일 뒤 자동으로 삭제
           </p>
           <button
             className={cn(
