@@ -1,6 +1,6 @@
 import DashboardSectionHeader from "../dashboard-section-header";
 import { dashboardWorkerColors } from "../../constants";
-import { AdminWorkScheduleList } from "@/features/admin/common";
+import { AdminWorkScheduleList } from "@/components/ui";
 import type { DashboardTimeRow } from "../../types";
 
 function getWorkerColor(workerId: string) {

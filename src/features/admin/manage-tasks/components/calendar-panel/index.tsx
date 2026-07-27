@@ -6,26 +6,14 @@ import { useState } from "react";
 import calendarDropdownIcon from "@/assets/icons/admin-manage-tasks/ic_calendar_dropdown.svg";
 import chevronRightCircleIcon from "@/assets/icons/admin-manage-tasks/ic_chevron_right_circle.svg";
 import {
+  formatDateValue,
+  getDateMonthStart,
   getPanelCalendarDays,
   type AdminCalendarDay,
-} from "@/features/admin/common";
+} from "@/utils/calendar";
 import { cn } from "@/lib/utils";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-
-const formatCalendarDate = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const getMonthDate = (dateValue: string) => {
-  const [year, month] = dateValue.split("-").map(Number);
-
-  return new Date(year, month - 1, 1);
-};
 
 export default function CalendarPanel({
   onSelectDate,
@@ -35,13 +23,13 @@ export default function CalendarPanel({
   selectedDate: string;
 }) {
   const [viewDate, setViewDate] = useState(() => {
-    return getMonthDate(selectedDate);
+    return getDateMonthStart(selectedDate);
   });
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth() + 1;
   const monthTitle = `${year}년 ${month}월`;
   const days = getPanelCalendarDays(year, month);
-  const todayDate = formatCalendarDate(new Date());
+  const todayDate = formatDateValue(new Date());
 
   const moveMonth = (offset: number) => {
     setViewDate((current) => {
@@ -51,12 +39,12 @@ export default function CalendarPanel({
 
   const selectDate = (dateValue: string) => {
     onSelectDate(dateValue);
-    setViewDate(getMonthDate(dateValue));
+    setViewDate(getDateMonthStart(dateValue));
   };
 
   const moveToday = () => {
     const today = new Date();
-    const todayDateValue = formatCalendarDate(today);
+    const todayDateValue = formatDateValue(today);
 
     setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
     onSelectDate(todayDateValue);

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import calendarIcon from "@/assets/icons/admin-worktime-request/ic_calendar.svg";
 import chevronLeftIcon from "@/assets/icons/admin-worktime-request/ic_chevron_left.svg";
-import { getPopoverCalendarDays } from "@/features/admin/common";
+import { getPopoverCalendarDays } from "@/utils/calendar";
 import { cn } from "@/lib/utils";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];

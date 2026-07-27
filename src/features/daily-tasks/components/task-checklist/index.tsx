@@ -21,6 +21,7 @@ export default function TaskChecklist({
         >
           <CheckButton
             checked={task.completed}
+            label={`${task.title} 완료 여부`}
             onClick={() => onToggleTask(task.id)}
           />
           <span

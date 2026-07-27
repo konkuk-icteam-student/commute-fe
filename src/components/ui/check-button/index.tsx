@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 type CheckButtonProps = {
   checked: boolean;
   className?: string;
-  label?: string;
+  label: string;
   onClick?: () => void;
 };
 

@@ -3,8 +3,7 @@ import Link from "next/link";
 
 import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
 import chevronRightIcon from "@/assets/icons/admin-common/ic_chevron_right_gray.svg";
-import type { BadgeVariant } from "@/components/ui";
-import { AdminWorkScheduleList } from "@/features/admin/common";
+import { AdminWorkScheduleList, type BadgeVariant } from "@/components/ui";
 
 import type { ManageTaskScheduleGroup } from "../../types";
 
@@ -48,7 +47,7 @@ export default function WorkSchedulePanel({
           title: group.title,
           workerShape: "rounded",
           rows: group.items.map((item) => ({
-            countLabel: item.count,
+            countLabel: `${item.students.length}명`,
             time: item.time,
             workers: item.students.map((student) => ({
               className: workerToneClass[student.tone],

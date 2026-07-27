@@ -14,7 +14,7 @@ import {
 export default function AdminDashboardScreen() {
   return (
     <div className="flex-1 p-4 min-[1728px]:p-8.5">
-      <div className="mx-auto w-full max-w-[1274px] min-[1728px]:max-w-327.25">
+      <div className="mx-auto w-full max-w-318.5 min-[1728px]:max-w-327.25">
         <DateNavigator dateLabels={dashboardDateLabels} initialIndex={2} />
         <SummaryPanel items={dashboardSummary} />
 

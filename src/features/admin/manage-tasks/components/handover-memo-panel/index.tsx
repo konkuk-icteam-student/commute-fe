@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import infoCircleIcon from "@/assets/icons/common/ic_info_circle.svg";
 import closeIcon from "@/assets/icons/daily-tasks/ic_close.svg";
@@ -20,15 +20,12 @@ const formatMemoCreatedAt = (date: Date) => {
 
 export default function HandoverMemoPanel({
   memos,
+  onMemosChange,
 }: {
   memos: ManageTaskMemo[];
+  onMemosChange: (memos: ManageTaskMemo[]) => void;
 }) {
-  const [handoverMemos, setHandoverMemos] = useState(memos);
   const [memo, setMemo] = useState("");
-  const nextMemoIdRef = useRef(
-    memos.reduce((maxId, handoverMemo) => Math.max(maxId, handoverMemo.id), 0) +
-      1,
-  );
   const trimmedMemo = memo.trim();
   const canSaveMemo = trimmedMemo.length > 0;
 
@@ -37,24 +34,27 @@ export default function HandoverMemoPanel({
       return;
     }
 
-    setHandoverMemos((currentMemos) => [
-      ...currentMemos,
+    const nextMemoId =
+      memos.reduce(
+        (maxId, handoverMemo) => Math.max(maxId, handoverMemo.id),
+        0,
+      ) + 1;
+
+    onMemosChange([
+      ...memos,
       {
-        id: nextMemoIdRef.current,
+        id: nextMemoId,
         author: "관리자",
         createdAt: formatMemoCreatedAt(new Date()),
         content: trimmedMemo,
         isMine: true,
       },
     ]);
-    nextMemoIdRef.current += 1;
     setMemo("");
   };
 
   const deleteMemo = (memoId: number) => {
-    setHandoverMemos((currentMemos) =>
-      currentMemos.filter((handoverMemo) => handoverMemo.id !== memoId),
-    );
+    onMemosChange(memos.filter((handoverMemo) => handoverMemo.id !== memoId));
   };
 
   return (
@@ -64,12 +64,12 @@ export default function HandoverMemoPanel({
           인수인계 메모
         </h2>
         <span className="flex h-5.25 min-w-9.25 items-center justify-center rounded-full border border-[#DDE3EF] bg-[#EDF5FF] px-3 text-[11px] font-bold text-[#2563EB]">
-          {handoverMemos.length}건
+          {memos.length}건
         </span>
       </div>
 
       <div className="mt-5.5 space-y-3">
-        {handoverMemos.map((handoverMemo) => (
+        {memos.map((handoverMemo) => (
           <article
             className="rounded-xl border border-[#DDE3EF] bg-[#F0F2F8] px-3.5 py-2.75"
             key={handoverMemo.id}

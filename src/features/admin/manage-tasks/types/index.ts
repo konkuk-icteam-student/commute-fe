@@ -6,7 +6,6 @@ export type ManageTaskStudent = {
 };
 
 export type ManageTaskScheduleItem = {
-  count: string;
   students: ManageTaskStudent[];
   time: string;
 };
@@ -17,7 +16,7 @@ export type ManageTaskScheduleGroup = {
 };
 
 export type ManageTaskItem = {
-  assignee: string;
+  assignee?: string;
   completed: boolean;
   completedAt?: string;
   id: number;

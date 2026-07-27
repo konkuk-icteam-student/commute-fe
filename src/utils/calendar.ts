@@ -12,6 +12,26 @@ export function formatCalendarDate(year: number, month: number, day: number) {
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
 
+export function formatDateValue(date: Date) {
+  return formatCalendarDate(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  );
+}
+
+export function parseDateValue(dateValue: string) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+
+  return new Date(year, month - 1, day);
+}
+
+export function getDateMonthStart(dateValue: string) {
+  const date = parseDateValue(dateValue);
+
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
 export function getPopoverCalendarDays(
   year: number,
   month: number,

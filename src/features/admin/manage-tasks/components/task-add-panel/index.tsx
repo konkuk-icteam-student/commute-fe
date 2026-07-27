@@ -50,6 +50,10 @@ export default function TaskAddPanel({
           value={taskTitle}
           onChange={(event) => setTaskTitle(event.target.value)}
           onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) {
+              return;
+            }
+
             if (event.key === "Enter") {
               addTask();
             }

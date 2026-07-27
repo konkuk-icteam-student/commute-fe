@@ -12,7 +12,6 @@ const morningSchedule = [
       { name: "학생A", tone: "student-blue" },
       { name: "학생B", tone: "student-green" },
     ],
-    count: "2명",
   },
   {
     time: "09:30",
@@ -21,7 +20,6 @@ const morningSchedule = [
       { name: "학생B", tone: "student-green" },
       { name: "학생C", tone: "student-red" },
     ],
-    count: "3명",
   },
   {
     time: "10:00",
@@ -31,7 +29,6 @@ const morningSchedule = [
       { name: "학생C", tone: "student-red" },
       { name: "학생D", tone: "student-orange" },
     ],
-    count: "3명",
   },
   {
     time: "10:30",
@@ -41,7 +38,6 @@ const morningSchedule = [
       { name: "학생C", tone: "student-red" },
       { name: "학생D", tone: "student-orange" },
     ],
-    count: "4명",
   },
   {
     time: "11:00",
@@ -51,7 +47,6 @@ const morningSchedule = [
       { name: "학생F", tone: "student-pink" },
       { name: "학생G", tone: "student-purple" },
     ],
-    count: "4명",
   },
 ] satisfies ManageTaskScheduleGroup["items"];
 
@@ -62,7 +57,6 @@ const afternoonSchedule = [
       { name: "학생B", tone: "student-green" },
       { name: "학생C", tone: "student-red" },
     ],
-    count: "2명",
   },
   {
     time: "01:30",
@@ -71,7 +65,6 @@ const afternoonSchedule = [
       { name: "학생D", tone: "student-orange" },
       { name: "학생F", tone: "student-pink" },
     ],
-    count: "3명",
   },
   {
     time: "02:00",
@@ -80,7 +73,6 @@ const afternoonSchedule = [
       { name: "학생E", tone: "student-cyan" },
       { name: "학생G", tone: "student-purple" },
     ],
-    count: "3명",
   },
   {
     time: "02:30",
@@ -89,7 +81,6 @@ const afternoonSchedule = [
       { name: "학생B", tone: "student-green" },
       { name: "학생D", tone: "student-orange" },
     ],
-    count: "3명",
   },
   {
     time: "03:00",
@@ -99,7 +90,6 @@ const afternoonSchedule = [
       { name: "학생F", tone: "student-pink" },
       { name: "학생G", tone: "student-purple" },
     ],
-    count: "4명",
   },
 ] satisfies ManageTaskScheduleGroup["items"];
 
@@ -130,7 +120,6 @@ const july26Tasks: ManageTaskItem[] = [
     id: 102,
     period: "오전",
     title: "커피머신 청소",
-    assignee: "미완료",
     completed: false,
   },
   {
@@ -145,7 +134,6 @@ const july26Tasks: ManageTaskItem[] = [
     id: 104,
     period: "오후",
     title: "싱크대 청소",
-    assignee: "미완료",
     completed: false,
   },
 ];
@@ -171,14 +159,12 @@ const july27Tasks: ManageTaskItem[] = [
     id: 203,
     period: "오전",
     title: "커피머신 청소",
-    assignee: "미완료",
     completed: false,
   },
   {
     id: 204,
     period: "오전",
     title: "커피머신 청소",
-    assignee: "미완료",
     completed: false,
   },
   {
@@ -201,21 +187,18 @@ const july27Tasks: ManageTaskItem[] = [
     id: 207,
     period: "오후",
     title: "회의실 청소",
-    assignee: "미완료",
     completed: false,
   },
   {
     id: 208,
     period: "오후",
     title: "싱크대 청소",
-    assignee: "미완료",
     completed: false,
   },
   {
     id: 209,
     period: "오후",
     title: "커피머신 청소",
-    assignee: "미완료",
     completed: false,
   },
 ];
@@ -233,14 +216,12 @@ const july28Tasks: ManageTaskItem[] = [
     id: 302,
     period: "오전",
     title: "복사실 용지 채우기",
-    assignee: "미완료",
     completed: false,
   },
   {
     id: 303,
     period: "오후",
     title: "라운지 테이블 정리",
-    assignee: "미완료",
     completed: false,
   },
 ];
@@ -287,8 +268,6 @@ export const emptyManageTaskDailyData: ManageTaskDailyData = {
   scheduleGroups: makeScheduleGroups([], []),
   tasks: [],
 };
-
-export const manageTaskDefaultDate = "2026-07-27";
 
 export const manageTaskDataByDate: Record<string, ManageTaskDailyData> = {
   "2026-07-26": {
