@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import icPencil from "@/assets/icons/admin-member/ic_pencil.svg";
@@ -74,13 +74,36 @@ export default function MemberDetailInfo({
     setIsModalOpen(true);
   };
   const handleCloseModal = () => {
+    handleCloseDetailInfo();
     setModalText("");
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleCloseDetailInfo();
+        handleCloseEdit();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, handleCloseDetailInfo]);
+
   return (
     isOpen && (
-      <div className="fixed inset-0 z-50 bg-[rgba(70,76,83,0.30)]">
+      <div
+        className="fixed inset-0 z-50 bg-[rgba(70,76,83,0.30)]"
+        role="dialog"
+        aria-modal="true"
+        aria-label="근무인원 상세보기"
+      >
         {isEdit ? (
           <EditMemberInfo
             name={name}

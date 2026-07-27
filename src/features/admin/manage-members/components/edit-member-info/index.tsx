@@ -25,8 +25,9 @@ export default function EditMemberInfo({
   const [inputName, setInputName] = useState<string>(name);
   const [inputStudentNumber, setInputStudentNumber] =
     useState<string>(studentNumber);
+  const initialGrade = normalizeGrade(grade);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(
-    normalizeGrade(grade),
+    initialGrade,
   );
   const [inputDepartment, setInputDepartment] = useState(department);
   const [inputPhoneNumber, setInputPhoneNumber] = useState(phoneNumber);
@@ -66,7 +67,7 @@ export default function EditMemberInfo({
   const disabledToEdit =
     inputName === name &&
     inputStudentNumber === studentNumber &&
-    selectedGrade === grade &&
+    selectedGrade === initialGrade &&
     inputDepartment === department &&
     inputPhoneNumber === phoneNumber;
 

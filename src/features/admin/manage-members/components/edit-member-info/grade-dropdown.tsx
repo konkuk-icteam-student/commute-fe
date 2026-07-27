@@ -104,7 +104,7 @@ export default function GradeDropdown({ value, onChange }: GradeDropdownProps) {
         closeDropdown(true);
         break;
       case "Tab":
-        closeDropdown();
+        closeDropdown(true);
         break;
     }
   };
