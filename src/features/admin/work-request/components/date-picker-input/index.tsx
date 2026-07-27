@@ -1,19 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import calendarIcon from "@/assets/icons/admin-worktime-request/ic_calendar.svg";
 import chevronLeftIcon from "@/assets/icons/admin-worktime-request/ic_chevron_left.svg";
+import { getPopoverCalendarDays } from "@/features/admin/common";
 import { cn } from "@/lib/utils";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-
-const pad2 = (value: number) => String(value).padStart(2, "0");
-
-function formatDateValue(year: number, month: number, day: number) {
-  return `${year}-${pad2(month)}-${pad2(day)}`;
-}
 
 function formatDisplayValue(value: string) {
   const match = value.match(/^\d{4}-(\d{2})-(\d{2})$/);
@@ -67,15 +62,7 @@ export default function DatePickerInput({
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth() + 1;
   const selectedDate = value.match(/^\d{4}-\d{2}-\d{2}$/) ? value : "";
-  const days = useMemo(() => {
-    const firstDay = new Date(viewYear, viewMonth - 1, 1).getDay();
-    const lastDate = new Date(viewYear, viewMonth, 0).getDate();
-
-    return [
-      ...Array.from({ length: firstDay }, () => null),
-      ...Array.from({ length: lastDate }, (_, index) => index + 1),
-    ];
-  }, [viewMonth, viewYear]);
+  const days = getPopoverCalendarDays(viewYear, viewMonth);
 
   const moveMonth = (offset: number) => {
     setViewDate((current) => {
@@ -150,31 +137,27 @@ export default function DatePickerInput({
           </div>
 
           <div className="mt-3 grid grid-cols-7 py-1 text-center">
-            {days.map((day, index) => {
-              if (!day) {
-                return <div key={`empty-${index}`} className="h-7" />;
-              }
-
-              const dateValue = formatDateValue(viewYear, viewMonth, day);
-              const isSelected = dateValue === selectedDate;
-
-              return (
+            {days.map((day, index) =>
+              day ? (
                 <button
-                  key={dateValue}
+                  key={day.dateValue}
                   type="button"
                   className={cn(
                     "mx-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[13.5px] font-medium text-[#374151] hover:bg-[#EEF2F7] active:bg-[#D6E0EB]",
-                    isSelected && "bg-[#EEF2F7] text-[#052B57]",
+                    day.dateValue === selectedDate &&
+                      "bg-[#EEF2F7] text-[#052B57]",
                   )}
                   onClick={() => {
-                    onChange?.(dateValue);
+                    onChange?.(day.dateValue);
                     onOpenChange(false);
                   }}
                 >
-                  {day}
+                  {day.day}
                 </button>
-              );
-            })}
+              ) : (
+                <div key={`empty-${index}`} className="h-7" />
+              ),
+            )}
           </div>
         </div>
       ) : null}

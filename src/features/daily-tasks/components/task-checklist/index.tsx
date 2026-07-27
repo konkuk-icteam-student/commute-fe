@@ -1,6 +1,4 @@
-import Image from "next/image";
-
-import checkIcon from "@/assets/icons/daily-tasks/ic_check.svg";
+import { CheckButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 import type { DailyTaskItem } from "../../types";
@@ -21,27 +19,10 @@ export default function TaskChecklist({
           className="flex h-7.75 items-center gap-2 border-b-[0.3px] border-[#DDE3EF] last:border-b-0"
           key={task.id}
         >
-          <button
-            aria-pressed={task.completed}
-            className={cn(
-              "flex h-3.75 w-3.75 shrink-0 cursor-pointer items-center justify-center rounded border-[0.5px]",
-              task.completed
-                ? "border-[#2D81FF] bg-[#2D81FF]"
-                : "border-[#C6CBD4] bg-white",
-            )}
-            type="button"
+          <CheckButton
+            checked={task.completed}
             onClick={() => onToggleTask(task.id)}
-          >
-            {task.completed && (
-              <Image
-                alt=""
-                aria-hidden="true"
-                src={checkIcon}
-                width={8}
-                height={6}
-              />
-            )}
-          </button>
+          />
           <span
             className={cn(
               "text-[12px] leading-5.25 font-medium",
