@@ -2,9 +2,12 @@ import { useState } from "react";
 import Image from "next/image";
 
 import icPencil from "@/assets/icons/admin-member/ic_pencil.svg";
+import { Modal } from "@/components/ui";
 
 import { DUMMY_MEMBER_DETAIL_INFO } from "../../constants";
 import EditMemberInfo from "../edit-member-info";
+import PasswordResetAlert from "./password-reset-alert";
+import DeleteAccountAlert from "./delete-account-alert";
 
 interface MemberDetailInfoProps {
   isOpen: boolean;
@@ -22,9 +25,14 @@ export default function MemberDetailInfo({
   handleCloseDetailInfo,
 }: MemberDetailInfoProps) {
   const [isEdit, setIsEdit] = useState(false);
+  const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalText, setModalText] = useState("");
 
   // TODO: 서버에서 받아온 값으로 진행
   const {
+    userId,
     name,
     studentNumber,
     department,
@@ -44,6 +52,30 @@ export default function MemberDetailInfo({
   };
   const handleCloseEdit = () => {
     setIsEdit(false);
+  };
+
+  const handleOpenPasswordReset = () => {
+    setIsPasswordResetOpen(true);
+  };
+
+  const handleClosePasswordReset = () => {
+    setIsPasswordResetOpen(false);
+  };
+
+  const handleOpenDeleteAccount = () => {
+    setIsDeleteAccountOpen(true);
+  };
+
+  const handleCloseDeleteAccount = () => {
+    setIsDeleteAccountOpen(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalText("");
+    setIsModalOpen(false);
   };
 
   return (
@@ -157,10 +189,18 @@ export default function MemberDetailInfo({
                   </span>
                 </div>
                 <div className="mt-1 flex flex-row gap-3">
-                  <button className="h-10 w-full cursor-pointer rounded-xl border border-[#C6CBD4] text-center text-sm font-semibold text-[#1A2236]">
+                  <button
+                    type="button"
+                    className="h-10 w-full cursor-pointer rounded-xl border border-[#C6CBD4] text-center text-sm font-semibold text-[#1A2236]"
+                    onClick={handleOpenPasswordReset}
+                  >
                     비밀번호 초기화
                   </button>
-                  <button className="h-10 w-full cursor-pointer rounded-xl border border-[rgba(253,113,113,0.33)] text-center text-sm font-semibold text-[#F84D4D]">
+                  <button
+                    type="button"
+                    className="h-10 w-full cursor-pointer rounded-xl border border-[rgba(253,113,113,0.33)] text-center text-sm font-semibold text-[#F84D4D]"
+                    onClick={handleOpenDeleteAccount}
+                  >
                     계정 삭제
                   </button>
                 </div>
@@ -168,6 +208,29 @@ export default function MemberDetailInfo({
             </div>
           </div>
         )}
+        <PasswordResetAlert
+          isOpen={isPasswordResetOpen}
+          userId={userId}
+          handleClose={handleClosePasswordReset}
+          handleOpenModal={handleOpenModal}
+          handleModalText={setModalText}
+        />
+        <DeleteAccountAlert
+          isOpen={isDeleteAccountOpen}
+          userId={userId}
+          handleClose={handleCloseDeleteAccount}
+          handleOpenModal={handleOpenModal}
+          handleModalText={setModalText}
+        />
+        <Modal
+          open={isModalOpen}
+          title="알림"
+          onButtonClick={handleCloseModal}
+          panelClassName="w-76.5 whitespace-pre-line text-center leading-none"
+          contentClassName="gap-5"
+        >
+          <span>{modalText}</span>
+        </Modal>
       </div>
     )
   );
