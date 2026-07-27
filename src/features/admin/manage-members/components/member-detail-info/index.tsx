@@ -1,7 +1,10 @@
-import icPencil from "@/assets/icons/admin-member/ic-pencil.svg";
+import { useState } from "react";
+import Image from "next/image";
+
+import icPencil from "@/assets/icons/admin-member/ic_pencil.svg";
 
 import { DUMMY_MEMBER_DETAIL_INFO } from "../../constants";
-import Image from "next/image";
+import GradeDropdown, { type Grade, normalizeGrade } from "../grade-dropdown";
 
 interface MemberDetailInfoProps {
   isOpen: boolean;
@@ -14,9 +17,62 @@ const MAX_MONTHLY_HOURS = 27;
 
 export default function MemberDetailInfo({
   isOpen,
-  id,
+  // 추후 id로 서버 api 요청 예정
+  // id,
   handleCloseDetailInfo,
 }: MemberDetailInfoProps) {
+  const [isEdit, setIsEdit] = useState(false);
+
+  // TODO: 서버에서 받아온 값으로 진행
+  const {
+    name,
+    studentNumber,
+    department,
+    grade,
+    phoneNumber,
+    commuteStartDate,
+    weeklyWorkedHours,
+    monthlyWorkedHours,
+    editRequestCount,
+    confirmedRequestCount,
+    accountId,
+    lastAccessDate,
+  } = DUMMY_MEMBER_DETAIL_INFO;
+
+  const [inputName, setInputName] = useState<string>(name);
+  const [inputStudentNumber, setInputStudentNumber] =
+    useState<string>(studentNumber);
+  const [selectedGrade, setSelectedGrade] = useState<Grade | null>(
+    normalizeGrade(grade),
+  );
+  const [inputDepartment, setInputDepartment] = useState(department);
+  const [inputPhoneNumber, setInputPhoneNumber] = useState(phoneNumber);
+
+  const handleOpenEdit = () => {
+    setIsEdit(true);
+  };
+  const handleCloseEdit = () => {
+    setIsEdit(false);
+  };
+  const handleEdit = () => {
+    console.log(
+      "바꿀 정보 : ",
+      inputName,
+      inputStudentNumber,
+      selectedGrade,
+      inputDepartment,
+      inputPhoneNumber,
+    );
+    setIsEdit(false);
+  };
+
+  const disabledToEdit =
+    inputName === name &&
+    inputStudentNumber === studentNumber &&
+    selectedGrade === grade &&
+    inputDepartment === department &&
+    inputPhoneNumber === phoneNumber;
+
   return (
     isOpen && (
       <div className="fixed inset-0 z-50 bg-[rgba(70,76,83,0.30)]">
@@ -24,116 +80,183 @@ export default function MemberDetailInfo({
           <div className="flex flex-row items-center justify-between">
             <h2 className="text-2xl font-bold">근무인원 상세보기</h2>
             {/* TODO: X 버튼은 임의대로 추가한 것이니 추후 수정 */}
-            <button
-              type="button"
-              className="h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#C6CBD4] hover:bg-[#EEF4FF]"
-              onClick={handleCloseDetailInfo}
-            >
-              X
-            </button>
+            {!isEdit && (
+              <button
+                type="button"
+                className="h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#C6CBD4] hover:bg-[#EEF4FF]"
+                onClick={handleCloseDetailInfo}
+              >
+                X
+              </button>
+            )}
           </div>
           <div className="flex flex-col gap-10">
             <div className="flex flex-col gap-8">
               <div className="flex flex-row items-center justify-between">
                 <div className="flex flex-col">
-                  <h2 className="text-2xl leading-9 font-bold">
-                    {DUMMY_MEMBER_DETAIL_INFO.name}
-                  </h2>
+                  <h2 className="text-2xl leading-9 font-bold">{name}</h2>
                   <span className="leading-6 text-[#757B88]">
-                    {DUMMY_MEMBER_DETAIL_INFO.studentId}・
-                    {DUMMY_MEMBER_DETAIL_INFO.department}・
-                    {DUMMY_MEMBER_DETAIL_INFO.grade}학년
+                    {isEdit
+                      ? "정보 수정"
+                      : `${studentNumber}・
+                    ${department}・
+                    ${grade}학년`}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="flex cursor-pointer flex-row items-center gap-1 rounded-lg border border-[#C6CBD4] px-3 py-2 hover:bg-[#EEF4FF]"
-                  onClick={() => console.log("수정하기")}
-                >
-                  <Image src={icPencil} alt="수정" />
-                  <span className="text-[#757B88]">수정</span>
-                </button>
+                {!isEdit && (
+                  <button
+                    type="button"
+                    className="flex cursor-pointer flex-row items-center gap-1 rounded-lg border border-[#C6CBD4] px-3 py-2 hover:bg-[#EEF4FF]"
+                    onClick={handleOpenEdit}
+                  >
+                    <Image src={icPencil} alt="수정" />
+                    <span className="text-[#757B88]">수정</span>
+                  </button>
+                )}
               </div>
-              <div className="flex w-full flex-row gap-7 rounded-xl border border-[#DDE3EF] px-4.5 py-4">
-                <div className="flex flex-1 flex-col gap-1">
-                  <span className="text-sm font-medium text-[#8892A6]">
-                    연락처
-                  </span>
-                  <span className="font-semibold">
-                    {DUMMY_MEMBER_DETAIL_INFO.phone}
-                  </span>
+              {!isEdit && (
+                <div className="flex w-full flex-row gap-7 rounded-xl border border-[#DDE3EF] px-4.5 py-4">
+                  <div className="flex flex-1 flex-col gap-1">
+                    <span className="text-sm font-medium text-[#8892A6]">
+                      연락처
+                    </span>
+                    <span className="font-semibold">{phoneNumber}</span>
+                  </div>
+                  <div className="h-full w-px bg-[#DDE3EF]" />
+                  <div className="flex flex-1 flex-col gap-1">
+                    <span className="text-sm font-medium text-[#8892A6]">
+                      근로시작일
+                    </span>
+                    <span className="font-semibold">{commuteStartDate}</span>
+                  </div>
                 </div>
-                <div className="h-full w-px bg-[#DDE3EF]" />
-                <div className="flex flex-1 flex-col gap-1">
-                  <span className="text-sm font-medium text-[#8892A6]">
-                    근로시작일
-                  </span>
-                  <span className="font-semibold">
-                    {DUMMY_MEMBER_DETAIL_INFO.commuteStartDate}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
-            <div className="flex flex-col gap-3">
-              <h3 className="font-bold">근태 요약</h3>
-              <div className="flex flex-row gap-3">
-                <div className="flex w-full flex-col rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
-                  <span className="mb-1.5 text-sm font-medium text-[#757B88]">
-                    이번주 누적 근무시간
-                  </span>
-                  <span className="text-lg font-bold">
-                    {DUMMY_MEMBER_DETAIL_INFO.weeklyWorkedHours}시간
-                  </span>
-                  <span className="text-sm text-[#8892A6]">
-                    / 최대 {MAX_WEEKLY_HOURS}시간
-                  </span>
+            {isEdit ? (
+              <div className="flex flex-col gap-4.5">
+                <div className="flex flex-col gap-2">
+                  <p className="text-[13px] font-bold text-[#8892A6]">이름</p>
+                  <input
+                    className="rounded-md border border-[#C6CBD4] bg-[#F8F9FB] p-3 text-[#464A4D]"
+                    value={inputName}
+                    onChange={(e) => setInputName(e.target.value)}
+                  />
                 </div>
-                <div className="flex w-full flex-col rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
-                  <span className="mb-1.5 text-sm font-medium text-[#757B88]">
-                    이번달 누적 근무시간
-                  </span>
-                  <span className="text-lg font-bold">
-                    {DUMMY_MEMBER_DETAIL_INFO.monthlyWorkedHours}시간
-                  </span>
-                  <span className="text-sm text-[#8892A6]">
-                    / 최대 {MAX_MONTHLY_HOURS}시간
-                  </span>
+                <div className="flex flex-row gap-3">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <p className="text-[13px] font-bold text-[#8892A6]">학번</p>
+                    <input
+                      className="w-full rounded-md border border-[#C6CBD4] bg-[#F8F9FB] p-3 text-[#464A4D]"
+                      value={inputStudentNumber}
+                      onChange={(e) => setInputStudentNumber(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <p className="text-[13px] font-bold text-[#8892A6]">학년</p>
+                    <GradeDropdown
+                      value={selectedGrade}
+                      onChange={setSelectedGrade}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="text-[13px] font-bold text-[#8892A6]">학과</p>
+                  <input
+                    className="rounded-md border border-[#C6CBD4] bg-[#F8F9FB] p-3 text-[#464A4D]"
+                    value={inputDepartment}
+                    onChange={(e) => setInputDepartment(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="text-[13px] font-bold text-[#8892A6]">연락처</p>
+                  <input
+                    className="rounded-md border border-[#C6CBD4] bg-[#F8F9FB] p-3 text-[#464A4D]"
+                    value={inputPhoneNumber}
+                    onChange={(e) => setInputPhoneNumber(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-row items-center justify-end gap-4">
+                  <button
+                    type="button"
+                    className="h-12 w-28 cursor-pointer rounded-lg border border-[#C6CBD4] bg-white font-bold text-[#464A4D]"
+                    onClick={handleCloseEdit}
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    className="h-12 w-28 cursor-pointer rounded-lg border border-[#E8EEF2] bg-[#2076FF] font-bold text-white disabled:cursor-not-allowed disabled:bg-[#C6CBD4]"
+                    onClick={handleEdit}
+                    disabled={disabledToEdit}
+                  >
+                    확인
+                  </button>
                 </div>
               </div>
-              <div className="flex w-full flex-row items-center justify-between rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
-                <span className="text-sm font-medium text-[#757B88]">
-                  수정 요청 횟수
-                </span>
-                <span className="text-sm font-medium text-[#8892A6]">
-                  <span className="text-base font-bold text-black">
-                    총 {DUMMY_MEMBER_DETAIL_INFO.editRequestCount}회
-                  </span>{" "}
-                  (승인 {DUMMY_MEMBER_DETAIL_INFO.confirmedRequestCount}회)
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h3 className="font-bold">계정</h3>
-              <div className="flex w-full flex-col gap-1 rounded-xl border border-[#DDE3EF] px-4.5 py-4">
-                <div className="flex flex-row items-baseline gap-2">
-                  <span className="text-[13px] text-[#757B88]">ID</span>
-                  <span className="font-semibold text-[#464C53]">
-                    {DUMMY_MEMBER_DETAIL_INFO.accountId}
-                  </span>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3">
+                  <h3 className="font-bold">근태 요약</h3>
+                  <div className="flex flex-row gap-3">
+                    <div className="flex w-full flex-col rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
+                      <span className="mb-1.5 text-sm font-medium text-[#757B88]">
+                        이번주 누적 근무시간
+                      </span>
+                      <span className="text-lg font-bold">
+                        {weeklyWorkedHours}시간
+                      </span>
+                      <span className="text-sm text-[#8892A6]">
+                        / 최대 {MAX_WEEKLY_HOURS}시간
+                      </span>
+                    </div>
+                    <div className="flex w-full flex-col rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
+                      <span className="mb-1.5 text-sm font-medium text-[#757B88]">
+                        이번달 누적 근무시간
+                      </span>
+                      <span className="text-lg font-bold">
+                        {monthlyWorkedHours}시간
+                      </span>
+                      <span className="text-sm text-[#8892A6]">
+                        / 최대 {MAX_MONTHLY_HOURS}시간
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-row items-center justify-between rounded-xl border border-[#DDE3EF] bg-[#F9FAFC] px-4.5 py-4">
+                    <span className="text-sm font-medium text-[#757B88]">
+                      수정 요청 횟수
+                    </span>
+                    <span className="text-sm font-medium text-[#8892A6]">
+                      <span className="text-base font-bold text-black">
+                        총 {editRequestCount}회
+                      </span>{" "}
+                      (승인 {confirmedRequestCount}회)
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[13px] text-[#757B88]">
-                  (최근 접속일 : {DUMMY_MEMBER_DETAIL_INFO.lastAccessDate})
-                </span>
-              </div>
-              <div className="mt-1 flex flex-row gap-3">
-                <button className="h-10 w-full cursor-pointer rounded-xl border border-[#C6CBD4] text-center text-sm font-semibold text-[#1A2236]">
-                  비밀번호 초기화
-                </button>
-                <button className="h-10 w-full cursor-pointer rounded-xl border border-[rgba(253,113,113,0.33)] text-center text-sm font-semibold text-[#F84D4D]">
-                  계정 삭제
-                </button>
-              </div>
-            </div>
+                <div className="flex flex-col gap-3">
+                  <h3 className="font-bold">계정</h3>
+                  <div className="flex w-full flex-col gap-1 rounded-xl border border-[#DDE3EF] px-4.5 py-4">
+                    <div className="flex flex-row items-baseline gap-2">
+                      <span className="text-[13px] text-[#757B88]">ID</span>
+                      <span className="font-semibold text-[#464C53]">
+                        {accountId}
+                      </span>
+                    </div>
+                    <span className="text-[13px] text-[#757B88]">
+                      (최근 접속일 : {lastAccessDate})
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-row gap-3">
+                    <button className="h-10 w-full cursor-pointer rounded-xl border border-[#C6CBD4] text-center text-sm font-semibold text-[#1A2236]">
+                      비밀번호 초기화
+                    </button>
+                    <button className="h-10 w-full cursor-pointer rounded-xl border border-[rgba(253,113,113,0.33)] text-center text-sm font-semibold text-[#F84D4D]">
+                      계정 삭제
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
