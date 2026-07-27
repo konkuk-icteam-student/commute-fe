@@ -44,7 +44,7 @@ export default function Alert({
     <div
       {...props}
       className={cn(
-        "fixed inset-0 z-60 flex w-full items-center justify-center bg-[#444444]/30 px-5",
+        "fixed inset-y-0 left-1/2 z-60 flex w-full -translate-x-1/2 items-center justify-center bg-[#444444]/30 px-5",
         className,
       )}
       role="alertdialog"
@@ -73,7 +73,7 @@ export default function Alert({
             </h2>
           ) : null}
 
-          <p className="mt-5 text-center align-middle text-sm leading-none font-medium tracking-[0.21px] whitespace-pre-line">
+          <p className="mt-5 text-center align-middle text-sm font-medium tracking-[0.21px] whitespace-pre-line">
             {message}
           </p>
         </div>

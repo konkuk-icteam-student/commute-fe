@@ -31,7 +31,6 @@ export default function MembersInfo() {
   };
 
   const handleDetailOpen = (id: number) => {
-    console.log(id, "번 학생 상세 보기");
     setDetailMemberId(id);
     setIsDetailOpen(true);
   };

@@ -50,15 +50,18 @@ export default function MembersInfoTable({
         </thead>
         <tbody className="divide-y divide-[#DDE3EF] border-b border-[#DDE3EF] text-sm text-[#464C53]">
           {DUMMY_MEMBER_LIST.map((student) => (
-            <tr key={student.id} className="transition-colors hover:bg-gray-50">
+            <tr
+              key={student.userId}
+              className="transition-colors hover:bg-gray-50"
+            >
               <td className="h-12 px-4 text-center font-medium whitespace-nowrap">
-                {student.id}
+                {student.userId}
               </td>
               <td className="h-12 px-4 font-medium whitespace-nowrap">
                 {student.name}
               </td>
               <td className="h-12 px-4 whitespace-nowrap">
-                {student.studentId}
+                {student.studentNumber}
               </td>
               <td className="h-12 px-4 whitespace-nowrap">
                 {student.department}
@@ -85,7 +88,7 @@ export default function MembersInfoTable({
                 <button
                   type="button"
                   className="cursor-pointer hover:bg-[#EEF4FF]"
-                  onClick={() => handleDetailOpen(student.id)}
+                  onClick={() => handleDetailOpen(student.userId)}
                 >
                   <Image
                     className="h-7 w-7 rounded-lg border border-[#DDE3EF] p-1"
