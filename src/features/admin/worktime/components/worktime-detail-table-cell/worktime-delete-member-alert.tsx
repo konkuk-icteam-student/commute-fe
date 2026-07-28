@@ -25,8 +25,8 @@ export default function WorktimeDeleteMemberAlert({
     <Alert
       open={isOpen}
       title="인원을 삭제하시겠습니까?"
-      message={`정보 : ${user.userName}, ${date} ${start}~${end}`}
-      cancelText="이전"
+      message={`정보 : ${user.userName} / ${date} ${start}~${end}`}
+      cancelText="취소"
       confirmText="삭제하기"
       confirmButtonClassName="bg-[#FD7171]"
       onCancel={handleClose}
