@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "Commute",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="flex justify-center">{children}</body>
+      <body className="flex justify-center">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
