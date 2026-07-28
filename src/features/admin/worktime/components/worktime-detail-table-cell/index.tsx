@@ -1,9 +1,11 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { Modal } from "@/components/ui";
 
 import type { WorktimeDetailTableCellType } from "../../types";
 import { DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD } from "../../constants";
+import WorktimeDeleteMemberAlert from "./worktime-delete-member-alert";
 
 interface WorktimeDetailTableCellProps {
   slot: WorktimeDetailTableCellType;
@@ -16,6 +18,14 @@ export default function WorktimeDetailTableCell({
   maxConcurrentWorkers,
   isEditMode,
 }: WorktimeDetailTableCellProps) {
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [deleteUserInfo, setDeleteUserInfo] = useState<{
+    userId: string;
+    userName: string;
+  } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalText, setModalText] = useState("");
+
   const [isOpenSearch, setIsOpenSearch] = useState(false);
   const [shouldOpenUpward, setShouldOpenUpward] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -43,9 +53,31 @@ export default function WorktimeDetailTableCell({
     setIsOpenSearch(false);
   };
 
+  const handleOpenDeleteAlert = (userId: string, userName: string) => {
+    setDeleteUserInfo({ userId, userName });
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleCloseDeleteAlert = () => {
+    setIsDeleteAlertOpen(false);
+  };
+
+  // TODO: 추후 파라미터 수정
   const handleDelete = (userId: string) => {
-    // TODO: 확인 팝업 띄우기
-    console.log(userId, " 삭제");
+    console.log(userId, "번 인원 삭제");
+    setIsDeleteAlertOpen(false);
+
+    // TODO: 서버 연동 후 요청 실패 시 알리기 / 성공 시에는 따로 알림 없고 그냥 화면에 인원이 삭제됨.
+    handleOpenModal();
+    setModalText("~~~에러로 인해 삭제에 실패했습니디. 이건 예시!");
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalText("");
+    setIsModalOpen(false);
   };
 
   const handleOpenSearch = () => {
@@ -106,7 +138,9 @@ export default function WorktimeDetailTableCell({
               <button
                 type="button"
                 className="cursor-pointer px-0.5 pb-0.5 font-bold text-[#FF3B30]"
-                onClick={() => handleDelete(user.userId)}
+                onClick={() =>
+                  handleOpenDeleteAlert(user.userId, user.userName)
+                }
               >
                 x
               </button>
@@ -166,6 +200,24 @@ export default function WorktimeDetailTableCell({
           )}
         </div>
       )}
+      <WorktimeDeleteMemberAlert
+        isOpen={isDeleteAlertOpen}
+        date={slot.date}
+        start={slot.start}
+        end={slot.end}
+        user={deleteUserInfo}
+        handleClose={handleCloseDeleteAlert}
+        handleDelete={handleDelete}
+      />
+      <Modal
+        open={isModalOpen}
+        title="알림"
+        onButtonClick={handleCloseModal}
+        panelClassName="w-76.5 whitespace-pre-line text-center leading-none"
+        contentClassName="gap-5"
+      >
+        <span>{modalText}</span>
+      </Modal>
     </div>
   );
 }
