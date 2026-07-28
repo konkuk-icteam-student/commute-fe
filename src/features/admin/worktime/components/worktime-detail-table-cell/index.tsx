@@ -132,23 +132,34 @@ export default function WorktimeDetailTableCell({
             >
               <input
                 type="text"
-                className="w-40 rounded-md border border-[hsl(240,11%,91%)] bg-[#F2F2F7] px-2.5 py-2 text-xs font-medium"
+                className="w-45 rounded-md border border-[#E5E5EA] bg-[#F2F2F7] px-2.5 py-2 text-xs font-medium"
                 value={searchText}
                 onChange={handleChangeSearchText}
                 placeholder="이름을 입력하세요."
               />
               {searchText.trim() !== "" && (
                 <div className="flex flex-col gap-0.5">
-                  {DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.map((user) => (
-                    <button
-                      key={user.userId}
-                      type="button"
-                      className="cursor-pointer rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
-                      onClick={() => handleAdd(user.name)}
-                    >
-                      {user.name}
-                    </button>
-                  ))}
+                  {DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.length === 0 ? (
+                    <span className="py-5 text-center text-sm text-[#8A949E]">
+                      검색결과가 없습니다.
+                    </span>
+                  ) : (
+                    DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.map((user) => (
+                      <button
+                        key={user.userId}
+                        type="button"
+                        className="flex cursor-pointer flex-col rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
+                        onClick={() => handleAdd(user.name)}
+                      >
+                        <span className="text-[13px] font-semibold">
+                          {user.name}
+                        </span>
+                        <span className="text-[13px] text-[#8A949E]">
+                          {user.department} | {user.studentNumber}
+                        </span>
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
             </div>

@@ -14,11 +14,11 @@ export default function WorktimeScreen() {
   const handleChangeText = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
   };
-  // TODO: 서버에 검색어 조회 요청
-  const handleSearch = () => {
-    console.log(searchText, "검색");
+  // TODO: 서버에 특정 인원의 시간표 조회 요청
+  const handleGetMemberSchedule = (name: string) => {
+    console.log(name, "의 시간표 조회");
     setSearchText("");
-    setUserResult(searchText);
+    setUserResult(name);
   };
 
   const handleReset = () => {
@@ -37,7 +37,7 @@ export default function WorktimeScreen() {
         searchText={searchText}
         userResult={userResult}
         handleChangeText={handleChangeText}
-        handleSearch={handleSearch}
+        handleGetMemberSchedule={handleGetMemberSchedule}
         handleReset={handleReset}
       />
       <WorktimeEditRequestSection

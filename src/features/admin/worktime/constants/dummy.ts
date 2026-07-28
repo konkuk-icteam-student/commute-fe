@@ -239,13 +239,40 @@ export const DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD = [
   {
     userId: 1,
     name: "홍길동",
+    department: "컴퓨터공학과",
+    studentNumber: "202012345",
   },
   {
     userId: 2,
     name: "철수",
+    department: "산업공학과",
+    studentNumber: "202212346",
   },
   {
     userId: 3,
     name: "영희",
+    department: "경영학과",
+    studentNumber: "202314345",
+  },
+];
+
+export const DUMMY_WORKTIME_SEARCH_RESULT = [
+  {
+    userId: 1,
+    name: "김길동",
+    department: "산업공학과",
+    studentNumber: "202211414",
+  },
+  {
+    userId: 2,
+    name: "홍길동",
+    department: "컴퓨터공학과",
+    studentNumber: "202212345",
+  },
+  {
+    userId: 3,
+    name: "장길동",
+    department: "산업공학과",
+    studentNumber: "202012345",
   },
 ];
