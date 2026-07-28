@@ -13,7 +13,7 @@ interface WorktimeScheduleSectionProps {
   searchText: string;
   userResult: string;
   handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleSearch: () => void;
+  handleGetMemberSchedule: (name: string) => void;
   handleReset: () => void;
 }
 
@@ -21,7 +21,7 @@ export default function WorktimeScheduleSection({
   searchText,
   userResult,
   handleChangeText,
-  handleSearch,
+  handleGetMemberSchedule,
   handleReset,
 }: WorktimeScheduleSectionProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -45,7 +45,7 @@ export default function WorktimeScheduleSection({
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         handleChangeText={handleChangeText}
-        handleSearch={handleSearch}
+        handleGetMemberSchedule={handleGetMemberSchedule}
         handleReset={handleReset}
       />
       <div className="flex flex-col gap-3">

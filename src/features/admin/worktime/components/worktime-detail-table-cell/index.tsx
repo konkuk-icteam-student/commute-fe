@@ -1,9 +1,11 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { Modal } from "@/components/ui";
 
 import type { WorktimeDetailTableCellType } from "../../types";
 import { DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD } from "../../constants";
+import WorktimeDeleteMemberAlert from "./worktime-delete-member-alert";
 
 interface WorktimeDetailTableCellProps {
   slot: WorktimeDetailTableCellType;
@@ -16,6 +18,14 @@ export default function WorktimeDetailTableCell({
   maxConcurrentWorkers,
   isEditMode,
 }: WorktimeDetailTableCellProps) {
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [deleteUserInfo, setDeleteUserInfo] = useState<{
+    userId: string;
+    userName: string;
+  } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalText, setModalText] = useState("");
+
   const [isOpenSearch, setIsOpenSearch] = useState(false);
   const [shouldOpenUpward, setShouldOpenUpward] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -43,9 +53,31 @@ export default function WorktimeDetailTableCell({
     setIsOpenSearch(false);
   };
 
+  const handleOpenDeleteAlert = (userId: string, userName: string) => {
+    setDeleteUserInfo({ userId, userName });
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleCloseDeleteAlert = () => {
+    setIsDeleteAlertOpen(false);
+  };
+
+  // TODO: 추후 파라미터 수정
   const handleDelete = (userId: string) => {
-    // TODO: 확인 팝업 띄우기
-    console.log(userId, " 삭제");
+    console.log(userId, "번 인원 삭제");
+    setIsDeleteAlertOpen(false);
+
+    // TODO: 서버 연동 후 요청 실패 시 알리기 / 성공 시에는 따로 알림 없고 그냥 화면에 인원이 삭제됨.
+    handleOpenModal();
+    setModalText("~~~에러로 인해 삭제에 실패했습니디. 이건 예시!");
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalText("");
+    setIsModalOpen(false);
   };
 
   const handleOpenSearch = () => {
@@ -106,7 +138,9 @@ export default function WorktimeDetailTableCell({
               <button
                 type="button"
                 className="cursor-pointer px-0.5 pb-0.5 font-bold text-[#FF3B30]"
-                onClick={() => handleDelete(user.userId)}
+                onClick={() =>
+                  handleOpenDeleteAlert(user.userId, user.userName)
+                }
               >
                 x
               </button>
@@ -132,29 +166,58 @@ export default function WorktimeDetailTableCell({
             >
               <input
                 type="text"
-                className="w-40 rounded-md border border-[hsl(240,11%,91%)] bg-[#F2F2F7] px-2.5 py-2 text-xs font-medium"
+                className="w-45 rounded-md border border-[#E5E5EA] bg-[#F2F2F7] px-2.5 py-2 text-xs font-medium"
                 value={searchText}
                 onChange={handleChangeSearchText}
                 placeholder="이름을 입력하세요."
               />
               {searchText.trim() !== "" && (
                 <div className="flex flex-col gap-0.5">
-                  {DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.map((user) => (
-                    <button
-                      key={user.userId}
-                      type="button"
-                      className="cursor-pointer rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
-                      onClick={() => handleAdd(user.name)}
-                    >
-                      {user.name}
-                    </button>
-                  ))}
+                  {DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.length === 0 ? (
+                    <span className="py-5 text-center text-sm text-[#8A949E]">
+                      검색결과가 없습니다.
+                    </span>
+                  ) : (
+                    DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.map((user) => (
+                      <button
+                        key={user.userId}
+                        type="button"
+                        className="flex cursor-pointer flex-col rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
+                        onClick={() => handleAdd(user.name)}
+                      >
+                        <span className="text-[13px] font-semibold">
+                          {user.name}
+                        </span>
+                        <span className="text-[13px] text-[#8A949E]">
+                          {user.department} | {user.studentNumber}
+                        </span>
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
             </div>
           )}
         </div>
       )}
+      <WorktimeDeleteMemberAlert
+        isOpen={isDeleteAlertOpen}
+        date={slot.date}
+        start={slot.start}
+        end={slot.end}
+        user={deleteUserInfo}
+        handleClose={handleCloseDeleteAlert}
+        handleDelete={handleDelete}
+      />
+      <Modal
+        open={isModalOpen}
+        title="알림"
+        onButtonClick={handleCloseModal}
+        panelClassName="w-76.5 whitespace-pre-line text-center leading-none"
+        contentClassName="gap-5"
+      >
+        <span>{modalText}</span>
+      </Modal>
     </div>
   );
 }
