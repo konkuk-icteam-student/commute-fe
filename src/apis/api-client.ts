@@ -1,8 +1,11 @@
-import { create, type AxiosRequestConfig } from "axios";
+import { create, isAxiosError, type AxiosRequestConfig } from "axios";
 
+import {
+  AuthRequiredError,
+  clearAuthAndRedirectToLogin,
+  isAuthError,
+} from "./auth-guard";
 import { getAccessToken } from "./token-storage";
-
-// TODO: 추후 권한 없는 경우에 대한 대응도 추가해야함 (token 관련)
 
 declare module "axios" {
   export interface AxiosRequestConfig {
@@ -17,18 +20,43 @@ export type ApiSuccessResponse<T> = {
 };
 
 export type ApiErrorResponse = {
-  isSuccess: true;
+  isSuccess: false;
   message: string;
   details: null;
 };
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-export type ApiClientResponse<T> = {
-  isSuccess: true;
-  message: string;
-  details: T;
-};
+export type ApiClientResponse<T> = ApiSuccessResponse<T>;
+
+export class ApiError extends Error {
+  readonly isSuccess = false;
+  readonly details = null;
+
+  constructor(
+    response: ApiErrorResponse,
+    readonly status?: number,
+  ) {
+    super(response.message);
+    this.name = "ApiError";
+  }
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+export const isApiErrorResponse = (
+  value: unknown,
+): value is ApiErrorResponse =>
+  isRecord(value) &&
+  value.isSuccess === false &&
+  typeof value.message === "string" &&
+  value.details === null;
+
+const isApiSuccessResponse = <T>(
+  value: ApiResponse<T>,
+): value is ApiSuccessResponse<T> =>
+  value.isSuccess === true && "details" in value;
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -41,16 +69,16 @@ const axiosInstance = create({
   timeout: 10000,
 });
 
-axiosInstance.interceptors.request.use(async (config) => {
+axiosInstance.interceptors.request.use((config) => {
   if (config.skipAuth) {
     return config;
   }
 
-  const token = await getAccessToken();
+  const token = getAccessToken();
 
-  //   if (!token) {
-  //     throw new AuthRequiredError();
-  //   }
+  if (!token) {
+    throw new AuthRequiredError();
+  }
 
   config.headers.Authorization = `Bearer ${token}`;
 
@@ -60,61 +88,36 @@ axiosInstance.interceptors.request.use(async (config) => {
 const request = async <T>(
   config: AxiosRequestConfig,
 ): Promise<ApiClientResponse<T>> => {
-  //   const shouldHandleAuthError = !config.skipAuth;
+  const shouldHandleAuthError = !config.skipAuth;
 
   try {
     const response = await axiosInstance.request<ApiResponse<T>>(config);
     const responseData = response.data;
 
-    if (!responseData.details) throw Error();
+    if (isApiErrorResponse(responseData)) {
+      throw new ApiError(responseData, response.status);
+    }
 
-    return {
-      isSuccess: responseData.isSuccess,
-      message: responseData.message,
-      details: responseData.details,
-    };
+    if (!isApiSuccessResponse(responseData)) {
+      throw new Error("Invalid API response.");
+    }
+
+    return responseData;
   } catch (error) {
-    // if (error instanceof AuthRequiredError) {
-    //   await clearAuthAndRedirectToLogin();
-    //   throw error;
-    // }
+    const normalizedError =
+      isAxiosError(error) && isApiErrorResponse(error.response?.data)
+        ? new ApiError(error.response.data, error.response?.status)
+        : error;
 
-    // if (error instanceof ApiError) {
-    //   if (
-    //     shouldHandleAuthError &&
-    //     isAuthError({ code: error.code, status: error.status })
-    //   ) {
-    //     await clearAuthAndRedirectToLogin();
-    //   }
+    const shouldClearAuth =
+      error instanceof AuthRequiredError ||
+      (isAxiosError(error) && isAuthError({ status: error.response?.status }));
 
-    //   throw error;
-    // }
+    if (shouldHandleAuthError && shouldClearAuth) {
+      clearAuthAndRedirectToLogin();
+    }
 
-    // if (
-    //   error instanceof AxiosError &&
-    //   isApiErrorResponse(error.response?.data)
-    // ) {
-    //   const apiError = new ApiError(error.response.data, error.response.status);
-
-    //     if (
-    //       shouldHandleAuthError &&
-    //       isAuthError({ code: apiError.code, status: apiError.status })
-    //     ) {
-    //       await clearAuthAndRedirectToLogin();
-    //     }
-
-    //   throw apiError;
-    // }
-
-    // if (
-    //   error instanceof AxiosError &&
-    //   shouldHandleAuthError &&
-    //   isAuthError({ status: error.response?.status })
-    // ) {
-    //   await clearAuthAndRedirectToLogin();
-    // }
-
-    throw error;
+    throw normalizedError;
   }
 };
 
