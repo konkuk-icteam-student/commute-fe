@@ -6,7 +6,7 @@ import type {
 } from "./work-schedules.types";
 import { WORK_SCHEDULES_QUERY_KEY } from "./work-schedules.key";
 import { getMonthlySchedulesApi } from "./work-schedules.api";
-import { ApiErrorResponse } from "../api-client";
+import { type ApiError } from "../api-client";
 
 const WORK_SCHEDULES_CACHE_TIME = {
   MONTHLY: {
@@ -24,7 +24,7 @@ export const useGetMonthlySchedulesQuery = ({
     isPending: isPendingMonthlySchedules,
     isError: isErrorMonthlySchedules,
     error: monthlySchedulesError,
-  } = useQuery<GetMonthlyWorkSchedulesResponse, ApiErrorResponse>({
+  } = useQuery<GetMonthlyWorkSchedulesResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.MONTHLY(year, month),
     queryFn: () => getMonthlySchedulesApi({ year, month }),
     retry: 1,
