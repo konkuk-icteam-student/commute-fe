@@ -118,6 +118,10 @@ describe("apiClient authentication guard", () => {
       configurable: true,
       value: storage,
     });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { localStorage: storage },
+    });
   });
 
   it("rejects a protected request and clears auth when the access token is missing", async () => {

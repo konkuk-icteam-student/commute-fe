@@ -1,11 +1,22 @@
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
-export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
+const getStorage = (): Storage | null =>
+  typeof window === "undefined" ? null : window.localStorage;
 
-export const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
+export const getAccessToken = () =>
+  getStorage()?.getItem(ACCESS_TOKEN_KEY) ?? null;
+
+export const getRefreshToken = () =>
+  getStorage()?.getItem(REFRESH_TOKEN_KEY) ?? null;
 
 export const deleteAuthToken = () => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  const storage = getStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  storage.removeItem(ACCESS_TOKEN_KEY);
+  storage.removeItem(REFRESH_TOKEN_KEY);
 };
