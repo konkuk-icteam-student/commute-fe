@@ -9,12 +9,7 @@ import type {
   ScheduleSlotStatus,
   WeekScheduleData,
 } from "../../types";
-import {
-  chunkScheduleSlots,
-  getDateStringFromDateLabel,
-  getMonthFromDateLabel,
-  isBeforeDate,
-} from "../../utils";
+import { chunkScheduleSlots, isBeforeDate } from "../../utils";
 import { SLOT_STATUS_CLASS_NAME, SLOTS_PER_DAY } from "../../constants";
 
 interface ScheduleTableProps {
@@ -56,9 +51,8 @@ export default function ScheduleTable({
 }: ScheduleTableProps) {
   const [isChecked, setIsChecked] = useState(false);
   const isView = type === "view";
-  const isApply = type === "apply";
 
-  const result = getWeekdaysOfMonthWeek(year, month, week);
+  const weekdays = getWeekdaysOfMonthWeek(year, month, week);
   const scheduleSlotsByDay = chunkScheduleSlots(
     scheduleData.slots,
     SLOTS_PER_DAY,
@@ -78,29 +72,25 @@ export default function ScheduleTable({
       />
       <div className="rounded-2xl border border-[#DDE3EF] bg-white p-3.5">
         <div className="flex flex-row items-start justify-between gap-1 pl-3">
-          {result.map((date, index) => (
+          {weekdays.map((weekday, index) => (
             <div
-              key={`${date.label}-${date.date}`}
+              key={weekday.date}
               className="flex flex-1 flex-col items-center"
             >
               <span className="text-[11px] font-bold text-[#1A2236]">
-                {date.label}
+                {weekday.label}
               </span>
-              <span className="text-[10px] text-[#2563EB]">{date.date}</span>
+              <span className="text-[10px] text-[#2563EB]">
+                {weekday.dateLabel}
+              </span>
               <div className="flex w-full flex-col items-center gap-1 pt-1">
                 {scheduleSlotsByDay[index]?.map((slot) => {
-                  const displayDate = getDateStringFromDateLabel(
-                    year,
-                    date.date,
-                  );
-                  const displaySlot = { ...slot, date: displayDate };
-                  const isOutsideApplyMonth =
-                    isApply && getMonthFromDateLabel(date.date) !== month;
+                  const displaySlot = { ...slot, date: weekday.date };
                   const isPastDate =
                     unavailableBeforeDate !== undefined &&
-                    isBeforeDate(displayDate, unavailableBeforeDate);
+                    isBeforeDate(weekday.date, unavailableBeforeDate);
                   const slotStatus: ScheduleSlotStatus =
-                    isOutsideApplyMonth || isPastDate
+                    !weekday.isCurrentMonth || isPastDate
                       ? "UNAVAILABLE"
                       : (getSlotStatus?.(displaySlot) ?? slot.status);
                   const slotCurrentCount =
@@ -139,12 +129,7 @@ export default function ScheduleTable({
                       >
                         {((isChecked && slotStatus !== "UNAVAILABLE") ||
                           (!isView && slotStatus !== "UNAVAILABLE")) && (
-                          <span
-                            className={cn(
-                              "text-xs",
-                              slotTextClassName,
-                            )}
-                          >
+                          <span className={cn("text-xs", slotTextClassName)}>
                             {slotCurrentCount}/
                             {scheduleData.maxConcurrentWorkers}
                           </span>

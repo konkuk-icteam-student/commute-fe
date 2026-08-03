@@ -1,17 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-const {
-  formatScheduleChangeHistorySlot,
-  getDateStringFromDateLabel,
-  isBeforeDate,
-} = (await import(new URL("./index.ts", import.meta.url).href)) as typeof import("./index");
-
-describe("getDateStringFromDateLabel", () => {
-  it("converts an M.DD date label to a YYYY-MM-DD date string", () => {
-    assert.equal(getDateStringFromDateLabel(2026, "5.27"), "2026-05-27");
-  });
-});
+const { formatScheduleChangeHistorySlot, isBeforeDate } = (await import(
+  new URL("./index.ts", import.meta.url).href
+)) as typeof import("./index");
 
 describe("isBeforeDate", () => {
   it("returns true when the schedule date is before the base date", () => {
