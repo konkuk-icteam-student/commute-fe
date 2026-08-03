@@ -32,9 +32,9 @@ export default function AttendanceCard({
   const canClockIn = attendance.canClockIn;
 
   return (
-    <div className="mt-5 h-22.25 w-[86vw] max-w-full rounded-[20px] border border-[#DDE3EF] py-5.75 pr-4 pl-5.5">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
+    <div className="mx-auto mt-5 min-h-22.25 w-full max-w-160 rounded-[20px] border border-[#DDE3EF] px-4 py-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
           <div className="flex h-10.75 w-10.75 shrink-0 items-center justify-center rounded-[14px] bg-[#DDEAFF] text-[#236AF2]">
             <Image
               alt=""
@@ -44,11 +44,11 @@ export default function AttendanceCard({
               height={22}
             />
           </div>
-          <div className="min-w-0">
-            <p className="text-[15px] leading-5 font-bold text-[#1A2236]">
+          <div className="min-w-0 flex-1">
+            <p className="mt-1 text-[15px] leading-5 font-bold text-[#1A2236]">
               {attendance.title}
             </p>
-            <p className="mt-1 text-[12px] leading-5 font-bold text-[#8892A6]">
+            <p className="mt-1 text-[12px] leading-5 font-bold break-keep text-[#8892A6]">
               {attendance.highlightTime ? (
                 <>
                   <span className="text-[#1D4ED8]">

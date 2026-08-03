@@ -3,9 +3,12 @@ type HomeGreetingProps = {
   userName: string;
 };
 
-export default function HomeGreeting({ teamName, userName }: HomeGreetingProps) {
+export default function HomeGreeting({
+  teamName,
+  userName,
+}: HomeGreetingProps) {
   return (
-    <div className="mt-12">
+    <div className="mt-10">
       <p className="ml-1.75 text-[13px] leading-5 font-bold text-[#8892A6]">
         안녕하세요, {userName}님!
       </p>
