@@ -21,10 +21,8 @@ export {
 
 export {
   chunkScheduleSlots,
-  getDateStringFromDateLabel,
   getFirstDateOfNextMonth,
   getAppliedScheduleSlotTimes,
-  getMonthFromDateLabel,
   getApplySlotCurrentCount,
   getApplySlotStatus,
   getMergedApplyPayload,

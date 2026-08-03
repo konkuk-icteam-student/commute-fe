@@ -1,44 +1,68 @@
+const WEEKDAY_LABELS = ["월", "화", "수", "목", "금"] as const;
+const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
+
+// 해당 날짜가 속한 주의 월요일 반환
+const getMondayOfWeek = (date: Date) => {
+  const day = date.getDay(); // 일=0, 월=1...
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + diffToMonday,
+  );
+};
+
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+
+// 해당 월의 첫 평일(월~금) 반환
+const getFirstWeekdayOfMonth = (year: number, monthIndex: number) => {
+  const date = new Date(year, monthIndex, 1);
+
+  while (isWeekend(date)) {
+    date.setDate(date.getDate() + 1);
+  }
+
+  return date;
+};
+
+// 해당 월의 마지막 평일(월~금) 반환
+const getLastWeekdayOfMonth = (year: number, monthIndex: number) => {
+  const date = new Date(year, monthIndex + 1, 0);
+
+  while (isWeekend(date)) {
+    date.setDate(date.getDate() - 1);
+  }
+
+  return date;
+};
+
+const getWeekDiff = (fromMonday: Date, toMonday: Date) =>
+  Math.round((toMonday.getTime() - fromMonday.getTime()) / MS_PER_WEEK);
+
+// 시간표는 월~금만 보여주므로 평일이 하나도 없는 주는 그 달의 주차로 세지 않는다.
+// 첫 평일이 속한 주가 1주차, 마지막 평일이 속한 주가 maxWeek.
+const getFirstWeekMonday = (year: number, monthIndex: number) =>
+  getMondayOfWeek(getFirstWeekdayOfMonth(year, monthIndex));
+
 // Date 객체의 년,월,몇주차인지 반환
 export const getMonthWeekOfDate = (date: Date) => {
   const year = date.getFullYear();
-  const month = date.getMonth(); // 0~11
+  const monthIndex = date.getMonth(); // 0~11
 
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const firstWeekMonday = getFirstWeekMonday(year, monthIndex);
+  const lastWeekMonday = getMondayOfWeek(
+    getLastWeekdayOfMonth(year, monthIndex),
+  );
 
-  // 월요일 기준 주 시작일 구하기
-  const firstDay = firstDayOfMonth.getDay(); // 일=0, 월=1...
-  const diffToMonday = firstDay === 0 ? -6 : 1 - firstDay;
-
-  const firstWeekMonday = new Date(firstDayOfMonth);
-  firstWeekMonday.setDate(firstDayOfMonth.getDate() + diffToMonday);
-
-  // 현재 날짜가 포함된 주의 월요일
-  const currentDay = date.getDay();
-  const diffCurrentToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-
-  const currentWeekMonday = new Date(date);
-  currentWeekMonday.setDate(date.getDate() + diffCurrentToMonday);
-
-  const diffTime = currentWeekMonday.getTime() - firstWeekMonday.getTime();
-  const week = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
-
-  const lastDay = lastDayOfMonth.getDay();
-  const diffLastToMonday = lastDay === 0 ? -6 : 1 - lastDay;
-
-  const lastWeekMonday = new Date(lastDayOfMonth);
-  lastWeekMonday.setDate(lastDayOfMonth.getDate() + diffLastToMonday);
-
-  const maxWeek =
-    Math.floor(
-      (lastWeekMonday.getTime() - firstWeekMonday.getTime()) /
-        (1000 * 60 * 60 * 24 * 7),
-    ) + 1;
+  const maxWeek = getWeekDiff(firstWeekMonday, lastWeekMonday) + 1;
+  const week = getWeekDiff(firstWeekMonday, getMondayOfWeek(date)) + 1;
 
   return {
     year,
-    month: month + 1,
-    week,
+    month: monthIndex + 1,
+    // 1일이 토/일인 달에서는 그 주말이 1주차 이전에 놓이므로 범위 안으로 보정
+    week: Math.min(Math.max(week, 1), maxWeek),
     maxWeek,
   };
 };
@@ -51,6 +75,21 @@ export const shiftDateByWeeks = (date: Date, weekOffset: number) => {
   return shiftedDate;
 };
 
+// 해당 주차의 월요일 Date 반환 (month: 1~12)
+export const getMondayOfMonthWeek = (
+  year: number,
+  month: number,
+  week: number,
+) => {
+  const firstWeekMonday = getFirstWeekMonday(year, month - 1);
+
+  return new Date(
+    firstWeekMonday.getFullYear(),
+    firstWeekMonday.getMonth(),
+    firstWeekMonday.getDate() + (week - 1) * 7,
+  );
+};
+
 // 해당 주차가 가지는 요일,월,일 반환
 export const getWeekdaysOfMonthWeek = (
   year: number,
@@ -58,34 +97,38 @@ export const getWeekdaysOfMonthWeek = (
   week: number,
 ) => {
   // month: 1~12
-  const firstDayOfMonth = new Date(year, month - 1, 1);
+  const targetMonday = getMondayOfMonthWeek(year, month, week);
 
-  // JS getDay(): 일=0, 월=1, ..., 토=6
-  const day = firstDayOfMonth.getDay();
-
-  // 월요일 기준으로 보정
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-
-  const firstMonday = new Date(firstDayOfMonth);
-  firstMonday.setDate(firstDayOfMonth.getDate() + diffToMonday);
-
-  const targetMonday = new Date(firstMonday);
-  targetMonday.setDate(firstMonday.getDate() + (week - 1) * 7);
-
-  return Array.from({ length: 5 }, (_, index) => {
-    const date = new Date(targetMonday);
-    date.setDate(targetMonday.getDate() + index);
+  return WEEKDAY_LABELS.map((label, index) => {
+    const date = new Date(
+      targetMonday.getFullYear(),
+      targetMonday.getMonth(),
+      targetMonday.getDate() + index,
+    );
 
     return {
-      label: ["월", "화", "수", "목", "금"][index],
-      date: formatDate(date),
+      label,
+      dateLabel: formatDateLabel(date),
+      date: formatDateString(date),
+      isCurrentMonth:
+        date.getFullYear() === year && date.getMonth() === month - 1,
     };
   });
 };
 
-function formatDate(date: Date) {
+// 화면 표시용 "M.DD"
+function formatDateLabel(date: Date) {
   const month = String(date.getMonth() + 1);
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${month}.${day}`;
+}
+
+// 데이터 식별용 "YYYY-MM-DD"
+function formatDateString(date: Date) {
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }

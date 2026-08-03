@@ -22,17 +22,6 @@ export const chunkScheduleSlots = (
   );
 };
 
-// "M.DD" 형식의 날짜 라벨에서 월 숫자를 추출합니다.
-export const getMonthFromDateLabel = (dateLabel: string) =>
-  Number(dateLabel.split(".")[0]);
-
-// "M.DD" 형식의 날짜 라벨을 YYYY-MM-DD 날짜 문자열로 변환합니다.
-export const getDateStringFromDateLabel = (year: number, dateLabel: string) => {
-  const [month, day] = dateLabel.split(".");
-
-  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-};
-
 // 오늘 기준 다음 달 1일 Date 객체를 반환합니다.
 export const getFirstDateOfNextMonth = () => {
   const today = new Date();
