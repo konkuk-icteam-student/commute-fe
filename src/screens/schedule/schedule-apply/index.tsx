@@ -17,8 +17,6 @@ import {
   ScheduleStatusLegend,
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
-  getDateStringFromDateLabel,
-  getMonthFromDateLabel,
   hasSlotTimesBelowMinSessionHours,
   ScheduleApplySummary,
   SLOTS_PER_DAY,
@@ -29,7 +27,6 @@ import {
 import {
   getMonthWeekOfDate,
   getWeekdaysOfMonthWeek,
-  shiftDateByWeeks,
 } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
@@ -43,7 +40,9 @@ const MONTH_TOTAL_HOURS = 25;
 
 // TODO: 서버 응답 pending 시 Toast 컴포넌트 말고 다른 식으로 보여주기
 export default function ScheduleApplyScreen() {
-  const [selectedDate, setSelectedDate] = useState(getFirstDateOfNextMonth);
+  // 근로 신청은 다음 달에 대해서만 가능하다.
+  const [nextMonthDate] = useState(getFirstDateOfNextMonth);
+  const [week, setWeek] = useState(1);
   const [applyPayload, setApplyPayload] = useState<ScheduleApplyPayload>({
     deleteSlots: [],
     addSlots: [],
@@ -52,34 +51,27 @@ export default function ScheduleApplyScreen() {
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
-  const { year, month, week } = getMonthWeekOfDate(selectedDate);
-  const prevWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, -1));
-  const nextWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, 1));
-  const isPrevWeekDisabled =
-    year !== prevWeekMonth.year || month !== prevWeekMonth.month;
-  const isNextWeekDisabled =
-    year !== nextWeekMonth.year || month !== nextWeekMonth.month;
+  const { year, month, maxWeek } = getMonthWeekOfDate(nextMonthDate);
+  const isPrevWeekDisabled = week <= 1;
+  const isNextWeekDisabled = week >= maxWeek;
 
   const addRequestHours = getSlotTimesTotalHours(applyPayload.addSlots);
   const deleteRequestHours = getSlotTimesTotalHours(applyPayload.deleteSlots);
   const currentWeekdays = getWeekdaysOfMonthWeek(year, month, week);
-  const currentWeekDates = currentWeekdays.map(({ date }) =>
-    getDateStringFromDateLabel(year, date),
-  );
+  const currentWeekDates = currentWeekdays
+    .filter(({ isCurrentMonth }) => isCurrentMonth)
+    .map(({ date }) => date);
   const currentWeekScheduleSlots = chunkScheduleSlots(
     DUMMY_NEXT_MONTH_SCHEDULE.slots,
     SLOTS_PER_DAY,
   ).flatMap((slots, index) => {
     const currentWeekday = currentWeekdays[index];
 
-    if (
-      currentWeekday === undefined ||
-      getMonthFromDateLabel(currentWeekday.date) !== month
-    ) {
+    if (currentWeekday === undefined || !currentWeekday.isCurrentMonth) {
       return [];
     }
 
-    const date = getDateStringFromDateLabel(year, currentWeekday.date);
+    const { date } = currentWeekday;
 
     return slots.map((slot) => ({ ...slot, date }));
   });
@@ -108,37 +100,11 @@ export default function ScheduleApplyScreen() {
     monthTotalTimeAfterApply > MAX_MONTH_HOURS;
 
   const handlePrevWeek = () => {
-    setSelectedDate((currentDate) => {
-      const prevDate = shiftDateByWeeks(currentDate, -1);
-      const currentMonth = getMonthWeekOfDate(currentDate);
-      const prevMonth = getMonthWeekOfDate(prevDate);
-
-      if (
-        currentMonth.year !== prevMonth.year ||
-        currentMonth.month !== prevMonth.month
-      ) {
-        return currentDate;
-      }
-
-      return prevDate;
-    });
+    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
   };
 
   const handleNextWeek = () => {
-    setSelectedDate((currentDate) => {
-      const nextDate = shiftDateByWeeks(currentDate, 1);
-      const currentMonth = getMonthWeekOfDate(currentDate);
-      const nextMonth = getMonthWeekOfDate(nextDate);
-
-      if (
-        currentMonth.year !== nextMonth.year ||
-        currentMonth.month !== nextMonth.month
-      ) {
-        return currentDate;
-      }
-
-      return nextDate;
-    });
+    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
   };
 
   const handleSlotClick = (slot: ScheduleSlot) => {

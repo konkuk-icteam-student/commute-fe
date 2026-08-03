@@ -11,7 +11,7 @@ import {
   DUMMY_SCHEDULE_CHANGE_HISTORY,
   WorkingHoursCard,
 } from "@/features/schedule";
-import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
+import { getMonthWeekOfDate } from "@/lib/date-formatter";
 import { useGetMonthlySchedulesQuery } from "@/apis/work-schedules";
 
 // TODO: 추후 서버에서 받아올 값
@@ -25,8 +25,10 @@ const MONTH_HOURS = 13;
 const MONTH_TOTAL_HOURS = 27;
 
 export default function ScheduleViewScreen() {
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { year, month, week } = getMonthWeekOfDate(selectedDate);
+  // 조회는 이번 달 안에서만 이동할 수 있다.
+  const [today] = useState(() => new Date());
+  const { year, month, week: currentWeek, maxWeek } = getMonthWeekOfDate(today);
+  const [week, setWeek] = useState(currentWeek);
 
   // TODO: 이건 api 연동 및 TanStack Query 적용 예시임
   const { monthlySchedulesData } = useGetMonthlySchedulesQuery({
@@ -35,11 +37,11 @@ export default function ScheduleViewScreen() {
   });
 
   const handlePrevWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, -1));
+    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
   };
 
   const handleNextWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, 1));
+    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
   };
 
   useEffect(() => {
@@ -55,6 +57,8 @@ export default function ScheduleViewScreen() {
           month={month}
           week={week}
           scheduleData={DUMMY_GET_SCHEDULE}
+          isPrevWeekDisabled={week <= 1}
+          isNextWeekDisabled={week >= maxWeek}
           handlePrevWeek={handlePrevWeek}
           handleNextWeek={handleNextWeek}
         />

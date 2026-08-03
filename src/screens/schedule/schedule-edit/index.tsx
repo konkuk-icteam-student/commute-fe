@@ -7,7 +7,6 @@ import {
   DUMMY_GET_SCHEDULE,
   getRequestEditSlotStatus,
   getRequestEditSlotDisabled,
-  getDateStringFromDateLabel,
   type ScheduleApplyPayload,
   type ScheduleSlot,
   ScheduleHeader,
@@ -19,14 +18,12 @@ import {
   WorkingHoursCard,
   ScheduleChangeList,
   hasAppliedScheduleBelowMinSessionHours,
-  isBeforeDate,
   SLOTS_PER_DAY,
 } from "@/features/schedule";
 import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
 import {
   getMonthWeekOfDate,
   getWeekdaysOfMonthWeek,
-  shiftDateByWeeks,
 } from "@/lib/date-formatter";
 import { Button, Modal, Alert } from "@/components/ui";
 
@@ -42,8 +39,7 @@ const getAbleToAddHours = (deleteRequestHours: number) =>
   MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
 
 export default function ScheduleEditScreen() {
-  const today = new Date();
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [today] = useState(() => new Date());
   const [editPayload, setEditPayload] = useState<ScheduleApplyPayload>({
     deleteSlots: [],
     addSlots: [],
@@ -52,17 +48,12 @@ export default function ScheduleEditScreen() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
-  const { year, month, week } = getMonthWeekOfDate(selectedDate);
-  const currentMonthWeek = getMonthWeekOfDate(today);
-  const prevWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, -1));
-  const nextWeekMonth = getMonthWeekOfDate(shiftDateByWeeks(selectedDate, 1));
-  const isPrevWeekDisabled =
-    currentMonthWeek.year !== prevWeekMonth.year ||
-    currentMonthWeek.month !== prevWeekMonth.month ||
-    prevWeekMonth.week < currentMonthWeek.week;
-  const isNextWeekDisabled =
-    currentMonthWeek.year !== nextWeekMonth.year ||
-    currentMonthWeek.month !== nextWeekMonth.month;
+  // 수정 요청은 이번 달 전체에 대해 가능하다.
+  // 지난 주차도 열어 둔다 — 제때 수정하지 못하고 넘어간 근무를 정정할 수 있어야 한다.
+  const { year, month, week: currentWeek, maxWeek } = getMonthWeekOfDate(today);
+  const [week, setWeek] = useState(currentWeek);
+  const isPrevWeekDisabled = week <= 1;
+  const isNextWeekDisabled = week >= maxWeek;
 
   const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
   const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
@@ -74,17 +65,13 @@ export default function ScheduleEditScreen() {
   ).flatMap((slots, index) => {
     const currentWeekday = currentWeekdays[index];
 
-    if (currentWeekday === undefined) {
+    if (currentWeekday === undefined || !currentWeekday.isCurrentMonth) {
       return [];
     }
 
-    const date = getDateStringFromDateLabel(year, currentWeekday.date);
+    const { date } = currentWeekday;
 
-    return slots.map((slot) => ({
-      ...slot,
-      date,
-      status: isBeforeDate(date, today) ? "UNAVAILABLE" : slot.status,
-    }));
+    return slots.map((slot) => ({ ...slot, date }));
   });
   const isBelowMinSessionHours = hasAppliedScheduleBelowMinSessionHours(
     currentWeekScheduleSlots,
@@ -99,36 +86,11 @@ export default function ScheduleEditScreen() {
     reason === "";
 
   const handlePrevWeek = () => {
-    setSelectedDate((currentDate) => {
-      const prevDate = shiftDateByWeeks(currentDate, -1);
-      const prevMonthWeek = getMonthWeekOfDate(prevDate);
-
-      if (
-        currentMonthWeek.year !== prevMonthWeek.year ||
-        currentMonthWeek.month !== prevMonthWeek.month ||
-        prevMonthWeek.week < currentMonthWeek.week
-      ) {
-        return currentDate;
-      }
-
-      return prevDate;
-    });
+    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
   };
 
   const handleNextWeek = () => {
-    setSelectedDate((currentDate) => {
-      const nextDate = shiftDateByWeeks(currentDate, 1);
-      const nextMonthWeek = getMonthWeekOfDate(nextDate);
-
-      if (
-        currentMonthWeek.year !== nextMonthWeek.year ||
-        currentMonthWeek.month !== nextMonthWeek.month
-      ) {
-        return currentDate;
-      }
-
-      return nextDate;
-    });
+    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
   };
 
   const handleSlotClick = (slot: ScheduleSlot) => {
@@ -192,7 +154,6 @@ export default function ScheduleEditScreen() {
               : undefined
           }
           onSlotClick={handleSlotClick}
-          unavailableBeforeDate={today}
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
