@@ -1,3 +1,4 @@
+export { default as DashboardPanel } from "./dashboard-panel";
 export { default as DashboardSectionHeader } from "./dashboard-section-header";
 export { default as DateNavigator } from "./date-navigator";
 export { default as MemberAttendancePanel } from "./member-attendance-panel";

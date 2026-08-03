@@ -47,7 +47,7 @@ export default function AdminLayout({
       <div className="h-screen min-w-0 flex-1 overflow-x-auto overflow-y-auto">
         <section
           className={cn(
-            "@container/dashboard relative z-10 flex min-h-full flex-col",
+            "relative z-10 flex min-h-full flex-col",
             contentMinWidth,
           )}
         >

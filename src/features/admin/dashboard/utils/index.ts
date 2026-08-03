@@ -1,6 +1,8 @@
 import type {
   DashboardAttendanceDetails,
   DashboardMemberAttendance,
+  DashboardMemberAttendanceIssueCode,
+  DashboardMemberWorkStatusCode,
   DashboardScheduleDetails,
   DashboardSummaryDetails,
   DashboardSummaryItem,
@@ -27,6 +29,37 @@ const getProgress = (workedMinutes: number, limitMinutes: number) => {
   }
 
   return Math.min(Math.max((workedMinutes / limitMinutes) * 100, 0), 100);
+};
+
+const memberAttendanceOrder: Record<DashboardMemberWorkStatusCode, number> = {
+  WORKING: 0,
+  NOT_CHECKED_IN: 1,
+  SCHEDULED: 2,
+  COMPLETED: 5,
+  OFF: 6,
+};
+
+const memberAttendanceIssueOrder: Partial<
+  Record<DashboardMemberAttendanceIssueCode, number>
+> = {
+  ABSENT: 4,
+};
+
+const getMemberAttendanceOrder = ({
+  attendanceIssueCode,
+  workStatusCode,
+}: {
+  attendanceIssueCode?: DashboardMemberAttendanceIssueCode;
+  workStatusCode: DashboardMemberWorkStatusCode;
+}) => {
+  if (
+    attendanceIssueCode &&
+    attendanceIssueCode in memberAttendanceIssueOrder
+  ) {
+    return memberAttendanceIssueOrder[attendanceIssueCode] ?? 0;
+  }
+
+  return memberAttendanceOrder[workStatusCode];
 };
 
 export const toDashboardSummaryItems = (
@@ -60,24 +93,36 @@ export const toDashboardTimeRows = (
 export const toDashboardMemberAttendanceRows = (
   details: DashboardAttendanceDetails,
 ): DashboardMemberAttendance[] =>
-  details.users.map((user) => ({
-    id: user.userId,
-    name: user.userName,
-    statusCode: user.statusCode,
-    meta: `${user.department} · ${user.studentId}`,
-    late: `${user.lateCount}회 (${user.lateMinutes}분)`,
-    week: `${formatMinutes(user.weeklyWorkedMinutes)} / ${formatMinutes(
-      user.weeklyLimitMinutes,
-    )}`,
-    weekProgress: getProgress(
-      user.weeklyWorkedMinutes,
-      user.weeklyLimitMinutes,
-    ),
-    total: `${formatMinutes(user.monthlyWorkedMinutes)} / ${formatMinutes(
-      user.monthlyLimitMinutes,
-    )}`,
-    totalProgress: getProgress(
-      user.monthlyWorkedMinutes,
-      user.monthlyLimitMinutes,
-    ),
-  }));
+  [...details.users]
+    .sort((firstUser, secondUser) => {
+      const firstOrder = getMemberAttendanceOrder(firstUser);
+      const secondOrder = getMemberAttendanceOrder(secondUser);
+
+      if (firstOrder !== secondOrder) {
+        return firstOrder - secondOrder;
+      }
+
+      return 0;
+    })
+    .map((user) => ({
+      attendanceIssueCode: user.attendanceIssueCode,
+      id: user.userId,
+      name: user.userName,
+      workStatusCode: user.workStatusCode,
+      meta: `${user.department} · ${user.studentId}`,
+      late: `${user.lateCount}회 (${user.lateMinutes}분)`,
+      week: `${formatMinutes(user.weeklyWorkedMinutes)} / ${formatMinutes(
+        user.weeklyLimitMinutes,
+      )}`,
+      weekProgress: getProgress(
+        user.weeklyWorkedMinutes,
+        user.weeklyLimitMinutes,
+      ),
+      total: `${formatMinutes(user.monthlyWorkedMinutes)} / ${formatMinutes(
+        user.monthlyLimitMinutes,
+      )}`,
+      totalProgress: getProgress(
+        user.monthlyWorkedMinutes,
+        user.monthlyLimitMinutes,
+      ),
+    }));

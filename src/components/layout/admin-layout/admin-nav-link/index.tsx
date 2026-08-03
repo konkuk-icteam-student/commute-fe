@@ -16,7 +16,7 @@ export default function AdminNavLink({
     <Link
       href={item.href}
       aria-current={isActive ? "page" : undefined}
-      className={`flex h-12 w-full items-center gap-3 rounded-lg px-3 min-[1728px]:w-48.75 ${
+      className={`flex h-12 w-48.75 items-center gap-3 rounded-lg px-3 ${
         isActive ? "bg-[#EEF4FF]" : ""
       }`}
     >

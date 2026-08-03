@@ -12,7 +12,7 @@ export default function DashboardSectionHeader({
   title: string;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 py-4 text-[15px] font-bold text-[#1A2236] min-[1728px]:px-5.25 min-[1728px]:pt-6 min-[1728px]:pb-5.25 min-[1728px]:text-[17px]">
+    <div className="flex items-center justify-between px-5.25 pt-6 pb-5.25 text-[17px] font-bold text-[#1A2236]">
       <div className="flex items-center gap-2">
         <Image src={checkCircleIcon} alt="" width={20} height={20} />
         <span className="leading-[22.5px]">{title}</span>

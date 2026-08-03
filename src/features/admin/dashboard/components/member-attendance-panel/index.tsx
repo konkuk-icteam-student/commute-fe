@@ -6,37 +6,61 @@ import { useMemo, useState } from "react";
 import rightCircleIcon from "@/assets/icons/admin-common/ic_chevron_right_circle.svg";
 import rightCircleDisabledIcon from "@/assets/icons/admin-common/ic_chevron_right_circle_disabled.svg";
 import searchIcon from "@/assets/icons/admin-dashboard/ic_search.svg";
-import DashboardSectionHeader from "../dashboard-section-header";
 import type {
+  DashboardMemberAttendanceIssueCode,
   DashboardMemberAttendance,
-  DashboardMemberStatusCode,
+  DashboardMemberWorkStatusCode,
 } from "../../types";
+import DashboardPanel from "../dashboard-panel";
 
 const statusStyles: Record<
-  DashboardMemberStatusCode,
+  DashboardMemberWorkStatusCode,
   { badge: string; dot: string }
 > = {
-  AT01: {
+  WORKING: {
+    badge: "bg-[#DBEAFE] text-[#1D4ED8]",
+    dot: "text-[#2563EB]",
+  },
+  SCHEDULED: {
+    badge: "bg-[#F0F2F8] text-[#8892A6]",
+    dot: "text-[#98989D]",
+  },
+  NOT_CHECKED_IN: {
+    badge: "bg-[#FFE4E4] text-[#ED5757]",
+    dot: "text-[#FD7C7C]",
+  },
+  COMPLETED: {
     badge: "bg-[#DCFCE7] text-[#008236]",
     dot: "text-[#00C950]",
   },
-  AT02: {
-    badge: "bg-[#F0F2F8] text-[#8892A6]",
-    dot: "text-[#8E8E93]",
-  },
-  AT03: {
-    badge: "bg-[#FEE2E2] text-[#B91C1C]",
-    dot: "text-[#E31B23]",
+  OFF: {
+    badge: "",
+    dot: "",
   },
 };
 
-const statusLabels: Record<DashboardMemberStatusCode, string> = {
-  AT01: "근무중",
-  AT02: "출근예정",
-  AT03: "지각",
+const statusLabels: Record<DashboardMemberWorkStatusCode, string> = {
+  WORKING: "근무중",
+  SCHEDULED: "근무 예정",
+  NOT_CHECKED_IN: "미출근",
+  COMPLETED: "근무 완료",
+  OFF: "",
 };
 
-const PAGE_SIZE = 5;
+const issueStyles: Record<DashboardMemberAttendanceIssueCode, string> = {
+  LATE: "bg-[#FFECB8] text-[#D79430]",
+  ABSENT: "bg-[#FEE2E2] text-[#ED5757]",
+};
+
+const issueLabels: Record<DashboardMemberAttendanceIssueCode, string> = {
+  LATE: "지각",
+  ABSENT: "결근",
+};
+
+const PAGE_SIZE = 6;
+const MEMBER_ROW_GRID_CLASS = "grid-cols-[169px_404px]";
+const MEMBER_ROW_MIN_WIDTH_CLASS = "min-w-143.25";
+const METRIC_GRID_CLASS = "grid-cols-[80px_132px_139px]";
 
 export default function MemberAttendancePanel({
   members,
@@ -59,12 +83,8 @@ export default function MemberAttendancePanel({
   const isLastPage = currentPage === pageCount - 1;
 
   return (
-    <section className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]">
-      <DashboardSectionHeader
-        title="인원별 근태 현황"
-        arrowHref="/admin/members"
-      />
-      <div className="mx-4 mb-4 rounded-xl bg-white p-3 min-[1728px]:mx-5.25 min-[1728px]:mb-5 min-[1728px]:p-4">
+    <DashboardPanel title="인원별 근태 현황" arrowHref="/admin/members">
+      <div className="mx-5.25 mb-5 rounded-xl bg-white p-4">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <label className="flex h-9.75 w-53.5 items-center gap-2 rounded-lg border border-[#DDE3EF] bg-[rgba(244,245,247,0.57)] p-3">
             <Image src={searchIcon} alt="" width={15} height={15} />
@@ -119,37 +139,32 @@ export default function MemberAttendancePanel({
         </div>
 
         <div className="overflow-x-auto">
-          <div className="min-w-146.25">
+          <div className={MEMBER_ROW_MIN_WIDTH_CLASS}>
             {visibleMembers.map((member) => (
               <MemberRow key={member.id} member={member} />
             ))}
           </div>
         </div>
       </div>
-    </section>
+    </DashboardPanel>
   );
 }
 
 function MemberRow({ member }: { member: DashboardMemberAttendance }) {
-  const statusStyle = statusStyles[member.statusCode];
-
   return (
-    <article className="grid min-h-17 grid-cols-[200px_minmax(0,1fr)] items-center">
+    <article className={`grid min-h-17 ${MEMBER_ROW_GRID_CLASS} items-center`}>
       <div className="px-3.75 py-[14.21px]">
         <div className="flex items-center gap-2">
           <p className="text-sm font-bold text-[#09121C]">{member.name}</p>
-          <span
-            className={`rounded-full px-2 py-px text-[10px] font-bold ${statusStyle.badge}`}
-          >
-            <span className={statusStyle.dot}>●</span>
-            <span className="ml-1">{statusLabels[member.statusCode]}</span>
-          </span>
+          <MemberStatusBadges member={member} />
         </div>
         <p className="mt-0.5 text-[11px] leading-[16.5px] text-[#6B7280]">
           {member.meta}
         </p>
       </div>
-      <div className="grid grid-cols-[minmax(0,80px)_minmax(0,132px)_minmax(0,139px)] items-center gap-3 px-5 py-2.75">
+      <div
+        className={`grid ${METRIC_GRID_CLASS} items-center gap-3 py-2.75 pr-2.25 pl-5`}
+      >
         <MetricBox label="지각 횟수" value={member.late} />
         <MetricBox
           label="이번 주 누적 시간"
@@ -163,6 +178,33 @@ function MemberRow({ member }: { member: DashboardMemberAttendance }) {
         />
       </div>
     </article>
+  );
+}
+
+function MemberStatusBadges({ member }: { member: DashboardMemberAttendance }) {
+  const statusStyle = statusStyles[member.workStatusCode];
+  const statusLabel = statusLabels[member.workStatusCode];
+  const shouldShowWorkStatus =
+    member.workStatusCode !== "OFF" && member.attendanceIssueCode !== "ABSENT";
+
+  return (
+    <div className="flex items-center gap-1">
+      {shouldShowWorkStatus ? (
+        <span
+          className={`rounded-full px-2 py-px text-[10px] font-bold ${statusStyle.badge}`}
+        >
+          <span className={statusStyle.dot}>●</span>
+          <span className="ml-1">{statusLabel}</span>
+        </span>
+      ) : null}
+      {member.attendanceIssueCode ? (
+        <span
+          className={`rounded-full px-2 py-px text-[10px] font-bold ${issueStyles[member.attendanceIssueCode]}`}
+        >
+          {issueLabels[member.attendanceIssueCode]}
+        </span>
+      ) : null}
+    </div>
   );
 }
 

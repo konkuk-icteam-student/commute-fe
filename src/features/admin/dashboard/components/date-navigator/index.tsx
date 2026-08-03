@@ -41,7 +41,7 @@ function DateNavigatorContent({
   const isLastDate = !hasDates || currentIndex === dateLabels.length - 1;
 
   return (
-    <div className="flex h-14 items-center justify-center gap-3 min-[1728px]:gap-7.5">
+    <div className="flex h-14 items-center justify-center gap-7.5">
       <button
         type="button"
         className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
@@ -61,7 +61,7 @@ function DateNavigatorContent({
           className="rotate-180"
         />
       </button>
-      <p className="mt-1 flex h-14 items-center text-[32px] font-bold text-[#17191A] min-[1728px]:text-[40px]">
+      <p className="mt-1 flex h-14 items-center text-[40px] font-bold text-[#17191A]">
         {hasDates ? dateLabels[currentIndex] : "표시할 날짜가 없습니다"}
       </p>
       <button
