@@ -10,8 +10,13 @@ export {
   type WorkScheduleStatus,
 } from "./components";
 
+export { useClockInLocation } from "./hooks";
+
 export {
   formatCurrentDateTime,
+  getDistanceInMeters,
   getAttendanceSummary,
+  isWithinRadius,
   syncSchedulesWithCurrentTime,
+  type Coordinates,
 } from "./utils";
