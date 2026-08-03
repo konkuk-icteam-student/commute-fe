@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
+import { Toast } from "@/components/ui";
 
 import type { ManageTaskItem } from "../../types";
 import TaskRepeatNotice from "../task-repeat-notice";
@@ -26,6 +27,7 @@ export default function TaskListPanel({
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+  const [toastMessage, setToastMessage] = useState("");
   const groupedTasks = ["오전", "오후"].map((period) => ({
     period,
     tasks: tasks.filter((task) => task.period === period),
@@ -80,6 +82,7 @@ export default function TaskListPanel({
       ),
     );
     cancelEditTask();
+    setToastMessage("업무가 수정되었습니다.");
   };
 
   const openDeleteTask = (taskId: number) => {
@@ -95,6 +98,7 @@ export default function TaskListPanel({
   const deleteTask = (taskId: number) => {
     onTasksChange(tasks.filter((task) => task.id !== taskId));
     setDeletingTaskId(null);
+    setToastMessage("업무가 삭제 되었습니다.");
   };
 
   return (
@@ -127,6 +131,12 @@ export default function TaskListPanel({
       </div>
 
       <TaskRepeatNotice />
+
+      <Toast
+        open={toastMessage.length > 0}
+        message={toastMessage}
+        onDismiss={() => setToastMessage("")}
+      />
     </section>
   );
 }
