@@ -13,6 +13,7 @@ import {
   getPanelCalendarDays,
   isDateValueInRange,
 } from "@/utils/calendar";
+import { cn } from "@/lib/utils";
 import CalendarDayButton from "../calendar-day-button";
 import { CalendarDropdown, CalendarDropdownButton } from "../calendar-dropdown";
 import CalendarMonthMoveButton from "../calendar-month-move-button";
@@ -143,16 +144,27 @@ export default function CalendarPanel({
         <div className="flex items-center gap-5 text-[19px] font-bold text-[#1E2124]">
           <button
             type="button"
+            aria-expanded={openDropdown === "year"}
             className="flex cursor-pointer items-center gap-1.5"
             onClick={() =>
               setOpenDropdown((current) => (current === "year" ? null : "year"))
             }
           >
             {year}년
-            <Image src={calendarDropdownIcon} alt="" width={16} height={16} />
+            <Image
+              src={calendarDropdownIcon}
+              alt=""
+              width={16}
+              height={16}
+              className={cn(
+                "transition-transform",
+                openDropdown === "year" && "rotate-180",
+              )}
+            />
           </button>
           <button
             type="button"
+            aria-expanded={openDropdown === "month"}
             className="flex cursor-pointer items-center gap-1.5"
             onClick={() =>
               setOpenDropdown((current) =>
@@ -161,7 +173,16 @@ export default function CalendarPanel({
             }
           >
             {month}월
-            <Image src={calendarDropdownIcon} alt="" width={16} height={16} />
+            <Image
+              src={calendarDropdownIcon}
+              alt=""
+              width={16}
+              height={16}
+              className={cn(
+                "transition-transform",
+                openDropdown === "month" && "rotate-180",
+              )}
+            />
           </button>
         </div>
         {openDropdown === "year" ? (

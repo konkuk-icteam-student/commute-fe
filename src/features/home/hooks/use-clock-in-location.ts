@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  getDistanceInMeters,
-  isWithinRadius,
-  type Coordinates,
-} from "@/features/home/utils";
+import { isWithinRadius, type Coordinates } from "@/features/home/utils";
 
 const parseNumberEnv = (value: string | undefined, fallback: number) => {
   if (value == null || value.trim() === "") {
@@ -44,60 +40,34 @@ const WATCH_GEOLOCATION_OPTIONS: PositionOptions = {
   timeout: 60_000,
 };
 
-const geolocationErrorMessage: Record<number, string> = {
-  1: "위치 권한이 거부되었습니다. 브라우저/OS 위치 권한을 허용해야 합니다.",
-  2: "현재 위치를 확인할 수 없습니다. 기기의 위치 서비스 상태를 확인해주세요.",
-  3: "위치 확인 시간이 초과되었습니다. 실내/PC 환경에서는 위치 수신이 늦거나 실패할 수 있습니다.",
-};
-
 export default function useClockInLocation() {
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
-  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
-      console.info("[clock-in] 위치 API를 사용할 수 없습니다.");
       return;
     }
 
     const updateUserLocation = ({ coords }: GeolocationPosition) => {
-      console.info("[clock-in] 사용자 위치 수신", {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        accuracyMeters: coords.accuracy,
-      });
-
       setUserLocation({
         latitude: coords.latitude,
         longitude: coords.longitude,
       });
-      setLocationAccuracy(coords.accuracy);
     };
 
-    const logLocationError = (error: GeolocationPositionError) => {
-      console.info("[clock-in] 사용자 위치 수신 실패", {
-        code: error.code,
-        message: error.message,
-        reason:
-          geolocationErrorMessage[error.code] ??
-          "알 수 없는 위치 오류가 발생했습니다.",
-      });
-
-      if (error.code === 1) {
-        setUserLocation(null);
-        setLocationAccuracy(null);
-      }
+    const resetLocationOnError = () => {
+      setUserLocation(null);
     };
 
     navigator.geolocation.getCurrentPosition(
       updateUserLocation,
-      logLocationError,
+      resetLocationOnError,
       CACHED_GEOLOCATION_OPTIONS,
     );
 
     const watchId = navigator.geolocation.watchPosition(
       updateUserLocation,
-      logLocationError,
+      resetLocationOnError,
       WATCH_GEOLOCATION_OPTIONS,
     );
 
@@ -107,10 +77,6 @@ export default function useClockInLocation() {
   }, []);
 
   return useMemo(() => {
-    const distanceFromWorkMeters =
-      userLocation == null
-        ? null
-        : getDistanceInMeters(WORK_LOCATION, userLocation);
     const canClockInAtWorkLocation =
       userLocation != null &&
       isWithinRadius({
@@ -120,12 +86,7 @@ export default function useClockInLocation() {
       });
 
     return {
-      allowedRadiusMeters: CLOCK_IN_RADIUS_METERS,
       canClockInAtWorkLocation,
-      distanceFromWorkMeters,
-      locationAccuracy,
-      userLocation,
-      workLocation: WORK_LOCATION,
     };
-  }, [locationAccuracy, userLocation]);
+  }, [userLocation]);
 }
