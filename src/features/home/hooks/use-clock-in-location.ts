@@ -55,23 +55,19 @@ export default function useClockInLocation() {
       });
     };
 
-    const resetLocationOnPermissionDenied = (
-      error: GeolocationPositionError,
-    ) => {
-      if (error.code === 1) {
-        setUserLocation(null);
-      }
+    const resetLocationOnError = () => {
+      setUserLocation(null);
     };
 
     navigator.geolocation.getCurrentPosition(
       updateUserLocation,
-      resetLocationOnPermissionDenied,
+      resetLocationOnError,
       CACHED_GEOLOCATION_OPTIONS,
     );
 
     const watchId = navigator.geolocation.watchPosition(
       updateUserLocation,
-      resetLocationOnPermissionDenied,
+      resetLocationOnError,
       WATCH_GEOLOCATION_OPTIONS,
     );
 

@@ -144,6 +144,7 @@ export default function CalendarPanel({
         <div className="flex items-center gap-5 text-[19px] font-bold text-[#1E2124]">
           <button
             type="button"
+            aria-expanded={openDropdown === "year"}
             className="flex cursor-pointer items-center gap-1.5"
             onClick={() =>
               setOpenDropdown((current) => (current === "year" ? null : "year"))
@@ -163,6 +164,7 @@ export default function CalendarPanel({
           </button>
           <button
             type="button"
+            aria-expanded={openDropdown === "month"}
             className="flex cursor-pointer items-center gap-1.5"
             onClick={() =>
               setOpenDropdown((current) =>
