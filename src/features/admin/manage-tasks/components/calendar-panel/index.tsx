@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-const systemConfiguredDate = new Date(2025, 7, 1);
+const systemConfiguredDate = new Date(2022, 0, 1);
 
 const getMonthValue = (date: Date) => date.getFullYear() * 12 + date.getMonth();
 
@@ -354,7 +354,7 @@ function CalendarDropdown({
   return (
     <div
       className={cn(
-        "absolute z-20 max-h-36 w-23 overflow-y-auto rounded-lg bg-white p-1.5 shadow-[0_2px_10px_0_#00000026]",
+        "absolute z-20 max-h-[176px] w-23 overflow-y-auto rounded-lg bg-white p-1.5 shadow-[0_2px_10px_0_#00000026]",
         className,
       )}
     >
