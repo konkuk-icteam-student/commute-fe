@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isPathActive } from "./route-match";
+const { isPathActive } = (await import(
+  new URL("./route-match.ts", import.meta.url).href
+)) as typeof import("./route-match");
 
 describe("isPathActive", () => {
   it("returns true for an exact route match", () => {
