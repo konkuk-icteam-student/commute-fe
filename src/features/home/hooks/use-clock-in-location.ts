@@ -6,12 +6,31 @@ import {
   type Coordinates,
 } from "@/features/home/utils";
 
-const WORK_LOCATION: Coordinates = {
-  latitude: 37.5402096,
-  longitude: 127.0736448,
+const parseNumberEnv = (value: string | undefined, fallback: number) => {
+  if (value == null || value.trim() === "") {
+    return fallback;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isFinite(parsedValue) ? parsedValue : fallback;
 };
 
-const CLOCK_IN_RADIUS_METERS = 50;
+const WORK_LOCATION: Coordinates = {
+  latitude: parseNumberEnv(
+    process.env.NEXT_PUBLIC_WORK_LOCATION_LATITUDE,
+    37.5402096,
+  ),
+  longitude: parseNumberEnv(
+    process.env.NEXT_PUBLIC_WORK_LOCATION_LONGITUDE,
+    127.0736448,
+  ),
+};
+
+const CLOCK_IN_RADIUS_METERS = parseNumberEnv(
+  process.env.NEXT_PUBLIC_CLOCK_IN_RADIUS_METERS,
+  50,
+);
 
 const CACHED_GEOLOCATION_OPTIONS: PositionOptions = {
   enableHighAccuracy: false,
