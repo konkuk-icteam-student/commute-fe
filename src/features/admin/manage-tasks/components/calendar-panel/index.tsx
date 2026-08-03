@@ -13,6 +13,7 @@ import {
   getPanelCalendarDays,
   isDateValueInRange,
 } from "@/utils/calendar";
+import { cn } from "@/lib/utils";
 import CalendarDayButton from "../calendar-day-button";
 import { CalendarDropdown, CalendarDropdownButton } from "../calendar-dropdown";
 import CalendarMonthMoveButton from "../calendar-month-move-button";
@@ -149,7 +150,16 @@ export default function CalendarPanel({
             }
           >
             {year}년
-            <Image src={calendarDropdownIcon} alt="" width={16} height={16} />
+            <Image
+              src={calendarDropdownIcon}
+              alt=""
+              width={16}
+              height={16}
+              className={cn(
+                "transition-transform",
+                openDropdown === "year" && "rotate-180",
+              )}
+            />
           </button>
           <button
             type="button"
@@ -161,7 +171,16 @@ export default function CalendarPanel({
             }
           >
             {month}월
-            <Image src={calendarDropdownIcon} alt="" width={16} height={16} />
+            <Image
+              src={calendarDropdownIcon}
+              alt=""
+              width={16}
+              height={16}
+              className={cn(
+                "transition-transform",
+                openDropdown === "month" && "rotate-180",
+              )}
+            />
           </button>
         </div>
         {openDropdown === "year" ? (
