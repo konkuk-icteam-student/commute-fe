@@ -1,58 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import type { ReactNode } from "react";
 import { useState } from "react";
 
 import calendarDropdownIcon from "@/assets/icons/admin-manage-tasks/ic_calendar_dropdown.svg";
-import checkBlackIcon from "@/assets/icons/admin-manage-tasks/ic_check_black.svg";
-import chevronRightCircleIcon from "@/assets/icons/admin-manage-tasks/ic_chevron_right_circle.svg";
 import {
   formatDateValue,
+  getAvailableMonths,
+  getAvailableYears,
   getDateMonthStart,
+  getMonthValue,
   getPanelCalendarDays,
-  type AdminCalendarDay,
+  isDateValueInRange,
 } from "@/utils/calendar";
-import { cn } from "@/lib/utils";
+import CalendarDayButton from "../calendar-day-button";
+import { CalendarDropdown, CalendarDropdownButton } from "../calendar-dropdown";
+import CalendarMonthMoveButton from "../calendar-month-move-button";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
 const systemConfiguredDate = new Date(2022, 0, 1);
-
-const getMonthValue = (date: Date) => date.getFullYear() * 12 + date.getMonth();
-
-const isDateValueInRange = (
-  dateValue: string,
-  startDate: Date,
-  endDate: Date,
-) => {
-  const dateMonthValue = getMonthValue(getDateMonthStart(dateValue));
-
-  return (
-    dateMonthValue >= getMonthValue(startDate) &&
-    dateMonthValue <= getMonthValue(endDate)
-  );
-};
-
-const getAvailableYears = (startDate: Date, endDate: Date) => {
-  const startYear = startDate.getFullYear();
-  const endYear = endDate.getFullYear();
-
-  return Array.from(
-    { length: endYear - startYear + 1 },
-    (_, index) => startYear + index,
-  );
-};
-
-const getAvailableMonths = (year: number, startDate: Date, endDate: Date) => {
-  const startMonth =
-    year === startDate.getFullYear() ? startDate.getMonth() : 0;
-  const endMonth = year === endDate.getFullYear() ? endDate.getMonth() : 11;
-
-  return Array.from(
-    { length: endMonth - startMonth + 1 },
-    (_, index) => startMonth + index + 1,
-  );
-};
 
 export default function CalendarPanel({
   onSelectDate,
@@ -168,7 +134,7 @@ export default function CalendarPanel({
   return (
     <section className="flex w-96 flex-col overflow-hidden rounded-xl border border-[#DDE3EF] bg-white">
       <div className="relative mt-2 flex h-14 items-center justify-between px-6">
-        <MonthMoveButton
+        <CalendarMonthMoveButton
           ariaLabel="이전 달"
           disabled={!canMovePrevious}
           direction="previous"
@@ -222,7 +188,7 @@ export default function CalendarPanel({
             ))}
           </CalendarDropdown>
         ) : null}
-        <MonthMoveButton
+        <CalendarMonthMoveButton
           ariaLabel="다음 달"
           disabled={!canMoveNext}
           direction="next"
@@ -271,126 +237,5 @@ export default function CalendarPanel({
         </button>
       </div>
     </section>
-  );
-}
-
-function CalendarDayButton({
-  day,
-  isDisabled,
-  isSelected,
-  isToday,
-  onSelectDate,
-}: {
-  day: AdminCalendarDay;
-  isDisabled: boolean;
-  isSelected: boolean;
-  isToday: boolean;
-  onSelectDate: (date: string) => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "relative mx-auto flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[17px]",
-        isDisabled
-          ? "cursor-not-allowed text-[#C6CBD4]"
-          : isSelected
-            ? "bg-[#2076FF] text-white"
-            : day.isCurrentMonth
-              ? "text-[#454C53]"
-              : "text-[#8A949E]",
-      )}
-      disabled={isDisabled}
-      onClick={() => onSelectDate(day.dateValue)}
-    >
-      {day.day}
-      {isToday ? (
-        <span className="absolute bottom-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#D63D4A]" />
-      ) : null}
-    </button>
-  );
-}
-
-function MonthMoveButton({
-  ariaLabel,
-  disabled = false,
-  direction,
-  onClick,
-}: {
-  ariaLabel: string;
-  disabled?: boolean;
-  direction: "next" | "previous";
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      className={cn(
-        "flex h-8 w-8 items-center justify-center",
-        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
-      )}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <Image
-        src={chevronRightCircleIcon}
-        alt=""
-        width={32}
-        height={32}
-        className={cn(direction === "previous" && "rotate-180")}
-      />
-    </button>
-  );
-}
-
-function CalendarDropdown({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "absolute z-20 max-h-[176px] w-23 overflow-y-auto rounded-lg bg-white p-1.5 shadow-[0_2px_10px_0_#00000026]",
-        className,
-      )}
-    >
-      <div>{children}</div>
-    </div>
-  );
-}
-
-function CalendarDropdownButton({
-  isSelected,
-  label,
-  onClick,
-}: {
-  isSelected: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "m-0 flex w-full cursor-pointer items-center rounded-md px-2 py-2.5 text-left text-[15px] text-[#1A2236] hover:bg-[#EEF2F7] active:bg-[#D6E0EB]",
-        isSelected && "bg-[#EEF2F7]",
-      )}
-      onClick={onClick}
-    >
-      {isSelected ? (
-        <Image
-          src={checkBlackIcon}
-          alt=""
-          width={12}
-          height={12}
-          className="mr-[5.5px] h-3 w-3"
-        />
-      ) : null}
-      <span>{label}</span>
-    </button>
   );
 }

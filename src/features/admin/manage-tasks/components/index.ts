@@ -1,4 +1,7 @@
 export { default as CalendarPanel } from "./calendar-panel";
+export { default as CalendarDayButton } from "./calendar-day-button";
+export { CalendarDropdown, CalendarDropdownButton } from "./calendar-dropdown";
+export { default as CalendarMonthMoveButton } from "./calendar-month-move-button";
 export { default as HandoverMemoPanel } from "./handover-memo-panel";
 export { default as TaskActionIconButton } from "./task-action-icon-button";
 export { default as TaskAddPanel } from "./task-add-panel";

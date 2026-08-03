@@ -32,6 +32,48 @@ export function getDateMonthStart(dateValue: string) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
+export function getMonthValue(date: Date) {
+  return date.getFullYear() * 12 + date.getMonth();
+}
+
+export function isDateValueInRange(
+  dateValue: string,
+  startDate: Date,
+  endDate: Date,
+) {
+  const dateMonthValue = getMonthValue(getDateMonthStart(dateValue));
+
+  return (
+    dateMonthValue >= getMonthValue(startDate) &&
+    dateMonthValue <= getMonthValue(endDate)
+  );
+}
+
+export function getAvailableYears(startDate: Date, endDate: Date) {
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  return Array.from(
+    { length: endYear - startYear + 1 },
+    (_, index) => startYear + index,
+  );
+}
+
+export function getAvailableMonths(
+  year: number,
+  startDate: Date,
+  endDate: Date,
+) {
+  const startMonth =
+    year === startDate.getFullYear() ? startDate.getMonth() : 0;
+  const endMonth = year === endDate.getFullYear() ? endDate.getMonth() : 11;
+
+  return Array.from(
+    { length: endMonth - startMonth + 1 },
+    (_, index) => startMonth + index + 1,
+  );
+}
+
 export function getPopoverCalendarDays(
   year: number,
   month: number,
