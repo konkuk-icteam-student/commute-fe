@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
 import { Toast } from "@/components/ui";
@@ -95,6 +95,10 @@ export default function TaskListPanel({
     setDeletingTaskId(null);
   };
 
+  const dismissToast = useCallback(() => {
+    setToastMessage("");
+  }, []);
+
   const deleteTask = (taskId: number) => {
     onTasksChange(tasks.filter((task) => task.id !== taskId));
     setDeletingTaskId(null);
@@ -135,7 +139,7 @@ export default function TaskListPanel({
       <Toast
         open={toastMessage.length > 0}
         message={toastMessage}
-        onDismiss={() => setToastMessage("")}
+        onDismiss={dismissToast}
       />
     </section>
   );

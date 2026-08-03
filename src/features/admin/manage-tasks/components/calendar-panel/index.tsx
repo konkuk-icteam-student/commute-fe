@@ -211,7 +211,7 @@ export default function CalendarPanel({
           </CalendarDropdown>
         ) : null}
         {openDropdown === "month" ? (
-          <CalendarDropdown className="top-12 left-52 w-18.5 p-2">
+          <CalendarDropdown className="top-12 left-50 w-18.5 p-2">
             {availableMonths.map((availableMonth) => (
               <CalendarDropdownButton
                 isSelected={availableMonth === month}
@@ -354,7 +354,7 @@ function CalendarDropdown({
   return (
     <div
       className={cn(
-        "absolute z-20 max-h-36 w-18 overflow-y-auto rounded-lg bg-white p-1.5 shadow-[0_2px_10px_0_#00000026]",
+        "absolute z-20 max-h-36 w-23 overflow-y-auto rounded-lg bg-white p-1.5 shadow-[0_2px_10px_0_#00000026]",
         className,
       )}
     >
