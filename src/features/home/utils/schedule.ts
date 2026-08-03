@@ -150,7 +150,11 @@ export const getAttendanceSummary = (
   currentDate: Date,
   clockedInScheduleId?: number | null,
   clockedInAt?: Date | null,
+  options: {
+    canClockInAtWorkLocation?: boolean;
+  } = {},
 ): AttendanceSummary | null => {
+  const canClockInAtWorkLocation = options.canClockInAtWorkLocation ?? true;
   const currentMinutes = getCurrentMinutes(currentDate);
   const clockedInAtMinutes = clockedInAt
     ? getCurrentMinutes(clockedInAt)
@@ -206,8 +210,10 @@ export const getAttendanceSummary = (
     return createScheduledAttendanceSummary({
       startMinutes: activeSchedule.startMinutes,
       description: attendanceText.expired.description,
-      canClockIn: true,
-      clockInScheduleId: activeSchedule.id,
+      canClockIn: canClockInAtWorkLocation,
+      clockInScheduleId: canClockInAtWorkLocation
+        ? activeSchedule.id
+        : undefined,
     });
   }
 
@@ -218,7 +224,8 @@ export const getAttendanceSummary = (
   if (nextSchedule) {
     const canClockIn =
       currentMinutes >=
-      nextSchedule.startMinutes - CLOCK_IN_AVAILABLE_BEFORE_MINUTES;
+        nextSchedule.startMinutes - CLOCK_IN_AVAILABLE_BEFORE_MINUTES &&
+      canClockInAtWorkLocation;
 
     return createScheduledAttendanceSummary({
       startMinutes: nextSchedule.startMinutes,
