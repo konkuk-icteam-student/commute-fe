@@ -32,12 +32,20 @@ export type DashboardWorkRequest = {
   changes: DashboardWorkRequestChange[];
 };
 
-export type DashboardMemberStatusCode = "AT01" | "AT02" | "AT03";
+export type DashboardMemberWorkStatusCode =
+  | "OFF"
+  | "SCHEDULED"
+  | "WORKING"
+  | "NOT_CHECKED_IN"
+  | "COMPLETED";
+
+export type DashboardMemberAttendanceIssueCode = "LATE" | "ABSENT";
 
 export type DashboardMemberAttendance = {
+  attendanceIssueCode?: DashboardMemberAttendanceIssueCode;
   id: string;
   name: string;
-  statusCode: DashboardMemberStatusCode;
+  workStatusCode: DashboardMemberWorkStatusCode;
   meta: string;
   late: string;
   week: string;
@@ -90,7 +98,8 @@ export type DashboardAttendanceUser = {
   userName: string;
   department: string;
   studentId: string;
-  statusCode: DashboardMemberStatusCode;
+  attendanceIssueCode?: DashboardMemberAttendanceIssueCode;
+  workStatusCode: DashboardMemberWorkStatusCode;
   lateCount: number;
   lateMinutes: number;
   weeklyWorkedMinutes: number;

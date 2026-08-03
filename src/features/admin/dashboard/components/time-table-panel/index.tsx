@@ -1,7 +1,7 @@
-import DashboardSectionHeader from "../dashboard-section-header";
 import { dashboardWorkerColors } from "../../constants";
 import { AdminWorkScheduleList } from "@/components/ui";
 import type { DashboardTimeRow } from "../../types";
+import DashboardPanel from "../dashboard-panel";
 
 function getWorkerColor(workerId: string) {
   const colorSeed = Array.from(workerId).reduce(
@@ -17,12 +17,8 @@ export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
   const afternoonRows = rows.filter((row) => row.periodCode === "AFTERNOON");
 
   return (
-    <section className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]">
-      <DashboardSectionHeader
-        title="오늘 근무 시간표"
-        arrowHref="/admin/worktime/detail"
-      />
-      <div className="mx-4 mb-4 rounded-xl border border-[#DDE3EF] bg-white p-4 min-[1728px]:mx-5.25 min-[1728px]:mb-5 min-[1728px]:pr-5.25">
+    <DashboardPanel title="오늘 근무 시간표" arrowHref="/admin/worktime/detail">
+      <div className="mx-5.25 mb-5 rounded-xl border border-[#DDE3EF] bg-white p-4 pr-5.25">
         <AdminWorkScheduleList
           groups={[
             {
@@ -39,7 +35,7 @@ export default function TimeTablePanel({ rows }: { rows: DashboardTimeRow[] }) {
           variant="dashboard"
         />
       </div>
-    </section>
+    </DashboardPanel>
   );
 }
 
