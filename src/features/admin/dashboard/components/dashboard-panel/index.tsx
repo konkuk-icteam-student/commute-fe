@@ -9,9 +9,18 @@ export default function DashboardPanel({
   children: React.ReactNode;
   title: string;
 }) {
+  const headingId = `${arrowHref.replaceAll("/", "-").replace(/^-/, "")}-heading`;
+
   return (
-    <section className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]">
-      <DashboardSectionHeader title={title} arrowHref={arrowHref} />
+    <section
+      aria-labelledby={headingId}
+      className="rounded-xl border border-[#DDE3EF] bg-[#F4F5F7]"
+    >
+      <DashboardSectionHeader
+        title={title}
+        arrowHref={arrowHref}
+        headingId={headingId}
+      />
       {children}
     </section>
   );
