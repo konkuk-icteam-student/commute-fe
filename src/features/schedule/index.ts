@@ -2,6 +2,9 @@ export {
   ScheduleTable,
   ScheduleHeader,
   ScheduleTableHeader,
+  ScheduleGrid,
+  ScheduleWeekNav,
+  ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleChangeHistoryPreview,
   WorkingHoursCard,
@@ -9,6 +12,26 @@ export {
   ScheduleApplySummary,
   ApplyResultModal,
 } from "./components";
+export type { ScheduleCell } from "./components";
+
+export { useScheduleGrid, useScheduleWeek } from "./hooks";
+
+export {
+  EMPTY_DRAFT,
+  getDraftSlotTimes,
+  toPayload,
+  toRawPayload,
+  toggleDraft,
+} from "./model/draft";
+export type { DraftKind, ScheduleDraft } from "./model/draft";
+export {
+  buildWeekSchedule,
+  getCurrentMonthDates,
+  getCurrentMonthSlots,
+} from "./model/week-schedule";
+export type { WeekDay, WeekSlot } from "./model/week-schedule";
+export { applyPolicy, editPolicy, viewPolicy } from "./model/policy";
+export type { PolicyContext, SchedulePolicy } from "./model/policy";
 
 export {
   DUMMY_GET_SCHEDULE,
