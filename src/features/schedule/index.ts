@@ -14,7 +14,9 @@ export {
 } from "./components";
 export type { ScheduleCell } from "./components";
 
-export { useScheduleGrid, useScheduleWeek } from "./hooks";
+export { useScheduleDraft, useScheduleGrid, useScheduleWeek } from "./hooks";
+
+export { getAppliedSlotTimes } from "./model/applied-slots";
 
 export {
   EMPTY_DRAFT,

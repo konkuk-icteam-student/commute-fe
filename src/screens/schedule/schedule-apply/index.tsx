@@ -3,31 +3,26 @@
 import { useState } from "react";
 
 import {
-  chunkScheduleSlots,
+  applyPolicy,
+  ApplyResultModal,
   DUMMY_NEXT_MONTH_SCHEDULE,
-  getAppliedScheduleSlotTimes,
-  type ScheduleApplyPayload,
-  ScheduleHeader,
-  type ScheduleSlot,
-  ScheduleTable,
+  DUMMY_SCHEDULE_APPLY_RESPONSE,
+  getAppliedSlotTimes,
+  getCurrentMonthDates,
+  getCurrentMonthSlots,
   getFirstDateOfNextMonth,
-  getApplySlotCurrentCount,
-  getApplySlotStatus,
-  toggleApplySlotChange,
-  ScheduleStatusLegend,
-  getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,
   ScheduleApplySummary,
-  SLOTS_PER_DAY,
-  getMergedApplyPayload,
-  DUMMY_SCHEDULE_APPLY_RESPONSE,
-  ApplyResultModal,
+  ScheduleGrid,
+  ScheduleHeader,
+  ScheduleRefreshButton,
+  ScheduleStatusLegend,
+  ScheduleWeekNav,
+  useScheduleDraft,
+  useScheduleGrid,
+  useScheduleWeek,
 } from "@/features/schedule";
-import {
-  getMonthWeekOfDate,
-  getWeekdaysOfMonthWeek,
-} from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
@@ -42,45 +37,53 @@ const MONTH_TOTAL_HOURS = 25;
 export default function ScheduleApplyScreen() {
   // 근로 신청은 다음 달에 대해서만 가능하다.
   const [nextMonthDate] = useState(getFirstDateOfNextMonth);
-  const [week, setWeek] = useState(1);
-  const [applyPayload, setApplyPayload] = useState<ScheduleApplyPayload>({
-    deleteSlots: [],
-    addSlots: [],
-  });
+  const {
+    year,
+    month,
+    week,
+    isPrevWeekDisabled,
+    isNextWeekDisabled,
+    goPrevWeek,
+    goNextWeek,
+  } = useScheduleWeek(nextMonthDate);
+
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
-  const { year, month, maxWeek } = getMonthWeekOfDate(nextMonthDate);
-  const isPrevWeekDisabled = week <= 1;
-  const isNextWeekDisabled = week >= maxWeek;
-
-  const addRequestHours = getSlotTimesTotalHours(applyPayload.addSlots);
-  const deleteRequestHours = getSlotTimesTotalHours(applyPayload.deleteSlots);
-  const currentWeekdays = getWeekdaysOfMonthWeek(year, month, week);
-  const currentWeekDates = currentWeekdays
-    .filter(({ isCurrentMonth }) => isCurrentMonth)
-    .map(({ date }) => date);
-  const currentWeekScheduleSlots = chunkScheduleSlots(
-    DUMMY_NEXT_MONTH_SCHEDULE.slots,
-    SLOTS_PER_DAY,
-  ).flatMap((slots, index) => {
-    const currentWeekday = currentWeekdays[index];
-
-    if (currentWeekday === undefined || !currentWeekday.isCurrentMonth) {
-      return [];
-    }
-
-    const { date } = currentWeekday;
-
-    return slots.map((slot) => ({ ...slot, date }));
+  const {
+    draft,
+    toggleSlot,
+    context,
+    rawPayload,
+    payload,
+    addHours: addRequestHours,
+    deleteHours: deleteRequestHours,
+  } = useScheduleDraft({
+    policy: applyPolicy,
+    resolveContext: () => ({
+      maxConcurrentWorkers: DUMMY_NEXT_MONTH_SCHEDULE.maxConcurrentWorkers,
+    }),
   });
+
+  const { days, cells } = useScheduleGrid({
+    data: DUMMY_NEXT_MONTH_SCHEDULE,
+    year,
+    month,
+    week,
+    policy: applyPolicy,
+    context,
+    draft,
+    onSlotClick: toggleSlot,
+  });
+
+  const currentWeekDates = getCurrentMonthDates(days);
   const weeklyAddRequestHours = getSlotTimesTotalHoursOnWeek(
-    applyPayload.addSlots,
+    rawPayload.addSlots,
     currentWeekDates,
   );
   const weeklyDeleteRequestHours = getSlotTimesTotalHoursOnWeek(
-    applyPayload.deleteSlots,
+    rawPayload.deleteSlots,
     currentWeekDates,
   );
 
@@ -90,7 +93,7 @@ export default function ScheduleApplyScreen() {
     MONTH_TOTAL_HOURS + addRequestHours - deleteRequestHours;
 
   const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
-    getAppliedScheduleSlotTimes(currentWeekScheduleSlots, applyPayload),
+    getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
     MIN_SESSION_HOURS,
   );
 
@@ -98,24 +101,6 @@ export default function ScheduleApplyScreen() {
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     weekTotalTimeAfterApply > MAX_WEEK_HOURS ||
     monthTotalTimeAfterApply > MAX_MONTH_HOURS;
-
-  const handlePrevWeek = () => {
-    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
-  };
-
-  const handleNextWeek = () => {
-    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
-  };
-
-  const handleSlotClick = (slot: ScheduleSlot) => {
-    setApplyPayload((currentPayload) =>
-      toggleApplySlotChange(
-        currentPayload,
-        slot,
-        DUMMY_NEXT_MONTH_SCHEDULE.maxConcurrentWorkers,
-      ),
-    );
-  };
 
   const handleClickButton = () => {
     if (isBelowMinSessionHours) {
@@ -126,7 +111,7 @@ export default function ScheduleApplyScreen() {
   };
 
   const handleApply = () => {
-    console.log("slot 병합 이후 : ", getMergedApplyPayload(applyPayload));
+    console.log("slot 병합 이후 : ", payload);
     setIsApplyAlertOpen(false);
 
     // TODO: 추후 이부분은 삭제 예정
@@ -139,22 +124,15 @@ export default function ScheduleApplyScreen() {
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader mode="apply" year={year} month={month} />
       <div className="flex flex-col gap-2">
-        <ScheduleTable
-          type="apply"
-          year={year}
-          month={month}
+        <ScheduleWeekNav
           week={week}
-          scheduleData={DUMMY_NEXT_MONTH_SCHEDULE}
           isPrevWeekDisabled={isPrevWeekDisabled}
           isNextWeekDisabled={isNextWeekDisabled}
-          handlePrevWeek={handlePrevWeek}
-          handleNextWeek={handleNextWeek}
-          getSlotCurrentCount={(slot) =>
-            getApplySlotCurrentCount(slot, applyPayload)
-          }
-          getSlotStatus={(slot) => getApplySlotStatus(slot, applyPayload)}
-          onSlotClick={handleSlotClick}
+          onPrevWeek={goPrevWeek}
+          onNextWeek={goNextWeek}
+          action={<ScheduleRefreshButton />}
         />
+        <ScheduleGrid days={days} cells={cells} />
         <ScheduleStatusLegend
           isApply
           minSessionHours={MIN_SESSION_HOURS}
@@ -167,7 +145,7 @@ export default function ScheduleApplyScreen() {
         week={week}
         maxMonthHours={MAX_MONTH_HOURS}
         maxWeekHours={MAX_WEEK_HOURS}
-        applyPayload={applyPayload}
+        applyPayload={rawPayload}
         addRequestHours={addRequestHours}
         deleteRequestHours={deleteRequestHours}
         weekTotalTimeAfterApply={weekTotalTimeAfterApply}
