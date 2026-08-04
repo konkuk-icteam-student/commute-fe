@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { getDistanceInMeters, isWithinRadius } from "./location.ts";
+import { getDistanceInMeters, isWithinRadius } from "./location";
 
 const workLocation = {
   latitude: 37.5402096,
