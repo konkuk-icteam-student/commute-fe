@@ -33,7 +33,7 @@ export default function ScheduleViewScreen() {
   // TODO: 이건 api 연동 및 TanStack Query 적용 예시임
   const { monthlySchedulesData } = useGetMonthlySchedulesQuery({
     year: 2026,
-    month: 7,
+    month: 8,
   });
 
   const handlePrevWeek = () => {

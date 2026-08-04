@@ -4,10 +4,12 @@ import { useState } from "react";
 
 import { Alert, Modal, Toast } from "@/components/ui";
 import {
+  createWorkRequestSettingsPayload,
   SettingsPanel,
   SummaryPanel,
   useWorkRequestState,
 } from "@/features/admin/work-request";
+import { useSaveAdminWorkSchedulesSettingsMutation } from "@/apis/admin-work-schedules";
 
 type WorkRequestAction = "end" | "start" | "update";
 
@@ -55,8 +57,7 @@ export default function AdminWorkRequestScreen() {
   const [pendingAction, setPendingAction] = useState<WorkRequestAction | null>(
     null,
   );
-  const [processingAction, setProcessingAction] =
-    useState<WorkRequestAction | null>(null);
+
   const [notificationMessage, setNotificationMessage] = useState("");
   const {
     addUnavailableDate,
@@ -64,51 +65,64 @@ export default function AdminWorkRequestScreen() {
     cancelEditRequest,
     canEditSettings,
     editRequest,
-    endRequest,
     formValues,
     isActive,
     isDirty,
     isEditing,
-    isSaving,
     isStartReady,
     removeUnavailableDate,
     removeUnavailableTimeRange,
-    startRequest,
     targetMonth,
     updateField,
-    updateRequest,
   } = useWorkRequestState();
+
+  const {
+    saveAdminWorkSchedulesSettings,
+    isPendingSaveAdminWorkSchedulesSettings,
+  } = useSaveAdminWorkSchedulesSettingsMutation();
 
   const closeAlert = () => {
     setPendingAction(null);
   };
 
-  const runWithProcessing = async (action: WorkRequestAction) => {
+  const alertContent = pendingAction ? actionAlertContent[pendingAction] : null;
+
+  const handleSaveApplication = (action: WorkRequestAction) => {
     setPendingAction(null);
-    setProcessingAction(action);
+    // 입력값("4명", "2시간", 시간 단위 숫자, "MM.DD")을 서버 스펙(분 단위 숫자, "YYYY-MM-DD")으로 변환
+    const payload = createWorkRequestSettingsPayload({
+      formValues,
+      target: targetMonth,
+    });
 
-    let didSucceed = false;
-
-    try {
-      didSucceed =
-        action === "start"
-          ? await startRequest()
-          : action === "update"
-            ? await updateRequest()
-            : (endRequest(), true);
-    } catch {
-      didSucceed = false;
+    // 유효하지 않은 값이면 요청을 보내지 않는다 (버튼 활성화 조건인 isStartReady에서 이미 걸러짐)
+    if (!payload) {
+      return;
     }
 
-    window.setTimeout(() => {
-      setProcessingAction(null);
-      setNotificationMessage(
-        didSucceed ? completionMessage[action] : failureMessage,
-      );
-    }, 450);
+    saveAdminWorkSchedulesSettings(
+      {
+        year: targetMonth.year,
+        month: targetMonth.month,
+        ...payload,
+        unavailableDates: payload.unavailableDates ?? [],
+        unavailableTimeRanges: payload.unavailableTimeRanges ?? [],
+      },
+      {
+        onSuccess: () => {
+          setNotificationMessage(completionMessage[action]);
+        },
+        onError: () => {
+          setNotificationMessage(failureMessage);
+        },
+      },
+    );
   };
 
-  const alertContent = pendingAction ? actionAlertContent[pendingAction] : null;
+  const handleResetNotificationMessage = () => {
+    setNotificationMessage("");
+  };
+
   return (
     <div className="flex-1 bg-[#F4F5F7] px-10 py-11.5">
       <div className="mx-auto w-full max-w-373.5">
@@ -118,7 +132,7 @@ export default function AdminWorkRequestScreen() {
           isActive={isActive}
           isDirty={isDirty}
           isEditing={isEditing}
-          isSaving={isSaving}
+          isSaving={isPendingSaveAdminWorkSchedulesSettings}
           isStartReady={isStartReady}
           monthLabel={targetMonth.label}
           onAddUnavailableDate={addUnavailableDate}
@@ -149,14 +163,14 @@ export default function AdminWorkRequestScreen() {
           cancelText={alertContent.cancelText}
           confirmText={alertContent.confirmText}
           onCancel={closeAlert}
-          onConfirm={() => void runWithProcessing(pendingAction!)}
+          onConfirm={() => void handleSaveApplication(pendingAction!)}
           panelClassName="w-82.5"
           confirmButtonClassName={alertContent.confirmButtonClassName}
         />
       ) : null}
 
       <Toast
-        open={processingAction !== null}
+        open={isPendingSaveAdminWorkSchedulesSettings}
         message="요청 처리 중..."
         duration={0}
         panelClassName="w-82.5"
@@ -167,7 +181,7 @@ export default function AdminWorkRequestScreen() {
         open={notificationMessage.length > 0}
         title="알림"
         buttonText="확인"
-        onButtonClick={() => setNotificationMessage("")}
+        onButtonClick={handleResetNotificationMessage}
         panelClassName="w-82.5 min-w-0"
         titleClassName="text-base"
         contentClassName="min-h-29.25"
