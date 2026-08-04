@@ -69,7 +69,6 @@ export default function AdminWorkRequestScreen() {
     isActive,
     isDirty,
     isEditing,
-    isSaving,
     isStartReady,
     removeUnavailableDate,
     removeUnavailableTimeRange,
@@ -79,7 +78,6 @@ export default function AdminWorkRequestScreen() {
 
   const {
     saveAdminWorkSchedulesSettings,
-    // TODO : 로딩 상태용
     isPendingSaveAdminWorkSchedulesSettings,
   } = useSaveAdminWorkSchedulesSettingsMutation();
 
@@ -134,7 +132,7 @@ export default function AdminWorkRequestScreen() {
           isActive={isActive}
           isDirty={isDirty}
           isEditing={isEditing}
-          isSaving={isSaving}
+          isSaving={isPendingSaveAdminWorkSchedulesSettings}
           isStartReady={isStartReady}
           monthLabel={targetMonth.label}
           onAddUnavailableDate={addUnavailableDate}
