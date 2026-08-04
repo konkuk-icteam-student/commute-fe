@@ -30,17 +30,11 @@ export const useScheduleDraft = ({
     );
   };
 
-  // 화면을 되돌릴 때 쓴다. (새로고침 등)
-  const resetDraft = () => {
-    setDraft(EMPTY_DRAFT);
-  };
-
   const rawPayload = toRawPayload(draft);
 
   return {
     draft,
     toggleSlot,
-    resetDraft,
     context: resolveContext(draft),
     // 슬롯 단위 그대로. 시간 합계와 주 단위 계산에 쓴다.
     rawPayload,
