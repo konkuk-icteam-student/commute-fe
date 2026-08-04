@@ -58,7 +58,7 @@ export default function WorkHourSettingsCard({
         </div>
       </SettingsCard>
 
-      <div className="flex max-w-68.25 min-w-17.5 shrink-[10] grow basis-68.25 flex-wrap items-center justify-center gap-3 self-center">
+      <div className="flex max-w-68.25 min-w-17.5 shrink-10 grow basis-68.25 flex-wrap items-center justify-center gap-3 self-center">
         <SettingsActionButtons
           isActive={isActive}
           isDirty={isDirty}
