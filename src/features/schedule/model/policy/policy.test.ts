@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type {
-  ScheduleApplyPayload,
-  ScheduleSlotStatus,
-  ScheduleSlotTime,
-} from "../../types";
+import type { ScheduleSlotStatus, ScheduleSlotTime } from "../../types";
 import type { WeekSlot } from "../week-schedule";
-import type { DraftKind, ScheduleDraft } from "../draft";
+import type { PolicyContext } from "./types";
 
 const { applyPolicy } = (await import(
   new URL("./apply.ts", import.meta.url).href
@@ -18,244 +14,249 @@ const { editPolicy } = (await import(
 const { viewPolicy } = (await import(
   new URL("./view.ts", import.meta.url).href
 )) as typeof import("./view");
-const { EMPTY_DRAFT, toggleDraft, toRawPayload } = (await import(
+const { EMPTY_DRAFT, getDraftKind, toggleDraft } = (await import(
   new URL("../draft.ts", import.meta.url).href
 )) as typeof import("../draft");
 const { toSlotKey } = (await import(
   new URL("../slot-key.ts", import.meta.url).href
 )) as typeof import("../slot-key");
-const {
-  getApplySlotCurrentCount,
-  getApplySlotStatus,
-  getRequestEditSlotDisabled,
-  getRequestEditSlotStatus,
-  getSlotTimesTotalHours,
-  toggleApplySlotChange,
-  toggleRequestEditSlotChange,
-} = (await import(
-  new URL("../../utils/index.ts", import.meta.url).href
-)) as typeof import("../../utils");
 
 const MAX_CONCURRENT_WORKERS = 3;
-const DATE = "2026-07-01";
 
-const STATUSES: ScheduleSlotStatus[] = [
-  "MY_SCHEDULE",
-  "PENDING_ADD",
-  "PENDING_DELETE",
-  "UNAVAILABLE",
-  "EMPTY",
-];
-// 정원 미만 / 정원 도달 / 정원 초과를 모두 훑는다.
-const COUNTS = [0, 2, 3, 4];
-const MAX_ADD_HOURS = [0, 0.5, 1, 5];
-
-const weekSlotOf = (
+// 30분짜리 슬롯 하나. 시작 시각이 다르면 다른 슬롯이 된다.
+const slotOf = (
   status: ScheduleSlotStatus,
-  currentCount: number,
+  currentCount = 0,
+  start = "09:00",
+  end = "09:30",
 ): WeekSlot => ({
-  key: toSlotKey({ date: DATE, start: "09:00", end: "09:30" }),
-  date: DATE,
-  start: "09:00",
-  end: "09:30",
+  key: toSlotKey({ date: "2026-07-01", start, end }),
+  date: "2026-07-01",
+  start,
+  end,
   status,
   currentCount,
-  isHourStart: true,
+  isHourStart: start.endsWith(":00"),
 });
 
-// 이미 골라 둔 다른 칸. 추가 신청 시간 합계가 0이 아닌 상황을 만든다.
-const OTHER_SLOT: ScheduleSlotTime = {
-  date: DATE,
-  start: "14:00",
-  end: "14:30",
+const MY_SLOT = slotOf("MY_SCHEDULE", 1);
+const EMPTY_SLOT = slotOf("EMPTY", 0, "10:00", "10:30");
+const FULL_SLOT = slotOf("EMPTY", MAX_CONCURRENT_WORKERS, "11:00", "11:30");
+const PENDING_ADD_SLOT = slotOf("PENDING_ADD", 1, "13:00", "13:30");
+const PENDING_DELETE_SLOT = slotOf("PENDING_DELETE", 1, "14:00", "14:30");
+const UNAVAILABLE_SLOT = slotOf("UNAVAILABLE", 0, "15:00", "15:30");
+
+const APPLY_CONTEXT: PolicyContext = {
+  maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
 };
 
-// 기존 utils가 payload에 담던 형태와 맞춘다. (toSlotTime)
-const toSlotTime = ({
-  date,
-  start,
-  end,
-}: ScheduleSlotTime): ScheduleSlotTime => ({
-  date,
-  start,
-  end,
+// 이미 addHours만큼 고른 상태에서 maxAddHours까지만 더 고를 수 있는 상황.
+const editContext = (addHours: number, maxAddHours: number): PolicyContext => ({
+  maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
+  editLimit: { addHours, maxAddHours },
 });
 
-// 같은 상태를 드래프트와 기존 payload 두 형태로 나란히 만든다.
-const buildStates = (entries: [ScheduleSlotTime, DraftKind][]) => {
-  const payload: ScheduleApplyPayload = { deleteSlots: [], addSlots: [] };
-  let draft: ScheduleDraft = EMPTY_DRAFT;
+const draftWith = (...entries: [ScheduleSlotTime, "ADD" | "DELETE"][]) =>
+  entries.reduce(
+    (draft, [slot, kind]) => toggleDraft(draft, slot, kind),
+    EMPTY_DRAFT,
+  );
 
-  entries.forEach(([slot, kind]) => {
-    draft = toggleDraft(draft, slot, kind);
-    if (kind === "ADD") {
-      payload.addSlots.push(toSlotTime(slot));
-    } else {
-      payload.deleteSlots.push(toSlotTime(slot));
-    }
+describe("viewPolicy", () => {
+  it("모든 칸이 잠겨 있다", () => {
+    assert.equal(viewPolicy.isDisabled(), true);
   });
 
-  return { draft, payload };
-};
-
-// 슬롯 하나에 대해 시험할 드래프트 상태들.
-// 빈 칸은 추가로만, 이미 잡힌 근무는 삭제로만 담긴다. 화면이 실제로 만들 수 있는 상태만 시험한다.
-const draftCasesFor = (slot: WeekSlot) => {
-  const selfKind: DraftKind = slot.status === "EMPTY" ? "ADD" : "DELETE";
-
-  return [
-    { label: "비어 있음", ...buildStates([]) },
-    { label: "다른 칸만 추가", ...buildStates([[OTHER_SLOT, "ADD"]]) },
-    {
-      label: `이 칸을 ${selfKind}`,
-      ...buildStates([
-        [OTHER_SLOT, "ADD"],
-        [slot, selfKind],
-      ]),
-    },
-  ];
-};
-
-const eachCase = (
-  run: (
-    slot: WeekSlot,
-    state: ReturnType<typeof draftCasesFor>[number],
-    label: string,
-  ) => void,
-) => {
-  STATUSES.forEach((status) => {
-    COUNTS.forEach((currentCount) => {
-      const slot = weekSlotOf(status, currentCount);
-
-      draftCasesFor(slot).forEach((state) => {
-        run(slot, state, `${status} / 인원 ${currentCount} / ${state.label}`);
-      });
-    });
-  });
-};
-
-// 대조 테스트 ③ — policy가 기존 함수와 같은 판정을 내는지 모든 조합에서 확인한다.
-describe("applyPolicy 는 기존 신청 화면 함수와 같은 판정을 낸다", () => {
-  it("resolveStatus == getApplySlotStatus", () => {
-    eachCase((slot, { draft, payload }, label) => {
-      assert.equal(
-        applyPolicy.resolveStatus(slot, draft),
-        getApplySlotStatus(slot, payload),
-        label,
-      );
-    });
+  it("상태와 인원수를 서버가 준 그대로 보여 준다", () => {
+    assert.equal(viewPolicy.resolveStatus(MY_SLOT, EMPTY_DRAFT), "MY_SCHEDULE");
+    assert.equal(viewPolicy.resolveCount(MY_SLOT, EMPTY_DRAFT), 1);
+    assert.equal(viewPolicy.resolveRequestStatus(), undefined);
   });
 
-  it("resolveCount == getApplySlotCurrentCount", () => {
-    eachCase((slot, { draft, payload }, label) => {
-      assert.equal(
-        applyPolicy.resolveCount(slot, draft),
-        getApplySlotCurrentCount(slot, payload),
-        label,
-      );
-    });
+  it("눌러도 고른 내역이 달라지지 않는다", () => {
+    assert.equal(viewPolicy.toggle(EMPTY_DRAFT), EMPTY_DRAFT);
   });
 
-  it("toggle == toggleApplySlotChange", () => {
-    eachCase((slot, { draft, payload }, label) => {
-      assert.deepEqual(
-        toRawPayload(
-          applyPolicy.toggle(draft, slot, {
-            maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
-          }),
-        ),
-        toggleApplySlotChange(payload, slot, MAX_CONCURRENT_WORKERS),
-        label,
-      );
-    });
+  it("'자세히'를 켰을 때만 인원수를 보여 준다", () => {
+    assert.equal(viewPolicy.countVisibility, "toggle");
   });
 });
 
-describe("editPolicy 는 기존 수정 요청 화면 함수와 같은 판정을 낸다", () => {
-  it("resolveRequestStatus == getRequestEditSlotStatus", () => {
-    eachCase((slot, { draft, payload }, label) => {
-      assert.equal(
-        editPolicy.resolveRequestStatus(slot, draft),
-        getRequestEditSlotStatus(slot, payload),
-        label,
-      );
-    });
+describe("applyPolicy", () => {
+  it("내 근무를 고르면 삭제로 담고 빈 칸처럼 보여 준다", () => {
+    const draft = applyPolicy.toggle(EMPTY_DRAFT, MY_SLOT, APPLY_CONTEXT);
+
+    assert.equal(getDraftKind(draft, MY_SLOT), "DELETE");
+    assert.equal(applyPolicy.resolveStatus(MY_SLOT, draft), "EMPTY");
+    assert.equal(applyPolicy.resolveCount(MY_SLOT, draft), 0);
   });
 
-  it("isDisabled == getRequestEditSlotDisabled", () => {
-    MAX_ADD_HOURS.forEach((maxAddHours) => {
-      eachCase((slot, { draft, payload }, label) => {
-        const context = {
-          maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
-          editLimit: {
-            addHours: getSlotTimesTotalHours(payload.addSlots),
-            maxAddHours,
-          },
-        };
+  it("빈 칸을 고르면 추가로 담고 내 근무처럼 보여 준다", () => {
+    const draft = applyPolicy.toggle(EMPTY_DRAFT, EMPTY_SLOT, APPLY_CONTEXT);
 
+    assert.equal(getDraftKind(draft, EMPTY_SLOT), "ADD");
+    assert.equal(applyPolicy.resolveStatus(EMPTY_SLOT, draft), "MY_SCHEDULE");
+    assert.equal(applyPolicy.resolveCount(EMPTY_SLOT, draft), 1);
+  });
+
+  it("같은 칸을 다시 누르면 취소된다", () => {
+    const draft = applyPolicy.toggle(
+      applyPolicy.toggle(EMPTY_DRAFT, EMPTY_SLOT, APPLY_CONTEXT),
+      EMPTY_SLOT,
+      APPLY_CONTEXT,
+    );
+
+    assert.equal(getDraftKind(draft, EMPTY_SLOT), undefined);
+  });
+
+  it("인원수는 0 아래로 내려가지 않는다", () => {
+    const zeroCountSlot = slotOf("MY_SCHEDULE", 0);
+    const draft = draftWith([zeroCountSlot, "DELETE"]);
+
+    assert.equal(applyPolicy.resolveCount(zeroCountSlot, draft), 0);
+  });
+
+  it("정원이 찬 빈 칸은 새로 고를 수 없다", () => {
+    const draft = applyPolicy.toggle(EMPTY_DRAFT, FULL_SLOT, APPLY_CONTEXT);
+
+    assert.equal(draft, EMPTY_DRAFT);
+  });
+
+  it("정원이 찼어도 이미 고른 칸은 취소할 수 있다", () => {
+    const picked = draftWith([FULL_SLOT, "ADD"]);
+    const draft = applyPolicy.toggle(picked, FULL_SLOT, APPLY_CONTEXT);
+
+    assert.equal(getDraftKind(draft, FULL_SLOT), undefined);
+  });
+
+  it("승인 대기중이거나 미운영 시간인 칸은 눌러도 달라지지 않는다", () => {
+    [PENDING_ADD_SLOT, PENDING_DELETE_SLOT, UNAVAILABLE_SLOT].forEach(
+      (slot) => {
         assert.equal(
-          editPolicy.isDisabled(slot, draft, context),
-          getRequestEditSlotDisabled(
-            slot,
-            payload,
-            MAX_CONCURRENT_WORKERS,
-            maxAddHours,
-          ),
-          `${label} / 한도 ${maxAddHours}`,
+          applyPolicy.toggle(EMPTY_DRAFT, slot, APPLY_CONTEXT),
+          EMPTY_DRAFT,
+          slot.status,
         );
-      });
-    });
+      },
+    );
   });
 
-  it("한도를 넘기지 않으면 기존 기본값(삭제 시간 합계)과 같게 계산한다", () => {
-    eachCase((slot, { draft, payload }, label) => {
-      assert.equal(
-        editPolicy.isDisabled(slot, draft, {
-          maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
-        }),
-        getRequestEditSlotDisabled(slot, payload, MAX_CONCURRENT_WORKERS),
-        label,
-      );
-    });
-  });
-
-  it("toggle == toggleRequestEditSlotChange", () => {
-    MAX_ADD_HOURS.forEach((maxAddHours) => {
-      eachCase((slot, { draft, payload }, label) => {
-        const context = {
-          maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
-          editLimit: {
-            addHours: getSlotTimesTotalHours(payload.addSlots),
-            maxAddHours,
-          },
-        };
-
-        assert.deepEqual(
-          toRawPayload(editPolicy.toggle(draft, slot, context)),
-          toggleRequestEditSlotChange(
-            payload,
-            slot,
-            MAX_CONCURRENT_WORKERS,
-            maxAddHours,
-          ),
-          `${label} / 한도 ${maxAddHours}`,
-        );
-      });
-    });
+  it("칸을 따로 잠그지 않고 인원수는 항상 보여 준다", () => {
+    assert.equal(applyPolicy.isDisabled(), false);
+    assert.equal(applyPolicy.countVisibility, "always");
   });
 });
 
-describe('viewPolicy 는 기존 type="view" 분기와 같다', () => {
-  it("항상 잠겨 있고 상태·인원수를 그대로 보여 준다", () => {
-    eachCase((slot, { draft }, label) => {
-      assert.equal(viewPolicy.isDisabled(), true, label);
-      assert.equal(viewPolicy.resolveStatus(slot, draft), slot.status, label);
-      assert.equal(
-        viewPolicy.resolveCount(slot, draft),
-        slot.currentCount,
-        label,
-      );
-      assert.equal(viewPolicy.toggle(draft), draft, label);
-    });
+describe("editPolicy", () => {
+  const LIMIT = editContext(0, 1);
+
+  it("확정된 시간표는 그대로 두고 요청만 덧칠한다", () => {
+    const draft = draftWith([MY_SLOT, "DELETE"], [EMPTY_SLOT, "ADD"]);
+
+    assert.equal(editPolicy.resolveStatus(MY_SLOT, draft), "MY_SCHEDULE");
+    assert.equal(editPolicy.resolveCount(MY_SLOT, draft), 1);
+    assert.equal(
+      editPolicy.resolveRequestStatus(MY_SLOT, draft),
+      "REQUEST_DELETE",
+    );
+    assert.equal(
+      editPolicy.resolveRequestStatus(EMPTY_SLOT, draft),
+      "REQUEST_ADD",
+    );
+  });
+
+  it("삭제 요청한 칸의 숫자는 흐리게 보여 준다", () => {
+    const draft = draftWith([MY_SLOT, "DELETE"]);
+
+    assert.equal(
+      editPolicy.resolveTextClassName(MY_SLOT, draft),
+      "text-[#C2C4C6]",
+    );
+    assert.equal(editPolicy.resolveTextClassName(EMPTY_SLOT, draft), undefined);
+  });
+
+  it("내 근무는 언제든 삭제 요청할 수 있다", () => {
+    assert.equal(editPolicy.isDisabled(MY_SLOT, EMPTY_DRAFT, LIMIT), false);
+    assert.equal(
+      getDraftKind(editPolicy.toggle(EMPTY_DRAFT, MY_SLOT, LIMIT), MY_SLOT),
+      "DELETE",
+    );
+  });
+
+  it("승인 대기중이거나 미운영 시간인 칸은 잠겨 있다", () => {
+    [PENDING_ADD_SLOT, PENDING_DELETE_SLOT, UNAVAILABLE_SLOT].forEach(
+      (slot) => {
+        assert.equal(
+          editPolicy.isDisabled(slot, EMPTY_DRAFT, LIMIT),
+          true,
+          slot.status,
+        );
+        assert.equal(
+          editPolicy.toggle(EMPTY_DRAFT, slot, LIMIT),
+          EMPTY_DRAFT,
+          slot.status,
+        );
+      },
+    );
+  });
+
+  it("정원이 찬 빈 칸은 잠겨 있다", () => {
+    assert.equal(editPolicy.isDisabled(FULL_SLOT, EMPTY_DRAFT, LIMIT), true);
+  });
+
+  it("잔여 시간이 없으면 빈 칸이 잠긴다", () => {
+    // 30분(0.5h)짜리 칸인데 남은 한도가 0이면 더 고를 수 없다.
+    assert.equal(
+      editPolicy.isDisabled(EMPTY_SLOT, EMPTY_DRAFT, editContext(0, 0)),
+      true,
+    );
+    assert.equal(
+      editPolicy.isDisabled(EMPTY_SLOT, EMPTY_DRAFT, editContext(0, 0.5)),
+      false,
+    );
+    // 이미 0.5h를 골라 한도를 다 쓴 상태.
+    assert.equal(
+      editPolicy.isDisabled(EMPTY_SLOT, EMPTY_DRAFT, editContext(0.5, 0.5)),
+      true,
+    );
+  });
+
+  it("한도를 넘겨도 이미 고른 칸은 취소할 수 있다", () => {
+    const picked = draftWith([EMPTY_SLOT, "ADD"]);
+    const context = editContext(0.5, 0.5);
+
+    assert.equal(editPolicy.isDisabled(EMPTY_SLOT, picked, context), false);
+    assert.equal(
+      getDraftKind(editPolicy.toggle(picked, EMPTY_SLOT, context), EMPTY_SLOT),
+      undefined,
+    );
+  });
+
+  it("한도를 넘기지 않으면 삭제 신청한 시간만큼만 추가할 수 있다", () => {
+    // editLimit 없이 부르면 '지금까지 고른 삭제 시간'이 곧 추가 한도가 된다.
+    const context = { maxConcurrentWorkers: MAX_CONCURRENT_WORKERS };
+
+    assert.equal(editPolicy.isDisabled(EMPTY_SLOT, EMPTY_DRAFT, context), true);
+    assert.equal(
+      editPolicy.isDisabled(
+        EMPTY_SLOT,
+        draftWith([MY_SLOT, "DELETE"]),
+        context,
+      ),
+      false,
+    );
+  });
+
+  it("잠긴 칸은 눌러도 달라지지 않는다", () => {
+    const context = editContext(0, 0);
+
+    assert.equal(
+      editPolicy.toggle(EMPTY_DRAFT, EMPTY_SLOT, context),
+      EMPTY_DRAFT,
+    );
+  });
+
+  it("인원수는 항상 보여 준다", () => {
+    assert.equal(editPolicy.countVisibility, "always");
   });
 });
