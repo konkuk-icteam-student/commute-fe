@@ -64,17 +64,26 @@ const draftWith = (...entries: [ScheduleSlotTime, "ADD" | "DELETE"][]) =>
 
 describe("viewPolicy", () => {
   it("모든 칸이 잠겨 있다", () => {
-    assert.equal(viewPolicy.isDisabled(), true);
+    assert.equal(
+      viewPolicy.isDisabled(EMPTY_SLOT, EMPTY_DRAFT, APPLY_CONTEXT),
+      true,
+    );
   });
 
   it("상태와 인원수를 서버가 준 그대로 보여 준다", () => {
     assert.equal(viewPolicy.resolveStatus(MY_SLOT, EMPTY_DRAFT), "MY_SCHEDULE");
     assert.equal(viewPolicy.resolveCount(MY_SLOT, EMPTY_DRAFT), 1);
-    assert.equal(viewPolicy.resolveRequestStatus(), undefined);
+    assert.equal(
+      viewPolicy.resolveRequestStatus(MY_SLOT, EMPTY_DRAFT),
+      undefined,
+    );
   });
 
   it("눌러도 고른 내역이 달라지지 않는다", () => {
-    assert.equal(viewPolicy.toggle(EMPTY_DRAFT), EMPTY_DRAFT);
+    assert.equal(
+      viewPolicy.toggle(EMPTY_DRAFT, MY_SLOT, APPLY_CONTEXT),
+      EMPTY_DRAFT,
+    );
   });
 
   it("'자세히'를 켰을 때만 인원수를 보여 준다", () => {
@@ -141,8 +150,15 @@ describe("applyPolicy", () => {
     );
   });
 
+  // 신청 화면은 정원이 찬 칸도 잠그지 않는다. 누를 수 없는 것은 toggle이 막는다.
   it("칸을 따로 잠그지 않고 인원수는 항상 보여 준다", () => {
-    assert.equal(applyPolicy.isDisabled(), false);
+    [MY_SLOT, EMPTY_SLOT, FULL_SLOT, PENDING_ADD_SLOT].forEach((slot) => {
+      assert.equal(
+        applyPolicy.isDisabled(slot, EMPTY_DRAFT, APPLY_CONTEXT),
+        false,
+        slot.status,
+      );
+    });
     assert.equal(applyPolicy.countVisibility, "always");
   });
 });
