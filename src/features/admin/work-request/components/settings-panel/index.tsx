@@ -6,7 +6,6 @@ import type {
   WorkRequestFieldChangeHandler,
   WorkRequestFormValues,
 } from "../../types";
-import MonthMoveButton from "../month-move-button";
 import UnavailableSettingsCard from "../unavailable-settings-card";
 import WorkHourSettingsCard from "../work-hour-settings-card";
 import WorkRequestPeriodCard from "../work-request-period-card";
@@ -29,8 +28,6 @@ export default function SettingsPanel({
   onEdit,
   onEnd,
   onFieldChange,
-  onNextMonth,
-  onPreviousMonth,
   onStart,
   onUpdate,
   targetMonth,
@@ -49,8 +46,6 @@ export default function SettingsPanel({
   onEdit: () => void;
   onEnd: () => void;
   onFieldChange: WorkRequestFieldChangeHandler;
-  onNextMonth: () => void;
-  onPreviousMonth: () => void;
   onStart: () => void;
   onUpdate: () => void;
   targetMonth: { month: number; year: number };
@@ -64,18 +59,9 @@ export default function SettingsPanel({
     <section className="relative z-10 rounded-xl border border-[#DDE3EF] bg-white px-8 pt-8 pb-5.75">
       <div className="mb-4.75 flex items-center justify-between">
         <h2 className="text-[19px] font-bold text-[#1A2236]">근로신청 설정</h2>
-        <div className="mr-6 flex items-center gap-3">
-          <MonthMoveButton ariaLabel="이전 달" onClick={onPreviousMonth} />
-          {/* 월 자릿수(9월/12월)에 따라 버튼 위치가 밀리지 않도록 너비를 고정 */}
-          <p className="w-37.5 text-center text-[24px] font-bold whitespace-nowrap text-[#1A2236]">
-            {monthLabel}
-          </p>
-          <MonthMoveButton
-            ariaLabel="다음 달"
-            direction="next"
-            onClick={onNextMonth}
-          />
-        </div>
+        <p className="mr-6 text-[24px] font-bold text-[#1A2236]">
+          {monthLabel}
+        </p>
       </div>
 
       <div className="grid grid-cols-[minmax(0,520fr)_minmax(0,860fr)] gap-[clamp(12px,2vw,28px)]">

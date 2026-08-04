@@ -66,8 +66,6 @@ export default function AdminWorkRequestScreen() {
     canEditSettings,
     editRequest,
     formValues,
-    goToNextMonth,
-    goToPreviousMonth,
     isActive,
     isDirty,
     isEditing,
@@ -145,8 +143,6 @@ export default function AdminWorkRequestScreen() {
           onEdit={editRequest}
           onEnd={() => setPendingAction("end")}
           onFieldChange={updateField}
-          onNextMonth={goToNextMonth}
-          onPreviousMonth={goToPreviousMonth}
           onStart={() => setPendingAction("start")}
           onUpdate={() => setPendingAction("update")}
           targetMonth={targetMonth}

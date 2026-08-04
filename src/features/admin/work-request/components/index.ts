@@ -1,7 +1,6 @@
 export { default as AddButton } from "./add-button";
 export { default as FormField } from "./form-field";
 export { default as MockSelect } from "./mock-select";
-export { default as MonthMoveButton } from "./month-move-button";
 export { default as SettingsActionButtons } from "./settings-action-buttons";
 export { default as SettingsCard } from "./settings-card";
 export { default as SettingsPanel } from "./settings-panel";

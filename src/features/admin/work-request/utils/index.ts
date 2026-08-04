@@ -24,15 +24,10 @@ export const initialWorkRequestFormValues: WorkRequestFormValues = {
   weeklyMinMinutes: "",
 };
 
-// 근로신청은 기본적으로 다음 달(monthOffset 0)을 대상으로 하고, monthOffset으로 앞뒤 달을 오갈 수 있다.
-export function getNextWorkRequestMonth(monthOffset = 0, date = new Date()) {
-  const targetDate = new Date(
-    date.getFullYear(),
-    date.getMonth() + 1 + monthOffset,
-    1,
-  );
-  const year = targetDate.getFullYear();
-  const month = targetDate.getMonth() + 1;
+export function getNextWorkRequestMonth(date = new Date()) {
+  const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  const year = nextMonth.getFullYear();
+  const month = nextMonth.getMonth() + 1;
 
   return {
     label: `${year}년 ${month}월`,

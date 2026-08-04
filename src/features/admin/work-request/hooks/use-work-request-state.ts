@@ -14,12 +14,7 @@ import {
 } from "../utils";
 
 export default function useWorkRequestState() {
-  // 0 = 다음 달. 관리자는 지난 달·이후 달 어디로든 이동할 수 있어 범위를 제한하지 않는다.
-  const [monthOffset, setMonthOffset] = useState(0);
-  const targetMonth = useMemo(
-    () => getNextWorkRequestMonth(monthOffset),
-    [monthOffset],
-  );
+  const targetMonth = useMemo(() => getNextWorkRequestMonth(), []);
   const [requestStatus, setRequestStatus] = useState<RequestStatus>("idle");
   const [formValues, setFormValues] = useState<WorkRequestFormValues>(
     initialWorkRequestFormValues,
@@ -40,14 +35,6 @@ export default function useWorkRequestState() {
     () => isWorkRequestStartReady({ formValues, target: targetMonth }),
     [formValues, targetMonth],
   );
-
-  const goToPreviousMonth = () => {
-    setMonthOffset((current) => current - 1);
-  };
-
-  const goToNextMonth = () => {
-    setMonthOffset((current) => current + 1);
-  };
 
   const updateField = <Key extends keyof WorkRequestFormValues>(
     key: Key,
@@ -186,8 +173,6 @@ export default function useWorkRequestState() {
     editRequest,
     endRequest,
     formValues,
-    goToNextMonth,
-    goToPreviousMonth,
     isActive,
     isDirty,
     isEditing,
