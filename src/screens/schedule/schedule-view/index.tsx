@@ -3,16 +3,20 @@
 import { useEffect, useState } from "react";
 
 import {
-  ScheduleHeader,
-  ScheduleTable,
   DUMMY_GET_SCHEDULE,
-  ScheduleStatusLegend,
-  ScheduleChangeHistoryPreview,
   DUMMY_SCHEDULE_CHANGE_HISTORY,
+  ScheduleChangeHistoryPreview,
+  ScheduleGrid,
+  ScheduleHeader,
+  ScheduleStatusLegend,
+  ScheduleWeekNav,
+  useScheduleGrid,
+  useScheduleWeek,
+  viewPolicy,
   WorkingHoursCard,
 } from "@/features/schedule";
-import { getMonthWeekOfDate } from "@/lib/date-formatter";
 import { useGetMonthlySchedulesQuery } from "@/apis/work-schedules";
+import { Toggle } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
 const MIN_SESSION_HOURS = 1;
@@ -27,22 +31,35 @@ const MONTH_TOTAL_HOURS = 27;
 export default function ScheduleViewScreen() {
   // 조회는 이번 달 안에서만 이동할 수 있다.
   const [today] = useState(() => new Date());
-  const { year, month, week: currentWeek, maxWeek } = getMonthWeekOfDate(today);
-  const [week, setWeek] = useState(currentWeek);
+  const {
+    year,
+    month,
+    week,
+    isPrevWeekDisabled,
+    isNextWeekDisabled,
+    goPrevWeek,
+    goNextWeek,
+  } = useScheduleWeek(today);
+  // '자세히'를 켜야 칸마다 인원수를 보여 준다.
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
+
+  const { days, cells } = useScheduleGrid({
+    data: DUMMY_GET_SCHEDULE,
+    year,
+    month,
+    week,
+    policy: viewPolicy,
+    context: {
+      maxConcurrentWorkers: DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+    },
+    isDetailVisible,
+  });
 
   // TODO: 이건 api 연동 및 TanStack Query 적용 예시임
   const { monthlySchedulesData } = useGetMonthlySchedulesQuery({
-    year: 2026,
-    month: 8,
+    year: year,
+    month: month,
   });
-
-  const handlePrevWeek = () => {
-    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
-  };
-
-  const handleNextWeek = () => {
-    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
-  };
 
   useEffect(() => {
     console.log(monthlySchedulesData);
@@ -52,16 +69,21 @@ export default function ScheduleViewScreen() {
     <div className="flex w-full flex-col gap-4 px-3 py-4">
       <ScheduleHeader year={year} month={month} />
       <div className="flex flex-col gap-2">
-        <ScheduleTable
-          year={year}
-          month={month}
+        <ScheduleWeekNav
           week={week}
-          scheduleData={DUMMY_GET_SCHEDULE}
-          isPrevWeekDisabled={week <= 1}
-          isNextWeekDisabled={week >= maxWeek}
-          handlePrevWeek={handlePrevWeek}
-          handleNextWeek={handleNextWeek}
+          isPrevWeekDisabled={isPrevWeekDisabled}
+          isNextWeekDisabled={isNextWeekDisabled}
+          onPrevWeek={goPrevWeek}
+          onNextWeek={goNextWeek}
+          action={
+            <Toggle
+              checked={isDetailVisible}
+              onCheckedChange={setIsDetailVisible}
+              label="자세히"
+            />
+          }
         />
+        <ScheduleGrid days={days} cells={cells} />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}

@@ -3,29 +3,26 @@
 import { useState } from "react";
 
 import {
-  chunkScheduleSlots,
   DUMMY_GET_SCHEDULE,
-  getRequestEditSlotStatus,
-  getRequestEditSlotDisabled,
-  type ScheduleApplyPayload,
-  type ScheduleSlot,
-  ScheduleHeader,
-  ScheduleTable,
-  toggleRequestEditSlotChange,
-  getMergedApplyPayload,
+  editPolicy,
+  getAppliedSlotTimes,
+  getCurrentMonthSlots,
+  getDraftSlotTimes,
   getSlotTimesTotalHours,
-  ScheduleStatusLegend,
-  WorkingHoursCard,
+  hasSlotTimesBelowMinSessionHours,
   ScheduleChangeList,
-  hasAppliedScheduleBelowMinSessionHours,
-  SLOTS_PER_DAY,
+  ScheduleGrid,
+  ScheduleHeader,
+  ScheduleRefreshButton,
+  ScheduleStatusLegend,
+  ScheduleWeekNav,
+  useScheduleDraft,
+  useScheduleGrid,
+  useScheduleWeek,
+  WorkingHoursCard,
+  type ScheduleDraft,
 } from "@/features/schedule";
-import { SLOT_REQUEST_EDIT_CLASS_NAME } from "@/features/schedule/constants";
-import {
-  getMonthWeekOfDate,
-  getWeekdaysOfMonthWeek,
-} from "@/lib/date-formatter";
-import { Button, Modal, Alert } from "@/components/ui";
+import { Alert, Button, Modal } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
 const MIN_SESSION_HOURS = 1;
@@ -35,47 +32,65 @@ const WEEK_HOURS = 2;
 const MONTH_TOTAL_HOURS = 26;
 const MAX_MONTH_HOURS = 27;
 
+// 이번 달에 추가로 신청할 수 있는 시간. 삭제를 신청한 만큼 다시 채워 넣을 수 있다.
 const getAbleToAddHours = (deleteRequestHours: number) =>
   MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
 
+// 칸을 누르는 시점의 내역으로 한도를 다시 계산한다.
+const resolveEditContext = (draft: ScheduleDraft) => ({
+  maxConcurrentWorkers: DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+  editLimit: {
+    addHours: getSlotTimesTotalHours(getDraftSlotTimes(draft, "ADD")),
+    maxAddHours: getAbleToAddHours(
+      getSlotTimesTotalHours(getDraftSlotTimes(draft, "DELETE")),
+    ),
+  },
+});
+
 export default function ScheduleEditScreen() {
+  // 수정 요청은 이번 달 전체에 대해 가능하다.
+  // 지난 주차도 열어 둔다 — 제때 수정하지 못하고 넘어간 근무를 정정할 수 있어야 한다.
   const [today] = useState(() => new Date());
-  const [editPayload, setEditPayload] = useState<ScheduleApplyPayload>({
-    deleteSlots: [],
-    addSlots: [],
-  });
+  const {
+    year,
+    month,
+    week,
+    isPrevWeekDisabled,
+    isNextWeekDisabled,
+    goPrevWeek,
+    goNextWeek,
+  } = useScheduleWeek(today);
+
   const [reason, setReason] = useState("");
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
-  // 수정 요청은 이번 달 전체에 대해 가능하다.
-  // 지난 주차도 열어 둔다 — 제때 수정하지 못하고 넘어간 근무를 정정할 수 있어야 한다.
-  const { year, month, week: currentWeek, maxWeek } = getMonthWeekOfDate(today);
-  const [week, setWeek] = useState(currentWeek);
-  const isPrevWeekDisabled = week <= 1;
-  const isNextWeekDisabled = week >= maxWeek;
-
-  const deleteRequestHours = getSlotTimesTotalHours(editPayload.deleteSlots);
-  const addRequestHours = getSlotTimesTotalHours(editPayload.addSlots);
-  const ableToAddHours = getAbleToAddHours(deleteRequestHours);
-  const currentWeekdays = getWeekdaysOfMonthWeek(year, month, week);
-  const currentWeekScheduleSlots = chunkScheduleSlots(
-    DUMMY_GET_SCHEDULE.slots,
-    SLOTS_PER_DAY,
-  ).flatMap((slots, index) => {
-    const currentWeekday = currentWeekdays[index];
-
-    if (currentWeekday === undefined || !currentWeekday.isCurrentMonth) {
-      return [];
-    }
-
-    const { date } = currentWeekday;
-
-    return slots.map((slot) => ({ ...slot, date }));
+  const {
+    draft,
+    toggleSlot,
+    context,
+    payload,
+    addHours: addRequestHours,
+    deleteHours: deleteRequestHours,
+  } = useScheduleDraft({
+    policy: editPolicy,
+    resolveContext: resolveEditContext,
   });
-  const isBelowMinSessionHours = hasAppliedScheduleBelowMinSessionHours(
-    currentWeekScheduleSlots,
-    editPayload,
+
+  const { days, cells } = useScheduleGrid({
+    data: DUMMY_GET_SCHEDULE,
+    year,
+    month,
+    week,
+    policy: editPolicy,
+    context,
+    draft,
+    onSlotClick: toggleSlot,
+  });
+
+  const ableToAddHours = getAbleToAddHours(deleteRequestHours);
+  const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
+    getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
     MIN_SESSION_HOURS,
   );
 
@@ -84,25 +99,6 @@ export default function ScheduleEditScreen() {
     deleteRequestHours > MONTH_TOTAL_HOURS ||
     addRequestHours > ableToAddHours ||
     reason === "";
-
-  const handlePrevWeek = () => {
-    setWeek((currentWeekNumber) => Math.max(1, currentWeekNumber - 1));
-  };
-
-  const handleNextWeek = () => {
-    setWeek((currentWeekNumber) => Math.min(maxWeek, currentWeekNumber + 1));
-  };
-
-  const handleSlotClick = (slot: ScheduleSlot) => {
-    setEditPayload((currentPayload) =>
-      toggleRequestEditSlotChange(
-        currentPayload,
-        slot,
-        DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
-        getAbleToAddHours(getSlotTimesTotalHours(currentPayload.deleteSlots)),
-      ),
-    );
-  };
 
   const handleClickButton = () => {
     if (isBelowMinSessionHours) {
@@ -114,7 +110,7 @@ export default function ScheduleEditScreen() {
   };
 
   const handleApply = () => {
-    console.log("제출 변경 시간 : ", getMergedApplyPayload(editPayload));
+    console.log("제출 변경 시간 : ", payload);
     console.log("제출 변경 사유 : ", reason);
     setIsApplyAlertOpen(false);
   };
@@ -123,38 +119,15 @@ export default function ScheduleEditScreen() {
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader mode="edit" year={year} month={month} />
       <div className="flex flex-col gap-2">
-        <ScheduleTable
-          type="edit"
-          year={year}
-          month={month}
+        <ScheduleWeekNav
           week={week}
-          scheduleData={DUMMY_GET_SCHEDULE}
           isPrevWeekDisabled={isPrevWeekDisabled}
           isNextWeekDisabled={isNextWeekDisabled}
-          handlePrevWeek={handlePrevWeek}
-          handleNextWeek={handleNextWeek}
-          getSlotClassName={(slot) => {
-            const requestStatus = getRequestEditSlotStatus(slot, editPayload);
-
-            return requestStatus
-              ? SLOT_REQUEST_EDIT_CLASS_NAME[requestStatus]
-              : undefined;
-          }}
-          getSlotDisabled={(slot) =>
-            getRequestEditSlotDisabled(
-              slot,
-              editPayload,
-              DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
-              ableToAddHours,
-            )
-          }
-          getSlotTextClassName={(slot) =>
-            getRequestEditSlotStatus(slot, editPayload) === "REQUEST_DELETE"
-              ? "text-[#C2C4C6]"
-              : undefined
-          }
-          onSlotClick={handleSlotClick}
+          onPrevWeek={goPrevWeek}
+          onNextWeek={goNextWeek}
+          action={<ScheduleRefreshButton />}
         />
+        <ScheduleGrid days={days} cells={cells} />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}
@@ -176,10 +149,7 @@ export default function ScheduleEditScreen() {
           isRed
           isOverflow={deleteRequestHours > MONTH_TOTAL_HOURS}
         />
-        <ScheduleChangeList
-          isAdd={false}
-          changeItems={getMergedApplyPayload(editPayload).deleteSlots}
-        />
+        <ScheduleChangeList isAdd={false} changeItems={payload.deleteSlots} />
 
         <WorkingHoursCard
           label="추가 근무 신청"
@@ -187,9 +157,7 @@ export default function ScheduleEditScreen() {
           maxHours={ableToAddHours}
           isOverflow={addRequestHours > ableToAddHours}
         />
-        <ScheduleChangeList
-          changeItems={getMergedApplyPayload(editPayload).addSlots}
-        />
+        <ScheduleChangeList changeItems={payload.addSlots} />
 
         <section className="flex w-full flex-col gap-2 rounded-[10px] border border-[#DDE3EF] px-3 py-2">
           <span className="text-xs leading-4.5 font-medium text-[#1A2236]">
