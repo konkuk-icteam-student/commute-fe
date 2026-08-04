@@ -97,7 +97,7 @@ export default function AdminWorkRequestScreen() {
       target: targetMonth,
     });
 
-    // 유효하지 않은 값이면 요청을 보내지 않는다 (실패 안내는 runWithProcessing에서 이미 처리됨)
+    // 유효하지 않은 값이면 요청을 보내지 않는다 (버튼 활성화 조건인 isStartReady에서 이미 걸러짐)
     if (!payload) {
       return;
     }
@@ -105,7 +105,7 @@ export default function AdminWorkRequestScreen() {
     saveAdminWorkSchedulesSettings(
       {
         year: targetMonth.year,
-        month: 8,
+        month: targetMonth.month,
         ...payload,
         unavailableDates: payload.unavailableDates ?? [],
         unavailableTimeRanges: payload.unavailableTimeRanges ?? [],
