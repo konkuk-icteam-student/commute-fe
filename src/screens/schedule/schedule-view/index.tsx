@@ -5,6 +5,9 @@ import { useState } from "react";
 import {
   DUMMY_SCHEDULE_CHANGE_HISTORY,
   EMPTY_SCHEDULE,
+  getConfirmedSlotTimes,
+  getCurrentMonthSlots,
+  getSlotTimesTotalHours,
   ScheduleChangeHistoryPreview,
   ScheduleGrid,
   ScheduleHeader,
@@ -19,15 +22,9 @@ import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
 
-// TODO: 추후 서버에서 받아올 값
+// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
 const MAX_WEEK_HOURS = 13;
-const MAX_MONTH_HOURS = 27;
-
-const WEEK_HOURS = 4;
-const WEEK_TOTAL_HOURS = 7;
-const MONTH_HOURS = 13;
-const MONTH_TOTAL_HOURS = 27;
 
 export default function ScheduleViewScreen() {
   // 조회는 이번 달 안에서만 이동할 수 있다.
@@ -52,6 +49,8 @@ export default function ScheduleViewScreen() {
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
+  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
 
   const { days, cells } = useScheduleGrid({
     data: schedule,
@@ -64,6 +63,11 @@ export default function ScheduleViewScreen() {
     },
     isDetailVisible,
   });
+
+  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
+  const weekHours = getSlotTimesTotalHours(
+    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
+  );
 
   return (
     <div className="flex w-full flex-col gap-4 px-3 py-4">
@@ -87,19 +91,19 @@ export default function ScheduleViewScreen() {
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}
-          monthlyTargetHours={MAX_MONTH_HOURS}
+          monthlyTargetHours={monthLimitHours}
         />
       </div>
       <div className="flex flex-col gap-2">
         <WorkingHoursCard
           label={`${week}주차 총 시간`}
-          hours={WEEK_HOURS}
-          maxHours={WEEK_TOTAL_HOURS}
+          hours={weekHours}
+          maxHours={MAX_WEEK_HOURS}
         />
         <WorkingHoursCard
           label={`${month}월 전체`}
-          hours={MONTH_HOURS}
-          maxHours={MONTH_TOTAL_HOURS}
+          hours={monthUsedHours}
+          maxHours={monthLimitHours}
           withProgressBar
         />
         <ScheduleChangeHistoryPreview

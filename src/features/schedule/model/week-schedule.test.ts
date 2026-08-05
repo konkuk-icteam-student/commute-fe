@@ -87,16 +87,22 @@ describe("buildWeekSchedule", () => {
     assert.equal(filled?.date, monday.date);
   });
 
-  // 서버가 일부 칸만 내려주더라도 표가 무너지면 안 된다.
+  // 서버는 하루 18칸을 모두 내려주기로 되어 있다.
+  // 빠진 칸은 이상 응답이므로 열어 두지 않고 잠근다.
   it("응답에 없는 칸은 UNAVAILABLE 0명으로 채운다", () => {
     const [monday] = SAME_MONTH_WEEKDAYS;
     const source: WeekScheduleSource = {
-      maxConcurrentWorkers: 4,
+      maxConcurrentWorkers: 5,
       days: [
         {
           date: monday.date,
           slots: [
-            { start: "10:00", end: "10:30", status: "EMPTY", currentCount: 0 },
+            {
+              start: "10:00",
+              end: "10:30",
+              status: "EMPTY",
+              currentCount: 2,
+            },
           ],
         },
       ],
@@ -104,10 +110,14 @@ describe("buildWeekSchedule", () => {
 
     const [firstDay] = buildWeekSchedule(source, SAME_MONTH_WEEKDAYS);
     const missing = firstDay.slots.find((slot) => slot.start === "09:00");
+    const filled = firstDay.slots.find((slot) => slot.start === "10:00");
 
     assert.equal(firstDay.slots.length, SLOTS_PER_DAY);
     assert.equal(missing?.status, "UNAVAILABLE");
     assert.equal(missing?.currentCount, 0);
+    // 내려온 칸은 응답 그대로 둔다.
+    assert.equal(filled?.status, "EMPTY");
+    assert.equal(filled?.currentCount, 2);
   });
 
   // 조회 범위를 이번 달로 자르면 6/29, 6/30은 응답에 들어 있지 않다.

@@ -6,6 +6,7 @@ import {
   editPolicy,
   EMPTY_SCHEDULE,
   getAppliedSlotTimes,
+  getConfirmedSlotTimes,
   getCurrentMonthSlots,
   getDraftSlotTimes,
   getSlotTimesTotalHours,
@@ -26,25 +27,31 @@ import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 추후 서버에서 받아올 값
+// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
 const MAX_WEEK_HOURS = 13;
 
-const WEEK_HOURS = 2;
-const MONTH_TOTAL_HOURS = 26;
-const MAX_MONTH_HOURS = 27;
-
 // 이번 달에 추가로 신청할 수 있는 시간. 삭제를 신청한 만큼 다시 채워 넣을 수 있다.
-const getAbleToAddHours = (deleteRequestHours: number) =>
-  MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
+const getAbleToAddHours = (
+  monthLimitHours: number,
+  monthUsedHours: number,
+  deleteRequestHours: number,
+) => monthLimitHours - monthUsedHours + deleteRequestHours;
 
 // 칸을 누르는 시점의 내역으로 한도를 다시 계산한다.
 const createResolveEditContext =
-  (maxConcurrentWorkers: number) => (draft: ScheduleDraft) => ({
+  (
+    maxConcurrentWorkers: number,
+    monthLimitHours: number,
+    monthUsedHours: number,
+  ) =>
+  (draft: ScheduleDraft) => ({
     maxConcurrentWorkers,
     editLimit: {
       addHours: getSlotTimesTotalHours(getDraftSlotTimes(draft, "ADD")),
       maxAddHours: getAbleToAddHours(
+        monthLimitHours,
+        monthUsedHours,
         getSlotTimesTotalHours(getDraftSlotTimes(draft, "DELETE")),
       ),
     },
@@ -76,6 +83,8 @@ export default function ScheduleEditScreen() {
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
+  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
 
   const {
     draft,
@@ -86,7 +95,11 @@ export default function ScheduleEditScreen() {
     deleteHours: deleteRequestHours,
   } = useScheduleDraft({
     policy: editPolicy,
-    resolveContext: createResolveEditContext(schedule.maxConcurrentWorkers),
+    resolveContext: createResolveEditContext(
+      schedule.maxConcurrentWorkers,
+      monthLimitHours,
+      monthUsedHours,
+    ),
   });
 
   const { days, cells } = useScheduleGrid({
@@ -100,7 +113,15 @@ export default function ScheduleEditScreen() {
     onSlotClick: toggleSlot,
   });
 
-  const ableToAddHours = getAbleToAddHours(deleteRequestHours);
+  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
+  const weekUsedHours = getSlotTimesTotalHours(
+    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
+  );
+  const ableToAddHours = getAbleToAddHours(
+    monthLimitHours,
+    monthUsedHours,
+    deleteRequestHours,
+  );
   const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
     getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
     MIN_SESSION_HOURS,
@@ -108,7 +129,7 @@ export default function ScheduleEditScreen() {
 
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
-    deleteRequestHours > MONTH_TOTAL_HOURS ||
+    deleteRequestHours > monthUsedHours ||
     addRequestHours > ableToAddHours ||
     reason === "";
 
@@ -143,23 +164,26 @@ export default function ScheduleEditScreen() {
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}
-          monthlyTargetHours={MAX_MONTH_HOURS}
+          monthlyTargetHours={monthLimitHours}
         />
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex w-full flex-row items-center gap-2">
-          <WorkingHoursCard label={`${week}주차 근무시간`} hours={WEEK_HOURS} />
+          <WorkingHoursCard
+            label={`${week}주차 근무시간`}
+            hours={weekUsedHours}
+          />
           <WorkingHoursCard
             label={`${month}월 근무시간`}
-            hours={MONTH_TOTAL_HOURS}
+            hours={monthUsedHours}
           />
         </div>
         <WorkingHoursCard
           label="근무 삭제 신청"
           hours={deleteRequestHours}
-          maxHours={MONTH_TOTAL_HOURS}
+          maxHours={monthUsedHours}
           isRed
-          isOverflow={deleteRequestHours > MONTH_TOTAL_HOURS}
+          isOverflow={deleteRequestHours > monthUsedHours}
         />
         <ScheduleChangeList isAdd={false} changeItems={payload.deleteSlots} />
 

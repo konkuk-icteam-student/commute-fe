@@ -60,8 +60,9 @@ const toWeekSlot = (slot: WeekScheduleSlotSource, date: string): WeekSlot => ({
   isHourStart: slot.start.endsWith(":00"),
 });
 
-// 응답에 없는 칸. 운영하지 않는 시간으로 보고 잠근다.
-// 이번 달이 아닌 날짜, 조회 범위 밖의 날짜, 서버가 생략한 시간대가 모두 여기에 해당한다.
+// 응답이 채우지 않은 칸은 잠근다.
+// 서버는 하루 18칸을 모두 내려주기로 되어 있으므로, 빠진 칸은 조회 범위 밖이거나 이상 응답이다.
+// 신청 불가한 시간이 열려 보이는 것보다 잠겨 보이는 쪽이 안전하다.
 const toUnavailableSlot = (
   date: string,
   { start, end }: { start: string; end: string },

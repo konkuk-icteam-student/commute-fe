@@ -8,9 +8,11 @@ import {
   DUMMY_SCHEDULE_APPLY_RESPONSE,
   EMPTY_SCHEDULE,
   getAppliedSlotTimes,
+  getConfirmedSlotTimes,
   getCurrentMonthDates,
   getCurrentMonthSlots,
   getFirstDateOfNextMonth,
+  getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,
   ScheduleApplySummary,
@@ -27,13 +29,9 @@ import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 추후 서버에서 받아올 값
+// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
 const MAX_WEEK_HOURS = 13;
-const MAX_MONTH_HOURS = 27;
-
-const WEEK_TOTAL_HOURS = 12;
-const MONTH_TOTAL_HOURS = 25;
 
 // TODO: 서버 응답 pending 시 Toast 컴포넌트 말고 다른 식으로 보여주기
 export default function ScheduleApplyScreen() {
@@ -61,6 +59,8 @@ export default function ScheduleApplyScreen() {
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
+  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
 
   const {
     draft,
@@ -88,6 +88,10 @@ export default function ScheduleApplyScreen() {
     onSlotClick: toggleSlot,
   });
 
+  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
+  const weekUsedHours = getSlotTimesTotalHours(
+    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
+  );
   const currentWeekDates = getCurrentMonthDates(days);
   const weeklyAddRequestHours = getSlotTimesTotalHoursOnWeek(
     rawPayload.addSlots,
@@ -99,9 +103,9 @@ export default function ScheduleApplyScreen() {
   );
 
   const weekTotalTimeAfterApply =
-    WEEK_TOTAL_HOURS + weeklyAddRequestHours - weeklyDeleteRequestHours;
+    weekUsedHours + weeklyAddRequestHours - weeklyDeleteRequestHours;
   const monthTotalTimeAfterApply =
-    MONTH_TOTAL_HOURS + addRequestHours - deleteRequestHours;
+    monthUsedHours + addRequestHours - deleteRequestHours;
 
   const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
     getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
@@ -111,7 +115,7 @@ export default function ScheduleApplyScreen() {
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     weekTotalTimeAfterApply > MAX_WEEK_HOURS ||
-    monthTotalTimeAfterApply > MAX_MONTH_HOURS;
+    monthTotalTimeAfterApply > monthLimitHours;
 
   const handleClickButton = () => {
     if (isBelowMinSessionHours) {
@@ -148,13 +152,13 @@ export default function ScheduleApplyScreen() {
           isApply
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}
-          monthlyTargetHours={MAX_MONTH_HOURS}
+          monthlyTargetHours={monthLimitHours}
         />
       </div>
       <ScheduleApplySummary
         month={month}
         week={week}
-        maxMonthHours={MAX_MONTH_HOURS}
+        maxMonthHours={monthLimitHours}
         maxWeekHours={MAX_WEEK_HOURS}
         applyPayload={rawPayload}
         addRequestHours={addRequestHours}
