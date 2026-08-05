@@ -3,13 +3,10 @@ import { describe, it } from "node:test";
 
 import type { ScheduleChangeHistoryType, WeekScheduleData } from "../types";
 
-const {
-  DUMMY_GET_SCHEDULE,
-  DUMMY_NEXT_MONTH_SCHEDULE,
-  DUMMY_SCHEDULE_CHANGE_HISTORY,
-} = (await import(new URL("./dummy.ts", import.meta.url).href)) as {
+const { DUMMY_GET_SCHEDULE, DUMMY_SCHEDULE_CHANGE_HISTORY } = (await import(
+  new URL("./dummy.ts", import.meta.url).href
+)) as {
   DUMMY_GET_SCHEDULE: WeekScheduleData;
-  DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData;
   DUMMY_SCHEDULE_CHANGE_HISTORY: ScheduleChangeHistoryType[];
 };
 
@@ -19,22 +16,6 @@ const SELECTED_STATUSES = new Set([
   "PENDING_DELETE",
 ]);
 const HISTORY_STATUS_CODES = ["CS01", "CS02", "CS03"] as const;
-
-describe("DUMMY_NEXT_MONTH_SCHEDULE", () => {
-  it("keeps every current count within max concurrent workers", () => {
-    const { maxConcurrentWorkers, slots } = DUMMY_NEXT_MONTH_SCHEDULE;
-
-    assert.ok(slots.every((slot) => slot.currentCount <= maxConcurrentWorkers));
-  });
-
-  it("fills empty available slots with preview worker counts", () => {
-    const availableSlots = DUMMY_NEXT_MONTH_SCHEDULE.slots.filter(
-      (slot) => slot.status === "EMPTY",
-    );
-
-    assert.ok(availableSlots.some((slot) => slot.currentCount > 0));
-  });
-});
 
 describe("schedule dummy data", () => {
   it("includes at least one full available slot in get schedule dummy data", () => {
@@ -49,10 +30,9 @@ describe("schedule dummy data", () => {
   });
 
   it("keeps selected slots with at least one current worker", () => {
-    const selectedSlots = [
-      ...DUMMY_GET_SCHEDULE.slots,
-      ...DUMMY_NEXT_MONTH_SCHEDULE.slots,
-    ].filter((slot) => SELECTED_STATUSES.has(slot.status));
+    const selectedSlots = DUMMY_GET_SCHEDULE.slots.filter((slot) =>
+      SELECTED_STATUSES.has(slot.status),
+    );
 
     assert.ok(selectedSlots.length > 0);
     assert.ok(selectedSlots.every((slot) => slot.currentCount >= 1));

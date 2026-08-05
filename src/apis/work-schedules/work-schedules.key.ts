@@ -5,4 +5,10 @@ export const WORK_SCHEDULES_QUERY_KEY = {
     year,
     month,
   ],
+  PERIOD: (startDate: string, endDate: string) => [
+    "work-schedules",
+    "period",
+    startDate,
+    endDate,
+  ],
 };

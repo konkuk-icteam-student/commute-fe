@@ -7,7 +7,6 @@ const WEEKDAYS = [
   "2026-05-21",
   "2026-05-22",
 ];
-const MAX_CONCURRENT_WORKERS = 5;
 const GET_SCHEDULE_MAX_CONCURRENT_WORKERS = 4;
 
 const TIME_SLOTS = Array.from({ length: 18 }, (_, index) => {
@@ -64,17 +63,6 @@ const isSelectedSlotStatus = (status: string) =>
 const getSelectedSlotCurrentCount = (status: string, currentCount: number) =>
   isSelectedSlotStatus(status) ? Math.max(1, currentCount) : currentCount;
 
-const isMyScheduleTime = (date: string, start: string, end: string) =>
-  date === "2026-05-20" && start >= "14:00" && end <= "16:00";
-
-const getRandomWorkerCount = (date: string, start: string) => {
-  const seed = `${date}-${start}`.split("").reduce((acc, char) => {
-    return acc + char.charCodeAt(0);
-  }, 0);
-
-  return seed % (MAX_CONCURRENT_WORKERS + 1);
-};
-
 export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
   maxConcurrentWorkers: GET_SCHEDULE_MAX_CONCURRENT_WORKERS,
   slots: WEEKDAYS.flatMap((date, dateIndex) =>
@@ -89,32 +77,6 @@ export const DUMMY_GET_SCHEDULE: WeekScheduleData = {
         : (override?.currentCount ??
           GET_SCHEDULE_CURRENT_COUNTS_BY_TIME[timeIndex] ??
           GET_SCHEDULE_MAX_CONCURRENT_WORKERS);
-
-      return {
-        date,
-        start,
-        end,
-        status,
-        currentCount: getSelectedSlotCurrentCount(status, currentCount),
-      };
-    }),
-  ),
-};
-
-export const DUMMY_NEXT_MONTH_SCHEDULE: WeekScheduleData = {
-  maxConcurrentWorkers: MAX_CONCURRENT_WORKERS,
-  slots: WEEKDAYS.flatMap((date) =>
-    TIME_SLOTS.map(({ start, end }) => {
-      const isUnavailable = isFixedUnavailableTime(start, end);
-      const isMySchedule = isMyScheduleTime(date, start, end);
-      const status = isUnavailable
-        ? "UNAVAILABLE"
-        : isMySchedule
-          ? "MY_SCHEDULE"
-          : "EMPTY";
-      const currentCount = isUnavailable
-        ? 0
-        : getRandomWorkerCount(date, start);
 
       return {
         date,

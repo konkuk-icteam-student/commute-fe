@@ -6,12 +6,13 @@ import type { PolicyContext, SchedulePolicy } from "../model/policy";
 import {
   buildWeekSchedule,
   type WeekDay,
+  type WeekScheduleSource,
   type WeekSlot,
 } from "../model/week-schedule";
-import type { WeekScheduleData } from "../types";
 
 interface UseScheduleGridOptions {
-  data: WeekScheduleData;
+  // 아직 응답이 없으면 EMPTY_SCHEDULE을 넘긴다. 표는 잠긴 상태로 그려진다.
+  data: WeekScheduleSource;
   year: number;
   month: number;
   week: number;
