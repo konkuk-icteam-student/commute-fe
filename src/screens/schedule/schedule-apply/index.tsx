@@ -5,8 +5,8 @@ import { useState } from "react";
 import {
   applyPolicy,
   ApplyResultModal,
-  DUMMY_NEXT_MONTH_SCHEDULE,
   DUMMY_SCHEDULE_APPLY_RESPONSE,
+  EMPTY_SCHEDULE,
   getAppliedSlotTimes,
   getCurrentMonthDates,
   getCurrentMonthSlots,
@@ -23,6 +23,8 @@ import {
   useScheduleGrid,
   useScheduleWeek,
 } from "@/features/schedule";
+import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
@@ -51,6 +53,15 @@ export default function ScheduleApplyScreen() {
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
+  const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
+  const { periodSchedulesData } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
+
+  // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
+  const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+
   const {
     draft,
     toggleSlot,
@@ -62,12 +73,12 @@ export default function ScheduleApplyScreen() {
   } = useScheduleDraft({
     policy: applyPolicy,
     resolveContext: () => ({
-      maxConcurrentWorkers: DUMMY_NEXT_MONTH_SCHEDULE.maxConcurrentWorkers,
+      maxConcurrentWorkers: schedule.maxConcurrentWorkers,
     }),
   });
 
   const { days, cells } = useScheduleGrid({
-    data: DUMMY_NEXT_MONTH_SCHEDULE,
+    data: schedule,
     year,
     month,
     week,

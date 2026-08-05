@@ -18,10 +18,15 @@ export { getAppliedSlotTimes } from "./model/applied-slots";
 export { getDraftSlotTimes } from "./model/draft";
 export type { DraftKind, ScheduleDraft } from "./model/draft";
 export {
+  EMPTY_SCHEDULE,
   getCurrentMonthDates,
   getCurrentMonthSlots,
 } from "./model/week-schedule";
-export type { WeekDay, WeekSlot } from "./model/week-schedule";
+export type {
+  WeekDay,
+  WeekScheduleSource,
+  WeekSlot,
+} from "./model/week-schedule";
 export { applyPolicy, editPolicy, viewPolicy } from "./model/policy";
 export type { PolicyContext, SchedulePolicy } from "./model/policy";
 

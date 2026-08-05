@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
-  DUMMY_GET_SCHEDULE,
   DUMMY_SCHEDULE_CHANGE_HISTORY,
+  EMPTY_SCHEDULE,
   ScheduleChangeHistoryPreview,
   ScheduleGrid,
   ScheduleHeader,
@@ -15,7 +15,8 @@ import {
   viewPolicy,
   WorkingHoursCard,
 } from "@/features/schedule";
-import { useGetMonthlySchedulesQuery } from "@/apis/work-schedules";
+import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
@@ -43,27 +44,26 @@ export default function ScheduleViewScreen() {
   // '자세히'를 켜야 칸마다 인원수를 보여 준다.
   const [isDetailVisible, setIsDetailVisible] = useState(false);
 
+  const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
+  const { periodSchedulesData } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
+
+  // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
+  const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+
   const { days, cells } = useScheduleGrid({
-    data: DUMMY_GET_SCHEDULE,
+    data: schedule,
     year,
     month,
     week,
     policy: viewPolicy,
     context: {
-      maxConcurrentWorkers: DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
+      maxConcurrentWorkers: schedule.maxConcurrentWorkers,
     },
     isDetailVisible,
   });
-
-  // TODO: 이건 api 연동 및 TanStack Query 적용 예시임
-  const { monthlySchedulesData } = useGetMonthlySchedulesQuery({
-    year: year,
-    month: month,
-  });
-
-  useEffect(() => {
-    console.log(monthlySchedulesData);
-  }, [monthlySchedulesData]);
 
   return (
     <div className="flex w-full flex-col gap-4 px-3 py-4">

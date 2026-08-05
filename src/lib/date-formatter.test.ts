@@ -3,12 +3,44 @@ import { describe, it } from "node:test";
 
 const {
   getMondayOfMonthWeek,
+  getMonthWeekDateRange,
   getMonthWeekOfDate,
   getWeekdaysOfMonthWeek,
   shiftDateByWeeks,
 } = (await import(
   new URL("./date-formatter.ts", import.meta.url).href
 )) as typeof import("./date-formatter");
+
+describe("getMonthWeekDateRange", () => {
+  it("returns the whole week when every weekday is inside the month", () => {
+    assert.deepEqual(getMonthWeekDateRange(2026, 8, 1), {
+      startDate: "2026-08-03",
+      endDate: "2026-08-07",
+    });
+  });
+
+  // 시간표 조회 api는 같은 달 안의 범위만 받으므로 지난 달 날짜는 빠져야 한다.
+  it("drops previous month days on the first week", () => {
+    assert.deepEqual(getMonthWeekDateRange(2026, 7, 1), {
+      startDate: "2026-07-01",
+      endDate: "2026-07-03",
+    });
+  });
+
+  it("drops next month days on the last week", () => {
+    assert.deepEqual(getMonthWeekDateRange(2026, 8, 5), {
+      startDate: "2026-08-31",
+      endDate: "2026-08-31",
+    });
+  });
+
+  it("keeps the range inside one month across a year boundary", () => {
+    assert.deepEqual(getMonthWeekDateRange(2027, 1, 1), {
+      startDate: "2027-01-01",
+      endDate: "2027-01-01",
+    });
+  });
+});
 
 describe("getMonthWeekOfDate", () => {
   it("returns maxWeek as 4 when February starts on Monday and has 28 days", () => {

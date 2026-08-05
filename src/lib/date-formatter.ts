@@ -116,6 +116,24 @@ export const getWeekdaysOfMonthWeek = (
   });
 };
 
+// 해당 주차에서 이번 달에 속한 날짜의 시작·끝을 반환 (month: 1~12)
+// 주차는 달을 넘나들 수 있지만 시간표 조회 api는 같은 달 안의 범위만 받으므로 잘라 낸다.
+// 예: 2026년 7월 1주차(6/29~7/03) -> { startDate: "2026-07-01", endDate: "2026-07-03" }
+export const getMonthWeekDateRange = (
+  year: number,
+  month: number,
+  week: number,
+) => {
+  const currentMonthDates = getWeekdaysOfMonthWeek(year, month, week)
+    .filter(({ isCurrentMonth }) => isCurrentMonth)
+    .map(({ date }) => date);
+
+  return {
+    startDate: currentMonthDates[0],
+    endDate: currentMonthDates[currentMonthDates.length - 1],
+  };
+};
+
 // 화면 표시용 "M.DD"
 function formatDateLabel(date: Date) {
   const month = String(date.getMonth() + 1);

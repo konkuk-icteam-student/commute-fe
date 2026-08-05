@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 import {
-  DUMMY_GET_SCHEDULE,
   editPolicy,
+  EMPTY_SCHEDULE,
   getAppliedSlotTimes,
   getCurrentMonthSlots,
   getDraftSlotTimes,
@@ -22,6 +22,8 @@ import {
   WorkingHoursCard,
   type ScheduleDraft,
 } from "@/features/schedule";
+import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
 // TODO: 추후 서버에서 받아올 값
@@ -37,15 +39,16 @@ const getAbleToAddHours = (deleteRequestHours: number) =>
   MAX_MONTH_HOURS - MONTH_TOTAL_HOURS + deleteRequestHours;
 
 // 칸을 누르는 시점의 내역으로 한도를 다시 계산한다.
-const resolveEditContext = (draft: ScheduleDraft) => ({
-  maxConcurrentWorkers: DUMMY_GET_SCHEDULE.maxConcurrentWorkers,
-  editLimit: {
-    addHours: getSlotTimesTotalHours(getDraftSlotTimes(draft, "ADD")),
-    maxAddHours: getAbleToAddHours(
-      getSlotTimesTotalHours(getDraftSlotTimes(draft, "DELETE")),
-    ),
-  },
-});
+const createResolveEditContext =
+  (maxConcurrentWorkers: number) => (draft: ScheduleDraft) => ({
+    maxConcurrentWorkers,
+    editLimit: {
+      addHours: getSlotTimesTotalHours(getDraftSlotTimes(draft, "ADD")),
+      maxAddHours: getAbleToAddHours(
+        getSlotTimesTotalHours(getDraftSlotTimes(draft, "DELETE")),
+      ),
+    },
+  });
 
 export default function ScheduleEditScreen() {
   // 수정 요청은 이번 달 전체에 대해 가능하다.
@@ -65,6 +68,15 @@ export default function ScheduleEditScreen() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
+  const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
+  const { periodSchedulesData } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
+
+  // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
+  const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+
   const {
     draft,
     toggleSlot,
@@ -74,11 +86,11 @@ export default function ScheduleEditScreen() {
     deleteHours: deleteRequestHours,
   } = useScheduleDraft({
     policy: editPolicy,
-    resolveContext: resolveEditContext,
+    resolveContext: createResolveEditContext(schedule.maxConcurrentWorkers),
   });
 
   const { days, cells } = useScheduleGrid({
-    data: DUMMY_GET_SCHEDULE,
+    data: schedule,
     year,
     month,
     week,
