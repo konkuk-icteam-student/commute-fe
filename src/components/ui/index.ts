@@ -7,3 +7,4 @@ export { default as AdminWorkScheduleList } from "./admin-work-schedule-list";
 export { default as Alert } from "./alert";
 export { default as Modal } from "./modal";
 export { default as Toast } from "./toast";
+export { default as Spinner } from "./spinner";

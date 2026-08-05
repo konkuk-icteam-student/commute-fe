@@ -76,10 +76,11 @@ export default function ScheduleEditScreen() {
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
-  const { periodSchedulesData } = useGetPeriodSchedulesQuery({
-    startDate,
-    endDate,
-  });
+  const { periodSchedulesData, isPendingPeriodSchedules } =
+    useGetPeriodSchedulesQuery({
+      startDate,
+      endDate,
+    });
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
@@ -160,7 +161,11 @@ export default function ScheduleEditScreen() {
           onNextWeek={goNextWeek}
           action={<ScheduleRefreshButton />}
         />
-        <ScheduleGrid days={days} cells={cells} />
+        <ScheduleGrid
+          days={days}
+          cells={cells}
+          isLoading={isPendingPeriodSchedules}
+        />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
           weeklyMaxHours={MAX_WEEK_HOURS}
