@@ -29,12 +29,17 @@ import {
   useGetPeriodSchedulesQuery,
   type ApplyWorkSchedulesResponse,
 } from "@/apis/work-schedules";
+import { ApiError } from "@/apis/api-client";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
 // TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
 const MAX_WEEK_HOURS = 13;
+
+// 결과 모달에 보여 줄 내용.
+// 전부 실패하면 서버가 구간 목록을 내려주지 않으므로 message만 채워진다.
+type ApplyResult = ApplyWorkSchedulesResponse & { message?: string };
 
 export default function ScheduleApplyScreen() {
   // 근로 신청은 다음 달에 대해서만 가능하다.
@@ -51,9 +56,8 @@ export default function ScheduleApplyScreen() {
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
-  // 신청 응답이 담기면 결과 모달이 열린다. 닫을 때 다시 비운다.
-  const [applyResult, setApplyResult] =
-    useState<ApplyWorkSchedulesResponse | null>(null);
+  // 신청 결과가 담기면 결과 모달이 열린다. 닫을 때 다시 비운다.
+  const [applyResult, setApplyResult] = useState<ApplyResult | null>(null);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const { periodSchedulesData, isPendingPeriodSchedules } =
@@ -143,6 +147,14 @@ export default function ScheduleApplyScreen() {
         setApplyResult(result);
         resetDraft();
       },
+      // 전부 실패하면 details 없이 메시지만 오므로 api 계층이 ApiError로 바꿔 던진다.
+      // 이때는 서버 문구를 그대로 보여 주고, 고쳐서 다시 신청할 수 있도록 내역은 남긴다.
+      // 통신 자체가 실패한 경우는 ApiError가 아니며 #101에서 Toast로 다룬다.
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          setApplyResult({ message: error.message, success: [], failure: [] });
+        }
+      },
     });
   };
 
@@ -208,6 +220,7 @@ export default function ScheduleApplyScreen() {
       <ApplyResultModal
         open={applyResult !== null}
         handleClose={() => setApplyResult(null)}
+        message={applyResult?.message}
         successList={applyResult?.success ?? []}
         failureList={applyResult?.failure ?? []}
       />
