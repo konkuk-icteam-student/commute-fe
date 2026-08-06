@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   applyPolicy,
   ApplyResultModal,
-  DUMMY_SCHEDULE_APPLY_RESPONSE,
   EMPTY_SCHEDULE,
   getAppliedSlotTimes,
   getConfirmedSlotTimes,
@@ -25,7 +24,11 @@ import {
   useScheduleGrid,
   useScheduleWeek,
 } from "@/features/schedule";
-import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import {
+  useApplyWorkSchedulesMutation,
+  useGetPeriodSchedulesQuery,
+  type ApplyWorkSchedulesResponse,
+} from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
@@ -33,7 +36,6 @@ import { Alert, Button, Modal } from "@/components/ui";
 const MIN_SESSION_HOURS = 1;
 const MAX_WEEK_HOURS = 13;
 
-// TODO: 서버 응답 pending 시 Toast 컴포넌트 말고 다른 식으로 보여주기
 export default function ScheduleApplyScreen() {
   // 근로 신청은 다음 달에 대해서만 가능하다.
   const [nextMonthDate] = useState(getFirstDateOfNextMonth);
@@ -49,7 +51,9 @@ export default function ScheduleApplyScreen() {
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
-  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  // 신청 응답이 담기면 결과 모달이 열린다. 닫을 때 다시 비운다.
+  const [applyResult, setApplyResult] =
+    useState<ApplyWorkSchedulesResponse | null>(null);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const { periodSchedulesData, isPendingPeriodSchedules } =
@@ -63,9 +67,13 @@ export default function ScheduleApplyScreen() {
   const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
   const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
 
+  const { applyWorkSchedules, isPendingApplyWorkSchedules } =
+    useApplyWorkSchedulesMutation();
+
   const {
     draft,
     toggleSlot,
+    resetDraft,
     context,
     rawPayload,
     payload,
@@ -116,7 +124,8 @@ export default function ScheduleApplyScreen() {
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     weekTotalTimeAfterApply > MAX_WEEK_HOURS ||
-    monthTotalTimeAfterApply > monthLimitHours;
+    monthTotalTimeAfterApply > monthLimitHours ||
+    isPendingApplyWorkSchedules;
 
   const handleClickButton = () => {
     if (isBelowMinSessionHours) {
@@ -127,13 +136,14 @@ export default function ScheduleApplyScreen() {
   };
 
   const handleApply = () => {
-    console.log("slot 병합 이후 : ", payload);
     setIsApplyAlertOpen(false);
 
-    // TODO: 추후 이부분은 삭제 예정
-    setTimeout(() => {
-      setIsResultModalOpen(true);
-    }, 1000);
+    applyWorkSchedules(payload, {
+      onSuccess: (result) => {
+        setApplyResult(result);
+        resetDraft();
+      },
+    });
   };
 
   return (
@@ -196,10 +206,10 @@ export default function ScheduleApplyScreen() {
         onConfirm={handleApply}
       />
       <ApplyResultModal
-        open={isResultModalOpen}
-        handleClose={() => setIsResultModalOpen(false)}
-        successList={DUMMY_SCHEDULE_APPLY_RESPONSE.details.success}
-        failureList={DUMMY_SCHEDULE_APPLY_RESPONSE.details.failure}
+        open={applyResult !== null}
+        handleClose={() => setApplyResult(null)}
+        successList={applyResult?.success ?? []}
+        failureList={applyResult?.failure ?? []}
       />
     </div>
   );

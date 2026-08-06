@@ -17,7 +17,6 @@ export default function ApplyResultModal({
 }: ApplyResultModalProps) {
   return (
     <Modal open={open} title="신청 결과" onButtonClick={handleClose}>
-      {/* TODO: 추후 더미 데이터 대신 서버 응답으로 수정 */}
       <div className="mt-4 flex w-full flex-col gap-6">
         {successList.length > 0 && (
           <section className="flex w-full flex-col gap-3">

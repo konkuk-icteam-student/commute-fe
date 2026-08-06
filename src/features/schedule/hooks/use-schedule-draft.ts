@@ -30,11 +30,16 @@ export const useScheduleDraft = ({
     );
   };
 
+  // 제출이 끝나면 담아 둔 내역을 비운다.
+  // 서버에 반영된 표 위에 같은 슬롯이 남아 있으면 신청 시간이 두 번 계산된다.
+  const resetDraft = () => setDraft(EMPTY_DRAFT);
+
   const rawPayload = toRawPayload(draft);
 
   return {
     draft,
     toggleSlot,
+    resetDraft,
     context: resolveContext(draft),
     // 슬롯 단위 그대로. 시간 합계와 주 단위 계산에 쓴다.
     rawPayload,

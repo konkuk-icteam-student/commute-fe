@@ -23,7 +23,10 @@ import {
   WorkingHoursCard,
   type ScheduleDraft,
 } from "@/features/schedule";
-import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import {
+  useEditWorkSchedulesMutation,
+  useGetPeriodSchedulesQuery,
+} from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
@@ -87,9 +90,13 @@ export default function ScheduleEditScreen() {
   const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
   const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
 
+  const { editWorkSchedules, isPendingEditWorkSchedules } =
+    useEditWorkSchedulesMutation();
+
   const {
     draft,
     toggleSlot,
+    resetDraft,
     context,
     payload,
     addHours: addRequestHours,
@@ -132,7 +139,8 @@ export default function ScheduleEditScreen() {
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     deleteRequestHours > monthUsedHours ||
     addRequestHours > ableToAddHours ||
-    reason === "";
+    reason === "" ||
+    isPendingEditWorkSchedules;
 
   const handleClickButton = () => {
     if (isBelowMinSessionHours) {
@@ -144,9 +152,17 @@ export default function ScheduleEditScreen() {
   };
 
   const handleApply = () => {
-    console.log("제출 변경 시간 : ", payload);
-    console.log("제출 변경 사유 : ", reason);
     setIsApplyAlertOpen(false);
+
+    editWorkSchedules(
+      { ...payload, reason },
+      {
+        onSuccess: () => {
+          resetDraft();
+          setReason("");
+        },
+      },
+    );
   };
 
   return (
