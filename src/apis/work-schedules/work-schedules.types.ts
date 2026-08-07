@@ -37,6 +37,38 @@ export interface GetMonthlyWorkSchedulesResponse {
   days: ScheduleDayType[];
 }
 
+// 요약 조회 범위 (YYYY-MM-DD). 기간 조회와 달리 같은 달, 같은 주 안이어야 한다.
+export interface GetWorkSchedulesSummaryRequest {
+  startDate: string;
+  endDate: string;
+}
+
+// 근로시간 한 칸. label은 서버가 만든 표시용 문구다. 예: "1주차", "4월 전체"
+export interface WorkSchedulesSummaryEntryType {
+  label: string;
+  usedHours: number;
+  limitHours: number;
+}
+
+// 주간과 월간 근로시간을 나눠서 내려준다.
+export interface GetWorkSchedulesSummaryResponse {
+  startDate: string;
+  endDate: string;
+  week: WorkSchedulesSummaryEntryType;
+  month: WorkSchedulesSummaryEntryType;
+}
+
+export interface GetMonthlyLimitRequest {
+  year: number;
+  month: number;
+}
+
+export interface GetMonthlyLimitResponse {
+  scheduleYear: number;
+  scheduleMonth: number;
+  maxConcurrentWorkers: number;
+}
+
 // 제출하는 슬롯. 날짜 YYYY-MM-DD, 시간 HH:MM, 30분 단위.
 export interface WorkScheduleSlotTimeType {
   date: string;

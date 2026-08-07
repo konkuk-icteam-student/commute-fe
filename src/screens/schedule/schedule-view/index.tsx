@@ -5,9 +5,6 @@ import { useState } from "react";
 import {
   DUMMY_SCHEDULE_CHANGE_HISTORY,
   EMPTY_SCHEDULE,
-  getConfirmedSlotTimes,
-  getCurrentMonthSlots,
-  getSlotTimesTotalHours,
   ScheduleChangeHistoryPreview,
   ScheduleGrid,
   ScheduleHeader,
@@ -18,13 +15,15 @@ import {
   viewPolicy,
   WorkingHoursCard,
 } from "@/features/schedule";
-import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
+import {
+  useGetPeriodSchedulesQuery,
+  useGetWorkSchedulesSummaryQuery,
+} from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
 
 // TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
-const MAX_WEEK_HOURS = 13;
 
 export default function ScheduleViewScreen() {
   // 조회는 이번 달 안에서만 이동할 수 있다.
@@ -48,10 +47,17 @@ export default function ScheduleViewScreen() {
       endDate,
     });
 
+  // 근로시간은 시간표와 따로 조회한다. 주간·월간 합계와 한도를 서버가 계산해 준다.
+  const { workSchedulesSummaryData, isPendingWorkSchedulesSummary } =
+    useGetWorkSchedulesSummaryQuery({
+      startDate,
+      endDate,
+    });
+
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
-  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
+  const weekSummary = workSchedulesSummaryData?.week;
+  const monthSummary = workSchedulesSummaryData?.month;
 
   const { days, cells } = useScheduleGrid({
     data: schedule,
@@ -64,11 +70,6 @@ export default function ScheduleViewScreen() {
     },
     isDetailVisible,
   });
-
-  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
-  const weekHours = getSlotTimesTotalHours(
-    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
-  );
 
   return (
     <div className="flex w-full flex-col gap-4 px-3 py-4">
@@ -95,21 +96,23 @@ export default function ScheduleViewScreen() {
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={MAX_WEEK_HOURS}
-          monthlyTargetHours={monthLimitHours}
+          weeklyMaxHours={weekSummary?.limitHours ?? 0}
+          monthlyTargetHours={monthSummary?.limitHours ?? 0}
         />
       </div>
       <div className="flex flex-col gap-2">
         <WorkingHoursCard
           label={`${week}주차 총 시간`}
-          hours={weekHours}
-          maxHours={MAX_WEEK_HOURS}
+          hours={weekSummary?.usedHours ?? 0}
+          maxHours={weekSummary?.limitHours ?? 0}
+          isLoading={isPendingWorkSchedulesSummary}
         />
         <WorkingHoursCard
           label={`${month}월 전체`}
-          hours={monthUsedHours}
-          maxHours={monthLimitHours}
+          hours={monthSummary?.usedHours ?? 0}
+          maxHours={monthSummary?.limitHours ?? 0}
           withProgressBar
+          isLoading={isPendingWorkSchedulesSummary}
         />
         <ScheduleChangeHistoryPreview
           histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
