@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { useGetNewNotificationsQuery } from "@/apis/notifications";
 import {
   AttendanceCard,
   DateRefreshButton,
@@ -13,7 +14,6 @@ import {
   useClockInLocation,
   WorkScheduleCard,
 } from "@/features/home";
-import { mockNotificationSummary } from "@/features/notification";
 
 const mockHomeData = {
   userName: "홍길동",
@@ -39,6 +39,7 @@ export default function HomeScreen() {
   );
   const [clockedInAt, setClockedInAt] = useState<Date | null>(null);
   const { canClockInAtWorkLocation } = useClockInLocation();
+  const { newNotificationsData } = useGetNewNotificationsQuery();
   const currentDateTime = formatCurrentDateTime(currentDate);
   const schedules = syncSchedulesWithCurrentTime(
     mockHomeData.schedules,
@@ -84,9 +85,7 @@ export default function HomeScreen() {
   return (
     <section className="min-h-full w-full bg-white px-6.5 pt-14.5 pb-28 text-[#111827]">
       <HomeHeader
-        newNotificationCount={
-          mockNotificationSummary.details.newNotificationCount
-        }
+        newNotificationCount={newNotificationsData?.newNotificationCount ?? 0}
       />
       <HomeGreeting
         teamName={mockHomeData.teamName}
