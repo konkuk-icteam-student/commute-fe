@@ -13,4 +13,16 @@ export const WORK_SCHEDULES_QUERY_KEY = {
     startDate,
     endDate,
   ],
+  SUMMARY: (startDate: string, endDate: string) => [
+    "work-schedules",
+    "summary",
+    startDate,
+    endDate,
+  ],
+  MONTHLY_LIMIT: (year: number, month: number) => [
+    "work-schedules",
+    "monthly-limit",
+    year,
+    month,
+  ],
 };

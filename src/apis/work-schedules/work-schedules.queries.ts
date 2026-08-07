@@ -7,17 +7,23 @@ import type {
   ApplyWorkSchedulesResponse,
   EditWorkSchedulesRequest,
   EditWorkSchedulesResponse,
+  GetMonthlyLimitRequest,
+  GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesRequest,
   GetMonthlyWorkSchedulesResponse,
   GetPeriodWorkSchedulesRequest,
   GetPeriodWorkSchedulesResponse,
+  GetWorkSchedulesSummaryRequest,
+  GetWorkSchedulesSummaryResponse,
 } from "./work-schedules.types";
 import { WORK_SCHEDULES_QUERY_KEY } from "./work-schedules.key";
 import {
   applyWorkSchedulesApi,
   editWorkSchedulesApi,
+  getMonthlyLimitApi,
   getMonthlySchedulesApi,
   getPeriodSchedulesApi,
+  getWorkSchedulesSummaryApi,
 } from "./work-schedules.api";
 import { type ApiError } from "../api-client";
 
@@ -27,6 +33,14 @@ const WORK_SCHEDULES_CACHE_TIME = {
     GC: 1000 * 60 * 15,
   },
   PERIOD: {
+    STALE: 1000 * 60 * 10,
+    GC: 1000 * 60 * 15,
+  },
+  SUMMARY: {
+    STALE: 1000 * 60 * 10,
+    GC: 1000 * 60 * 15,
+  },
+  MONTHLY_LIMIT: {
     STALE: 1000 * 60 * 10,
     GC: 1000 * 60 * 15,
   },
@@ -83,6 +97,65 @@ export const useGetPeriodSchedulesQuery = ({
     isPendingPeriodSchedules,
     isErrorPeriodSchedules,
     periodSchedulesError,
+  };
+};
+
+// 화면이 보고 있는 주차의 주간·월간 근로시간 요약.
+// 기간 조회와 같은 범위를 쓰므로 날짜가 정해지기 전에는 enabled로 미룰 수 있다.
+export const useGetWorkSchedulesSummaryQuery = ({
+  startDate,
+  endDate,
+  enabled = true,
+}: GetWorkSchedulesSummaryRequest & { enabled?: boolean }) => {
+  const {
+    data: workSchedulesSummaryData,
+    isPending: isPendingWorkSchedulesSummary,
+    isError: isErrorWorkSchedulesSummary,
+    error: workSchedulesSummaryError,
+  } = useQuery<GetWorkSchedulesSummaryResponse, ApiError>({
+    queryKey: WORK_SCHEDULES_QUERY_KEY.SUMMARY(startDate, endDate),
+    queryFn: () => getWorkSchedulesSummaryApi({ startDate, endDate }),
+    enabled,
+    retry: 1,
+    staleTime: WORK_SCHEDULES_CACHE_TIME.SUMMARY.STALE,
+    gcTime: WORK_SCHEDULES_CACHE_TIME.SUMMARY.GC,
+  });
+
+  return {
+    workSchedulesSummaryData,
+    isPendingWorkSchedulesSummary,
+    isErrorWorkSchedulesSummary,
+    workSchedulesSummaryError,
+  };
+};
+
+// 해당 연월의 최대 동시 근무 인원.
+// 지금은 기간 조회 응답의 maxConcurrentWorkers를 쓰고 있어 화면에서 호출하지 않는다.
+// 별도로 필요해질 때를 대비해 준비만 해 둔다.
+export const useGetMonthlyLimitQuery = ({
+  year,
+  month,
+  enabled = true,
+}: GetMonthlyLimitRequest & { enabled?: boolean }) => {
+  const {
+    data: monthlyLimitData,
+    isPending: isPendingMonthlyLimit,
+    isError: isErrorMonthlyLimit,
+    error: monthlyLimitError,
+  } = useQuery<GetMonthlyLimitResponse, ApiError>({
+    queryKey: WORK_SCHEDULES_QUERY_KEY.MONTHLY_LIMIT(year, month),
+    queryFn: () => getMonthlyLimitApi({ year, month }),
+    enabled,
+    retry: 1,
+    staleTime: WORK_SCHEDULES_CACHE_TIME.MONTHLY_LIMIT.STALE,
+    gcTime: WORK_SCHEDULES_CACHE_TIME.MONTHLY_LIMIT.GC,
+  });
+
+  return {
+    monthlyLimitData,
+    isPendingMonthlyLimit,
+    isErrorMonthlyLimit,
+    monthlyLimitError,
   };
 };
 

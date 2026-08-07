@@ -5,10 +5,14 @@ import type {
   ApplyWorkSchedulesResponse,
   EditWorkSchedulesRequest,
   EditWorkSchedulesResponse,
+  GetMonthlyLimitRequest,
+  GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesResponse,
   GetMonthlyWorkSchedulesRequest,
   GetPeriodWorkSchedulesRequest,
   GetPeriodWorkSchedulesResponse,
+  GetWorkSchedulesSummaryRequest,
+  GetWorkSchedulesSummaryResponse,
 } from "./work-schedules.types";
 
 export const getMonthlySchedulesApi = async ({
@@ -30,6 +34,31 @@ export const getPeriodSchedulesApi = async ({
   const response = await apiClient.get<GetPeriodWorkSchedulesResponse>(
     WORK_SCHEDULES_URL.DEFAULT,
     { params: { startDate, endDate } },
+  );
+
+  return response.details;
+};
+
+// 이 주차의 주간·월간 근로시간 요약. 사용 시간과 한도를 서버가 계산해 준다.
+export const getWorkSchedulesSummaryApi = async ({
+  startDate,
+  endDate,
+}: GetWorkSchedulesSummaryRequest) => {
+  const response = await apiClient.get<GetWorkSchedulesSummaryResponse>(
+    WORK_SCHEDULES_URL.SUMMARY,
+    { params: { startDate, endDate } },
+  );
+
+  return response.details;
+};
+
+// 해당 연월의 최대 동시 근무 인원.
+export const getMonthlyLimitApi = async ({
+  year,
+  month,
+}: GetMonthlyLimitRequest) => {
+  const response = await apiClient.get<GetMonthlyLimitResponse>(
+    WORK_SCHEDULES_URL.MONTHLY_LIMIT(year, month),
   );
 
   return response.details;
