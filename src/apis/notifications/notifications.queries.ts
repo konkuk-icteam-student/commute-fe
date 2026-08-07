@@ -8,7 +8,10 @@ import {
   getNewNotificationsApi,
   getNotificationsApi,
 } from "./notifications.api";
-import { NOTIFICATIONS_QUERY_KEY } from "./notifications.key";
+import {
+  invalidateNotificationsQueries,
+  NOTIFICATIONS_QUERY_KEY,
+} from "./notifications.key";
 import type {
   CheckNotificationsResponse,
   GetNewNotificationsResponse,
@@ -73,8 +76,7 @@ export const useGetNewNotificationsQuery = () => {
 const useInvalidateNotifications = () => {
   const queryClient = useQueryClient();
 
-  return () =>
-    queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY.ALL });
+  return () => invalidateNotificationsQueries(queryClient);
 };
 
 export const useCheckNotificationsMutation = () => {

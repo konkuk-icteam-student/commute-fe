@@ -16,6 +16,7 @@ import {
 
 export default function AlarmScreen() {
   const hasCheckedNotificationsRef = useRef(false);
+  const isCheckingNotificationsRef = useRef(false);
   const {
     notificationsData,
     isPendingNotifications,
@@ -26,12 +27,23 @@ export default function AlarmScreen() {
   const notifications = notificationsData?.notifications ?? [];
 
   useEffect(() => {
-    if (!notificationsData || hasCheckedNotificationsRef.current) {
+    if (
+      !notificationsData ||
+      hasCheckedNotificationsRef.current ||
+      isCheckingNotificationsRef.current
+    ) {
       return;
     }
 
-    hasCheckedNotificationsRef.current = true;
-    checkNotifications();
+    isCheckingNotificationsRef.current = true;
+    checkNotifications(undefined, {
+      onSuccess: () => {
+        hasCheckedNotificationsRef.current = true;
+      },
+      onSettled: () => {
+        isCheckingNotificationsRef.current = false;
+      },
+    });
   }, [checkNotifications, notificationsData]);
 
   return (
