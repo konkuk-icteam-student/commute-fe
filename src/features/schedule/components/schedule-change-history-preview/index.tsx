@@ -13,6 +13,9 @@ import { formatScheduleChangeHistorySlot } from "../../utils";
 
 interface ScheduleChangeHistoryPreviewProps {
   histories: ScheduleChangeHistoryType[];
+  isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 interface ScheduleChangeHistorySlotRowProps {
@@ -38,6 +41,9 @@ function ScheduleChangeHistorySlotRow({
 
 export default function ScheduleChangeHistoryPreview({
   histories,
+  isLoading = false,
+  isError = false,
+  errorMessage = "처리 내역을 불러오지 못했습니다.",
 }: ScheduleChangeHistoryPreviewProps) {
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-[#DDE3EF] p-3">
@@ -49,7 +55,19 @@ export default function ScheduleChangeHistoryPreview({
           <Image alt="처리내역 자세히보기" src={chevronRightIcon} />
         </Link>
       </div>
-      {histories.length === 0 ? (
+      {isLoading ? (
+        <div className="flex w-full items-center justify-center pb-3">
+          <span className="text-[10px] text-[#8892A6]">
+            처리 내역을 불러오는 중입니다.
+          </span>
+        </div>
+      ) : isError ? (
+        <div className="flex w-full items-center justify-center pb-3">
+          <span className="text-center text-[10px] text-[#8892A6]">
+            {errorMessage}
+          </span>
+        </div>
+      ) : histories.length === 0 ? (
         <div className="flex w-full items-center justify-center pb-3">
           <span className="text-[10px] text-[#8892A6]">
             지금은 처리 중인 내역이 없습니다.

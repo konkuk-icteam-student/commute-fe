@@ -1,3 +1,11 @@
+import type {
+  WorkChangeRequestChangeTypeCode,
+  WorkChangeRequestHistoryItem,
+  WorkChangeRequestHistorySlot,
+  WorkChangeRequestHistoryStatusFilterCode,
+  WorkChangeRequestStatusCode,
+} from "@/apis/work-change-requests";
+
 export type ScheduleSlotStatus =
   | "MY_SCHEDULE"
   | "PENDING_DELETE"
@@ -31,28 +39,13 @@ export interface WeekScheduleData {
 export type ScheduleSlot = WeekScheduleData["slots"][number];
 
 // 수정 처리내역 관련 type
-export type ScheduleChangeHistoryStatusCode = "CS01" | "CS02" | "CS03";
+export type ScheduleChangeHistoryStatusCode = WorkChangeRequestStatusCode;
 
 export type ScheduleChangeHistoryFilterStatusCode =
-  | "ALL"
-  | ScheduleChangeHistoryStatusCode;
+  WorkChangeRequestHistoryStatusFilterCode;
 
-export type ScheduleChangeTypeCode = "CR01" | "CR02";
+export type ScheduleChangeTypeCode = WorkChangeRequestChangeTypeCode;
 
-export interface ScheduleChangeHistorySlot {
-  start: string;
-  end: string;
-  changeTypeCode?: ScheduleChangeTypeCode;
-}
+export type ScheduleChangeHistorySlot = WorkChangeRequestHistorySlot;
 
-export interface ScheduleChangeHistoryType {
-  requestId: string;
-  statusCode: ScheduleChangeHistoryStatusCode;
-  statusName: string;
-  requestedAt: string;
-  processedAt: string | null;
-  reason: string;
-  rejectReason: string | null;
-  deleteSlots: ScheduleChangeHistorySlot[];
-  addSlots: ScheduleChangeHistorySlot[];
-}
+export type ScheduleChangeHistoryType = WorkChangeRequestHistoryItem;

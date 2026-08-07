@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import {
-  DUMMY_SCHEDULE_CHANGE_HISTORY,
   EMPTY_SCHEDULE,
   ScheduleChangeHistoryPreview,
   ScheduleGrid,
@@ -15,6 +14,7 @@ import {
   viewPolicy,
   WorkingHoursCard,
 } from "@/features/schedule";
+import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
 import {
   useGetPeriodSchedulesQuery,
   useGetWorkSchedulesSummaryQuery,
@@ -53,6 +53,16 @@ export default function ScheduleViewScreen() {
       startDate,
       endDate,
     });
+  const {
+    workChangeRequestHistoryData,
+    isPendingWorkChangeRequestHistory,
+    isErrorWorkChangeRequestHistory,
+    workChangeRequestHistoryError,
+  } = useGetWorkChangeRequestHistoryQuery({
+    statusCode: "ALL",
+    page: 0,
+    size: 3,
+  });
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
@@ -115,7 +125,10 @@ export default function ScheduleViewScreen() {
           isLoading={isPendingWorkSchedulesSummary}
         />
         <ScheduleChangeHistoryPreview
-          histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
+          histories={workChangeRequestHistoryData?.histories ?? []}
+          isLoading={isPendingWorkChangeRequestHistory}
+          isError={isErrorWorkChangeRequestHistory}
+          errorMessage={workChangeRequestHistoryError?.message}
         />
       </div>
     </div>

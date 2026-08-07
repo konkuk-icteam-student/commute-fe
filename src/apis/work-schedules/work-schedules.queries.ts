@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { WORK_CHANGE_REQUESTS_QUERY_KEY } from "../work-change-requests";
 import type {
   ApplyWorkSchedulesRequest,
   ApplyWorkSchedulesResponse,
@@ -163,8 +164,12 @@ export const useGetMonthlyLimitQuery = ({
 const useInvalidateWorkSchedules = () => {
   const queryClient = useQueryClient();
 
-  return () =>
+  return () => {
     queryClient.invalidateQueries({ queryKey: WORK_SCHEDULES_QUERY_KEY.ALL });
+    queryClient.invalidateQueries({
+      queryKey: WORK_CHANGE_REQUESTS_QUERY_KEY.ALL,
+    });
+  };
 };
 
 // 근로 일정 신청. 결과 모달에 쓸 성공·실패 구간이 응답으로 온다.

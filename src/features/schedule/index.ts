@@ -35,7 +35,6 @@ export type { PolicyContext, SchedulePolicy } from "./model/policy";
 
 export {
   DUMMY_GET_SCHEDULE,
-  DUMMY_SCHEDULE_CHANGE_HISTORY,
   SLOTS_PER_DAY,
   SLOT_STATUS_CLASS_NAME,
 } from "./constants";
