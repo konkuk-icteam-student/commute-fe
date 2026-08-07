@@ -37,6 +37,44 @@ export interface GetMonthlyWorkSchedulesResponse {
   days: ScheduleDayType[];
 }
 
+// 제출하는 슬롯. 날짜 YYYY-MM-DD, 시간 HH:MM, 30분 단위.
+export interface WorkScheduleSlotTimeType {
+  date: string;
+  start: string;
+  end: string;
+}
+
+// 처리 결과로 돌려받는 시간 구간. 날짜와 시각이 붙은 ISO 형식이다.
+// 예: { start: "2026-04-06T13:00:00", end: "2026-04-06T14:30:00" }
+export interface WorkScheduleSlotRangeType {
+  start: string;
+  end: string;
+}
+
+// addSlots / deleteSlots는 둘 중 하나만 보내도 된다.
+export interface ApplyWorkSchedulesRequest {
+  addSlots?: WorkScheduleSlotTimeType[];
+  deleteSlots?: WorkScheduleSlotTimeType[];
+}
+
+// 구간별로 등록에 성공했는지 실패했는지 나뉘어 온다. 일부만 실패할 수 있다.
+export interface ApplyWorkSchedulesResponse {
+  success: WorkScheduleSlotRangeType[];
+  failure: WorkScheduleSlotRangeType[];
+}
+
+export interface EditWorkSchedulesRequest {
+  addSlots?: WorkScheduleSlotTimeType[];
+  deleteSlots?: WorkScheduleSlotTimeType[];
+  reason: string;
+}
+
+export interface EditWorkSchedulesResponse {
+  requestId: number;
+  // 스웨거에 PENDING만 정의돼 있고 EDIT 타입은 기획 확인 중이라 리터럴로 좁히지 않는다.
+  status: string;
+}
+
 export interface GetPeriodWorkSchedulesResponse {
   startDate: string;
   endDate: string;

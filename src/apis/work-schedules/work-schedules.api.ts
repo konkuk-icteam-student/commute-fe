@@ -1,6 +1,10 @@
 import { apiClient } from "../api-client";
 import { WORK_SCHEDULES_URL } from "./work-schedules.endpoint";
 import type {
+  ApplyWorkSchedulesRequest,
+  ApplyWorkSchedulesResponse,
+  EditWorkSchedulesRequest,
+  EditWorkSchedulesResponse,
   GetMonthlyWorkSchedulesResponse,
   GetMonthlyWorkSchedulesRequest,
   GetPeriodWorkSchedulesRequest,
@@ -26,6 +30,28 @@ export const getPeriodSchedulesApi = async ({
   const response = await apiClient.get<GetPeriodWorkSchedulesResponse>(
     WORK_SCHEDULES_URL.DEFAULT,
     { params: { startDate, endDate } },
+  );
+
+  return response.details;
+};
+
+// 고른 슬롯을 근로 일정으로 신청한다. 구간별 성공·실패가 나뉘어 돌아온다.
+export const applyWorkSchedulesApi = async (
+  body: ApplyWorkSchedulesRequest,
+) => {
+  const response = await apiClient.post<ApplyWorkSchedulesResponse>(
+    WORK_SCHEDULES_URL.APPLY,
+    body,
+  );
+
+  return response.details;
+};
+
+// 초기 신청 기간이 지난 뒤의 시간표 수정을 요청한다. 관리자 승인 후 반영된다.
+export const editWorkSchedulesApi = async (body: EditWorkSchedulesRequest) => {
+  const response = await apiClient.post<EditWorkSchedulesResponse>(
+    WORK_SCHEDULES_URL.EDIT,
+    body,
   );
 
   return response.details;

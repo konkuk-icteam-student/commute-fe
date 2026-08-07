@@ -1,8 +1,12 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
+  ApplyWorkSchedulesRequest,
+  ApplyWorkSchedulesResponse,
+  EditWorkSchedulesRequest,
+  EditWorkSchedulesResponse,
   GetMonthlyWorkSchedulesRequest,
   GetMonthlyWorkSchedulesResponse,
   GetPeriodWorkSchedulesRequest,
@@ -10,6 +14,8 @@ import type {
 } from "./work-schedules.types";
 import { WORK_SCHEDULES_QUERY_KEY } from "./work-schedules.key";
 import {
+  applyWorkSchedulesApi,
+  editWorkSchedulesApi,
   getMonthlySchedulesApi,
   getPeriodSchedulesApi,
 } from "./work-schedules.api";
@@ -78,4 +84,48 @@ export const useGetPeriodSchedulesQuery = ({
     isErrorPeriodSchedules,
     periodSchedulesError,
   };
+};
+
+// 제출이 반영되면 화면에 떠 있는 시간표가 낡으므로 다시 받아 오게 한다.
+const useInvalidateWorkSchedules = () => {
+  const queryClient = useQueryClient();
+
+  return () =>
+    queryClient.invalidateQueries({ queryKey: WORK_SCHEDULES_QUERY_KEY.ALL });
+};
+
+// 근로 일정 신청. 결과 모달에 쓸 성공·실패 구간이 응답으로 온다.
+export const useApplyWorkSchedulesMutation = () => {
+  const invalidateWorkSchedules = useInvalidateWorkSchedules();
+
+  const { mutate: applyWorkSchedules, isPending: isPendingApplyWorkSchedules } =
+    useMutation<
+      ApplyWorkSchedulesResponse,
+      ApiError,
+      ApplyWorkSchedulesRequest
+    >({
+      mutationFn: applyWorkSchedulesApi,
+      onSuccess: invalidateWorkSchedules,
+      onError: () => {
+        // TODO(#101): 실패를 Toast로 안내한다
+      },
+    });
+
+  return { applyWorkSchedules, isPendingApplyWorkSchedules };
+};
+
+// 근무 시간표 수정 요청. 승인 대기 상태로 접수되므로 시간표는 바로 바뀌지 않는다.
+export const useEditWorkSchedulesMutation = () => {
+  const invalidateWorkSchedules = useInvalidateWorkSchedules();
+
+  const { mutate: editWorkSchedules, isPending: isPendingEditWorkSchedules } =
+    useMutation<EditWorkSchedulesResponse, ApiError, EditWorkSchedulesRequest>({
+      mutationFn: editWorkSchedulesApi,
+      onSuccess: invalidateWorkSchedules,
+      onError: () => {
+        // TODO(#101): 실패를 Toast로 안내한다
+      },
+    });
+
+  return { editWorkSchedules, isPendingEditWorkSchedules };
 };
