@@ -98,8 +98,8 @@ export type DashboardAttendanceUser = {
   userName: string;
   department: string;
   studentId: string;
-  attendanceIssueCode?: DashboardMemberAttendanceIssueCode;
-  workStatusCode: DashboardMemberWorkStatusCode;
+  attendanceStatusCode: "AT01" | "AT02" | "AT03" | null;
+  workStatusCode: "WK01" | "WK02" | "WK03" | "WK04" | null;
   lateCount: number;
   lateMinutes: number;
   weeklyWorkedMinutes: number;

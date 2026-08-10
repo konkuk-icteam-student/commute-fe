@@ -45,6 +45,37 @@ const memberAttendanceIssueOrder: Partial<
   ABSENT: 4,
 };
 
+const toMemberWorkStatusCode = (
+  workStatusCode: DashboardAttendanceDetails["users"][number]["workStatusCode"],
+): DashboardMemberWorkStatusCode => {
+  switch (workStatusCode) {
+    case "WK01":
+      return "SCHEDULED";
+    case "WK02":
+      return "WORKING";
+    case "WK03":
+      return "COMPLETED";
+    case "WK04":
+      return "NOT_CHECKED_IN";
+    case null:
+      return "OFF";
+  }
+};
+
+const toMemberAttendanceIssueCode = (
+  attendanceStatusCode: DashboardAttendanceDetails["users"][number]["attendanceStatusCode"],
+): DashboardMemberAttendanceIssueCode | undefined => {
+  switch (attendanceStatusCode) {
+    case "AT02":
+      return "LATE";
+    case "AT03":
+      return "ABSENT";
+    case "AT01":
+    case null:
+      return undefined;
+  }
+};
+
 const getMemberAttendanceOrder = ({
   attendanceIssueCode,
   workStatusCode,
@@ -94,9 +125,22 @@ export const toDashboardMemberAttendanceRows = (
   details: DashboardAttendanceDetails,
 ): DashboardMemberAttendance[] =>
   [...details.users]
+    .map((user) => ({
+      ...user,
+      attendanceIssueCode: toMemberAttendanceIssueCode(
+        user.attendanceStatusCode,
+      ),
+      workStatusCode: toMemberWorkStatusCode(user.workStatusCode),
+    }))
     .sort((firstUser, secondUser) => {
-      const firstOrder = getMemberAttendanceOrder(firstUser);
-      const secondOrder = getMemberAttendanceOrder(secondUser);
+      const firstOrder = getMemberAttendanceOrder({
+        attendanceIssueCode: firstUser.attendanceIssueCode,
+        workStatusCode: firstUser.workStatusCode,
+      });
+      const secondOrder = getMemberAttendanceOrder({
+        attendanceIssueCode: secondUser.attendanceIssueCode,
+        workStatusCode: secondUser.workStatusCode,
+      });
 
       if (firstOrder !== secondOrder) {
         return firstOrder - secondOrder;
