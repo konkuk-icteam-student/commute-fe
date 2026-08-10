@@ -6,18 +6,19 @@ import {
   editPolicy,
   EMPTY_SCHEDULE,
   getAppliedSlotTimes,
-  getConfirmedSlotTimes,
   getCurrentMonthSlots,
   getDraftSlotTimes,
   getSlotTimesTotalHours,
   hasSlotTimesBelowMinSessionHours,
   ScheduleChangeList,
+  ScheduleErrorModal,
   ScheduleGrid,
   ScheduleHeader,
   ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
   useScheduleDraft,
+  useScheduleErrorModal,
   useScheduleGrid,
   useScheduleWeek,
   WorkingHoursCard,
@@ -26,13 +27,13 @@ import {
 import {
   useEditWorkSchedulesMutation,
   useGetPeriodSchedulesQuery,
+  useGetWorkSchedulesSummaryQuery,
 } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
+// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다!
 const MIN_SESSION_HOURS = 1;
-const MAX_WEEK_HOURS = 13;
 
 // 이번 달에 추가로 신청할 수 있는 시간. 삭제를 신청한 만큼 다시 채워 넣을 수 있다.
 const getAbleToAddHours = (
@@ -79,19 +80,47 @@ export default function ScheduleEditScreen() {
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
-  const { periodSchedulesData, isPendingPeriodSchedules } =
-    useGetPeriodSchedulesQuery({
-      startDate,
-      endDate,
-    });
+  const {
+    periodSchedulesData,
+    isFetchingPeriodSchedules,
+    periodSchedulesError,
+    refetchPeriodSchedules,
+  } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
 
-  // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
-  const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
-  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
+  // 범례에 쓸 주·월 한도. 시간표와 따로 조회하며 서버가 계산해 준다.
+  const {
+    workSchedulesSummaryData,
+    workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
+  } = useGetWorkSchedulesSummaryQuery({
+    startDate,
+    endDate,
+  });
+
+  // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
+  const handleRefresh = () => {
+    void refetchPeriodSchedules();
+    void refetchWorkSchedulesSummary();
+  };
 
   const { editWorkSchedules, isPendingEditWorkSchedules } =
     useEditWorkSchedulesMutation();
+
+  // 조회 실패는 자동으로, 수정 요청 실패는 showError로 알린다.
+  const { errorMessage, showError, closeErrorModal } = useScheduleErrorModal([
+    periodSchedulesError,
+    workSchedulesSummaryError,
+  ]);
+
+  // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
+  const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
+  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
+  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
 
   const {
     draft,
@@ -121,10 +150,6 @@ export default function ScheduleEditScreen() {
     onSlotClick: toggleSlot,
   });
 
-  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
-  const weekUsedHours = getSlotTimesTotalHours(
-    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
-  );
   const ableToAddHours = getAbleToAddHours(
     monthLimitHours,
     monthUsedHours,
@@ -161,6 +186,8 @@ export default function ScheduleEditScreen() {
           resetDraft();
           setReason("");
         },
+        // 실패하면 입력한 내역과 사유는 그대로 두고 서버 문구만 보여 준다.
+        onError: showError,
       },
     );
   };
@@ -175,16 +202,16 @@ export default function ScheduleEditScreen() {
           isNextWeekDisabled={isNextWeekDisabled}
           onPrevWeek={goPrevWeek}
           onNextWeek={goNextWeek}
-          action={<ScheduleRefreshButton />}
+          action={<ScheduleRefreshButton onClick={handleRefresh} />}
         />
         <ScheduleGrid
           days={days}
           cells={cells}
-          isLoading={isPendingPeriodSchedules}
+          isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={MAX_WEEK_HOURS}
+          weeklyMaxHours={weekLimitHours}
           monthlyTargetHours={monthLimitHours}
         />
       </div>
@@ -262,6 +289,7 @@ export default function ScheduleEditScreen() {
         onCancel={() => setIsApplyAlertOpen(false)}
         onConfirm={handleApply}
       />
+      <ScheduleErrorModal message={errorMessage} onClose={closeErrorModal} />
     </div>
   );
 }

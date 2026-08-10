@@ -9,3 +9,4 @@ export { default as WorkingHoursCard } from "./working-hours-card";
 export { default as ScheduleChangeList } from "./schedule-change-item";
 export { default as ScheduleApplySummary } from "./schedule-request-summary";
 export { default as ApplyResultModal } from "./apply-result-modal";
+export { default as ScheduleErrorModal } from "./schedule-error-modal";

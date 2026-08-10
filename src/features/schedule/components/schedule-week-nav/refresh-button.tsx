@@ -2,12 +2,12 @@ import Image from "next/image";
 
 import icScheduleRefresh from "@/assets/icons/common/ic_schedule_refresh.svg";
 
-// 신청·수정 요청 화면의 새로고침 버튼.
-// onClick을 넘기지 않으면 지금처럼 자리만 차지한다. (api 연동 시 연결 예정)
+// 화면이 보고 있는 조회를 다시 요청한다.
+// 조회에 실패하면 표가 잠긴 채로 남으므로, 사용자가 직접 다시 시도할 통로가 된다.
 export default function ScheduleRefreshButton({
   onClick,
 }: {
-  onClick?: () => void;
+  onClick: () => void;
 }) {
   return (
     <button

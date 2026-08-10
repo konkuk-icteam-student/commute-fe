@@ -10,7 +10,9 @@ interface ScheduleWeekNavProps {
   isNextWeekDisabled?: boolean;
   onPrevWeek: () => void;
   onNextWeek: () => void;
-  // 오른쪽 끝에 놓을 것. 조회 화면은 '자세히' 토글, 나머지 화면은 새로고침 버튼.
+  // 왼쪽 끝에 놓을 것. 조회 화면의 '자세히' 토글이 여기 붙는다.
+  leadingAction?: ReactNode;
+  // 오른쪽 끝에 놓을 것. 세 화면 모두 새로고침 버튼이다.
   action?: ReactNode;
 }
 
@@ -18,18 +20,19 @@ const ARROW_BUTTON_CLASS_NAME =
   "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full";
 const ARROW_DISABLED_CLASS_NAME = "cursor-not-allowed opacity-35";
 
-// 주차 이동 헤더. 어떤 화면인지는 알지 못하고, 오른쪽에 놓을 것만 받아 그린다.
+// 주차 이동 헤더. 어떤 화면인지는 알지 못하고, 양쪽에 놓을 것만 받아 그린다.
 export default function ScheduleWeekNav({
   week,
   isPrevWeekDisabled = false,
   isNextWeekDisabled = false,
   onPrevWeek,
   onNextWeek,
+  leadingAction,
   action,
 }: ScheduleWeekNavProps) {
   return (
     <header className="flex flex-row items-center justify-between">
-      <div className="flex-1" />
+      <div className="flex flex-1 justify-start">{leadingAction}</div>
       <div className="flex flex-row items-center gap-2">
         <button
           className={cn(

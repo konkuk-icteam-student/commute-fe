@@ -1,3 +1,4 @@
 export { useScheduleWeek } from "./use-schedule-week";
 export { useScheduleGrid } from "./use-schedule-grid";
 export { useScheduleDraft } from "./use-schedule-draft";
+export { useScheduleErrorModal } from "./use-schedule-error-modal";

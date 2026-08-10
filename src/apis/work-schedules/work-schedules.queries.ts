@@ -82,8 +82,11 @@ export const useGetPeriodSchedulesQuery = ({
   const {
     data: periodSchedulesData,
     isPending: isPendingPeriodSchedules,
+    // 최초 조회와 새로고침을 모두 덮는다. 로딩 UI는 이 값을 쓴다.
+    isFetching: isFetchingPeriodSchedules,
     isError: isErrorPeriodSchedules,
     error: periodSchedulesError,
+    refetch: refetchPeriodSchedules,
   } = useQuery<GetPeriodWorkSchedulesResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.PERIOD(startDate, endDate),
     queryFn: () => getPeriodSchedulesApi({ startDate, endDate }),
@@ -96,8 +99,10 @@ export const useGetPeriodSchedulesQuery = ({
   return {
     periodSchedulesData,
     isPendingPeriodSchedules,
+    isFetchingPeriodSchedules,
     isErrorPeriodSchedules,
     periodSchedulesError,
+    refetchPeriodSchedules,
   };
 };
 
@@ -111,8 +116,11 @@ export const useGetWorkSchedulesSummaryQuery = ({
   const {
     data: workSchedulesSummaryData,
     isPending: isPendingWorkSchedulesSummary,
+    // 최초 조회와 새로고침을 모두 덮는다. 로딩 UI는 이 값을 쓴다.
+    isFetching: isFetchingWorkSchedulesSummary,
     isError: isErrorWorkSchedulesSummary,
     error: workSchedulesSummaryError,
+    refetch: refetchWorkSchedulesSummary,
   } = useQuery<GetWorkSchedulesSummaryResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.SUMMARY(startDate, endDate),
     queryFn: () => getWorkSchedulesSummaryApi({ startDate, endDate }),
@@ -125,8 +133,10 @@ export const useGetWorkSchedulesSummaryQuery = ({
   return {
     workSchedulesSummaryData,
     isPendingWorkSchedulesSummary,
+    isFetchingWorkSchedulesSummary,
     isErrorWorkSchedulesSummary,
     workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
   };
 };
 

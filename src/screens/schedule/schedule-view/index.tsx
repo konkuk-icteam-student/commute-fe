@@ -6,10 +6,13 @@ import {
   DUMMY_SCHEDULE_CHANGE_HISTORY,
   EMPTY_SCHEDULE,
   ScheduleChangeHistoryPreview,
+  ScheduleErrorModal,
   ScheduleGrid,
   ScheduleHeader,
+  ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
+  useScheduleErrorModal,
   useScheduleGrid,
   useScheduleWeek,
   viewPolicy,
@@ -21,6 +24,7 @@ import {
 } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
+import { useGetMyPageQuery } from "@/apis/my-page";
 
 // TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
 const MIN_SESSION_HOURS = 1;
@@ -41,23 +45,57 @@ export default function ScheduleViewScreen() {
   const [isDetailVisible, setIsDetailVisible] = useState(false);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
-  const { periodSchedulesData, isPendingPeriodSchedules } =
-    useGetPeriodSchedulesQuery({
-      startDate,
-      endDate,
-    });
+  const {
+    periodSchedulesData,
+    isFetchingPeriodSchedules,
+    periodSchedulesError,
+    refetchPeriodSchedules,
+  } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
 
   // 근로시간은 시간표와 따로 조회한다. 주간·월간 합계와 한도를 서버가 계산해 준다.
-  const { workSchedulesSummaryData, isPendingWorkSchedulesSummary } =
-    useGetWorkSchedulesSummaryQuery({
-      startDate,
-      endDate,
-    });
+  const {
+    workSchedulesSummaryData,
+    isFetchingWorkSchedulesSummary,
+    workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
+  } = useGetWorkSchedulesSummaryQuery({
+    startDate,
+    endDate,
+  });
+
+  const { myPageData, isFetchingMyPage, myPageError, refetchMyPage } =
+    useGetMyPageQuery();
+
+  // 근로시간 카드는 요약과 마이페이지를 함께 쓰므로 둘 중 하나라도 받는 중이면 로딩이다.
+  const isFetchingWorkingHours =
+    isFetchingWorkSchedulesSummary || isFetchingMyPage;
+
+  // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
+  // 근로시간 카드가 세 조회를 함께 쓰므로 셋 다 다시 요청한다.
+  const handleRefresh = () => {
+    void refetchPeriodSchedules();
+    void refetchWorkSchedulesSummary();
+    void refetchMyPage();
+  };
+
+  // 조회에 실패하면 표가 회색으로만 남아 장애인지 알 수 없으므로 모달로 알린다.
+  const { errorMessage, closeErrorModal } = useScheduleErrorModal([
+    periodSchedulesError,
+    workSchedulesSummaryError,
+    myPageError,
+  ]);
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const weekSummary = workSchedulesSummaryData?.week;
-  const monthSummary = workSchedulesSummaryData?.month;
+  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
+  const weekWorkedHours = myPageData?.week.workedHours ?? 0;
+  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
+  const monthWorkedHours = myPageData?.month.workedHours ?? 0;
 
   const { days, cells } = useScheduleGrid({
     data: schedule,
@@ -81,43 +119,49 @@ export default function ScheduleViewScreen() {
           isNextWeekDisabled={isNextWeekDisabled}
           onPrevWeek={goPrevWeek}
           onNextWeek={goNextWeek}
-          action={
+          leadingAction={
             <Toggle
               checked={isDetailVisible}
               onCheckedChange={setIsDetailVisible}
               label="자세히"
+              className="ml-5"
             />
           }
+          action={<ScheduleRefreshButton onClick={handleRefresh} />}
         />
         <ScheduleGrid
           days={days}
           cells={cells}
-          isLoading={isPendingPeriodSchedules}
+          isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={weekSummary?.limitHours ?? 0}
-          monthlyTargetHours={monthSummary?.limitHours ?? 0}
+          weeklyMaxHours={weekLimitHours}
+          monthlyTargetHours={monthLimitHours}
         />
       </div>
       <div className="flex flex-col gap-2">
+        {/* hours는 실 근무 시간, maxHours는 신청한 시간 */}
         <WorkingHoursCard
           label={`${week}주차 총 시간`}
-          hours={weekSummary?.usedHours ?? 0}
-          maxHours={weekSummary?.limitHours ?? 0}
-          isLoading={isPendingWorkSchedulesSummary}
+          hours={weekWorkedHours}
+          maxHours={weekUsedHours}
+          isLoading={isFetchingWorkingHours}
         />
+        {/* hours는 실 근무 시간, maxHours는 신청한 시간 */}
         <WorkingHoursCard
           label={`${month}월 전체`}
-          hours={monthSummary?.usedHours ?? 0}
-          maxHours={monthSummary?.limitHours ?? 0}
+          hours={monthWorkedHours}
+          maxHours={monthUsedHours}
           withProgressBar
-          isLoading={isPendingWorkSchedulesSummary}
+          isLoading={isFetchingWorkingHours}
         />
         <ScheduleChangeHistoryPreview
           histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
         />
       </div>
+
+      <ScheduleErrorModal message={errorMessage} onClose={closeErrorModal} />
     </div>
   );
 }
