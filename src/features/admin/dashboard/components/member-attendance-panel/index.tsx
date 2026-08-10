@@ -13,6 +13,8 @@ const MEMBER_ROW_MIN_WIDTH_CLASS = "min-w-143.25";
 
 export default function MemberAttendancePanel({
   members,
+  isLoading = false,
+  isError = false,
   page,
   query,
   totalPages,
@@ -20,6 +22,8 @@ export default function MemberAttendancePanel({
   onQueryChange,
 }: {
   members: DashboardMemberAttendance[];
+  isLoading?: boolean;
+  isError?: boolean;
   page: number;
   query: string;
   totalPages: number;
@@ -30,6 +34,15 @@ export default function MemberAttendancePanel({
   const currentPage = Math.min(page, pageCount - 1);
   const isFirstPage = currentPage === 0;
   const isLastPage = currentPage === pageCount - 1;
+  const isPreviousPageDisabled = isLoading || isError || isFirstPage;
+  const isNextPageDisabled = isLoading || isError || isLastPage;
+  const statusMessage = isLoading
+    ? "인원별 근태 현황을 불러오는 중입니다."
+    : isError
+      ? "인원별 근태 현황을 불러오지 못했습니다."
+      : members.length === 0
+        ? "조회된 인원이 없습니다."
+        : undefined;
 
   return (
     <DashboardPanel title="인원별 근태 현황" arrowHref="/admin/members">
@@ -54,11 +67,15 @@ export default function MemberAttendancePanel({
               type="button"
               className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
               aria-label="이전 페이지"
-              disabled={isFirstPage}
+              disabled={isPreviousPageDisabled}
               onClick={() => onPageChange(currentPage - 1)}
             >
               <Image
-                src={isFirstPage ? rightCircleDisabledIcon : rightCircleIcon}
+                src={
+                  isPreviousPageDisabled
+                    ? rightCircleDisabledIcon
+                    : rightCircleIcon
+                }
                 alt=""
                 width={32}
                 height={32}
@@ -73,11 +90,13 @@ export default function MemberAttendancePanel({
               type="button"
               className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
               aria-label="다음 페이지"
-              disabled={isLastPage}
+              disabled={isNextPageDisabled}
               onClick={() => onPageChange(currentPage + 1)}
             >
               <Image
-                src={isLastPage ? rightCircleDisabledIcon : rightCircleIcon}
+                src={
+                  isNextPageDisabled ? rightCircleDisabledIcon : rightCircleIcon
+                }
                 alt=""
                 width={32}
                 height={32}
@@ -88,9 +107,15 @@ export default function MemberAttendancePanel({
 
         <div className="overflow-x-auto">
           <div className={MEMBER_ROW_MIN_WIDTH_CLASS}>
-            {members.map((member) => (
-              <MemberRow key={member.id} member={member} />
-            ))}
+            {statusMessage ? (
+              <div className="flex h-40 items-center justify-center text-sm font-medium text-[#6B7280]">
+                {statusMessage}
+              </div>
+            ) : (
+              members.map((member) => (
+                <MemberRow key={member.id} member={member} />
+              ))
+            )}
           </div>
         </div>
       </div>

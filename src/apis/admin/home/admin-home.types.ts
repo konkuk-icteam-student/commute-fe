@@ -29,8 +29,8 @@ export interface GetAdminHomeAttendanceStatusRequest {
 export interface AdminHomeAttendanceStatusUser {
   userId: string;
   userName: string;
-  department: string;
-  studentId: string;
+  department: string | null;
+  studentId: string | null;
   workStatusCode: AdminHomeWorkStatusCode | null;
   attendanceStatusCode: AdminHomeAttendanceStatusCode | null;
   lateCount: number;
