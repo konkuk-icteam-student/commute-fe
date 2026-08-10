@@ -9,20 +9,12 @@ import leftIcon from "@/assets/icons/common/ic_left.svg";
 import { Spinner } from "@/components/ui";
 import {
   formatWorktimeHistoryPeriod,
+  getCurrentWorktimeHistoryYearMonth,
   WorktimeHistoryList,
   WorktimeHistorySummaryCard,
 } from "@/features/my-page";
 
 const PAGE_SIZE = 10;
-
-const getCurrentYearMonth = () => {
-  const today = new Date();
-
-  return {
-    year: today.getFullYear(),
-    month: today.getMonth() + 1,
-  };
-};
 
 const getPrevMonth = (year: number, month: number) =>
   month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
@@ -32,9 +24,9 @@ const getNextMonth = (year: number, month: number) =>
 
 export default function WorktimeHistoryScreen() {
   const router = useRouter();
-  const [currentYearMonth] = useState(getCurrentYearMonth);
+  const [currentYearMonth] = useState(getCurrentWorktimeHistoryYearMonth);
   const [selectedYearMonth, setSelectedYearMonth] =
-    useState(getCurrentYearMonth);
+    useState(getCurrentWorktimeHistoryYearMonth);
   const [page, setPage] = useState(0);
   const { year, month } = selectedYearMonth;
   const isNextDisabled =
