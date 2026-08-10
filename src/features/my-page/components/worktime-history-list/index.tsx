@@ -2,6 +2,8 @@ import Image from "next/image";
 
 import minusFilledIcon from "@/assets/icons/common/ic_minus_filled.svg";
 import plusFilledIcon from "@/assets/icons/common/ic_plus_filled.svg";
+import rightButtonIcon from "@/assets/icons/common/ic_right_button.svg";
+import rightButtonDisabledIcon from "@/assets/icons/common/ic_right_button_disabled.svg";
 import { formatScheduleChangeHistorySlot } from "@/features/schedule/utils";
 import type { WorktimeHistoryItem } from "@/features/my-page/types";
 import {
@@ -12,6 +14,10 @@ import {
 interface WorktimeHistoryListProps {
   period: string;
   histories: WorktimeHistoryItem[];
+  page?: number;
+  totalPages?: number;
+  onPrevPage?: () => void;
+  onNextPage?: () => void;
 }
 
 const statusClassNames = {
@@ -33,8 +39,15 @@ const getHistorySlots = (history: WorktimeHistoryItem) => [
 export default function WorktimeHistoryList({
   period,
   histories,
+  page = 0,
+  totalPages = 0,
+  onPrevPage,
+  onNextPage,
 }: WorktimeHistoryListProps) {
   const hasHistories = histories.length > 0;
+  const pageCount = Math.max(totalPages, hasHistories ? 1 : 0);
+  const isPrevDisabled = page <= 0;
+  const isNextDisabled = pageCount === 0 || page >= pageCount - 1;
 
   return (
     <section className="flex flex-1 flex-col">
@@ -63,20 +76,20 @@ export default function WorktimeHistoryList({
               </div>
 
               <ul className="mt-3 flex flex-col gap-1">
-              {getHistorySlots(history).map((change, changeIndex) => (
-                <li
-                  className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
-                  key={`${change.changeTypeCode ?? "CR01"}-${change.start}-${change.end}-${changeIndex}`}
-                >
-                  <Image
-                    alt=""
-                    aria-hidden="true"
-                    className="shrink-0"
-                    height={5}
-                    src={changeTypeIcons[change.changeTypeCode ?? "CR01"]}
-                    unoptimized
-                    width={5}
-                  />
+                {getHistorySlots(history).map((change, changeIndex) => (
+                  <li
+                    className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
+                    key={`${change.changeTypeCode ?? "CR01"}-${change.start}-${change.end}-${changeIndex}`}
+                  >
+                    <Image
+                      alt=""
+                      aria-hidden="true"
+                      className="shrink-0"
+                      height={5}
+                      src={changeTypeIcons[change.changeTypeCode ?? "CR01"]}
+                      unoptimized
+                      width={5}
+                    />
                     <span>{formatScheduleChangeHistorySlot(change)}</span>
                   </li>
                 ))}
@@ -87,6 +100,50 @@ export default function WorktimeHistoryList({
               </p>
             </article>
           ))}
+          {pageCount > 1 ? (
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <button
+                type="button"
+                className="flex h-7 w-7 cursor-pointer items-center justify-center disabled:cursor-default"
+                aria-label="이전 신청기록 페이지"
+                disabled={isPrevDisabled}
+                onClick={onPrevPage}
+              >
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="rotate-180"
+                  height={21}
+                  src={
+                    isPrevDisabled ? rightButtonDisabledIcon : rightButtonIcon
+                  }
+                  unoptimized
+                  width={21}
+                />
+              </button>
+              <span className="text-[11px] leading-4.5 font-bold text-[#1A2236]">
+                {page + 1}/{pageCount}
+              </span>
+              <button
+                type="button"
+                className="flex h-7 w-7 cursor-pointer items-center justify-center disabled:cursor-default"
+                aria-label="다음 신청기록 페이지"
+                disabled={isNextDisabled}
+                onClick={onNextPage}
+              >
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  height={21}
+                  src={
+                    isNextDisabled ? rightButtonDisabledIcon : rightButtonIcon
+                  }
+                  unoptimized
+                  width={21}
+                />
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center">

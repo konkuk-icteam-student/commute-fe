@@ -1,3 +1,5 @@
+const WORKTIME_HISTORY_TIME_ZONE = "Asia/Seoul";
+
 const parseIsoDateTime = (dateTime: string) => {
   const [date, time] = dateTime.split("T");
 
@@ -55,4 +57,16 @@ export const formatWorktimeHistoryPeriod = (year: number, month: number) => {
   const paddedLastDate = String(lastDate).padStart(2, "0");
 
   return `${year}.${paddedMonth}.01 ~ ${year}.${paddedMonth}.${paddedLastDate}`;
+};
+
+export const getCurrentWorktimeHistoryYearMonth = (date = new Date()) => {
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: WORKTIME_HISTORY_TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(date);
+  const year = Number(dateParts.find(({ type }) => type === "year")?.value);
+  const month = Number(dateParts.find(({ type }) => type === "month")?.value);
+
+  return { year, month };
 };

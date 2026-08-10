@@ -4,30 +4,55 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
 import leftIcon from "@/assets/icons/common/ic_left.svg";
+import { Spinner } from "@/components/ui";
 import {
-  WORKTIME_HISTORY_RESPONSES,
   formatWorktimeHistoryPeriod,
+  getCurrentWorktimeHistoryYearMonth,
   WorktimeHistoryList,
   WorktimeHistorySummaryCard,
 } from "@/features/my-page";
 
+const PAGE_SIZE = 10;
+
+const getPrevMonth = (year: number, month: number) =>
+  month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
+
+const getNextMonth = (year: number, month: number) =>
+  month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
+
 export default function WorktimeHistoryScreen() {
   const router = useRouter();
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(1);
-  const selectedHistory = WORKTIME_HISTORY_RESPONSES[selectedMonthIndex].details;
-  const isPrevDisabled = selectedMonthIndex === 0;
+  const [currentYearMonth] = useState(getCurrentWorktimeHistoryYearMonth);
+  const [selectedYearMonth, setSelectedYearMonth] =
+    useState(getCurrentWorktimeHistoryYearMonth);
+  const [page, setPage] = useState(0);
+  const { year, month } = selectedYearMonth;
   const isNextDisabled =
-    selectedMonthIndex === WORKTIME_HISTORY_RESPONSES.length - 1;
+    year === currentYearMonth.year && month === currentYearMonth.month;
+
+  const {
+    workChangeRequestHistoryData,
+    isPendingWorkChangeRequestHistory,
+    isErrorWorkChangeRequestHistory,
+    workChangeRequestHistoryError,
+  } = useGetWorkChangeRequestHistoryQuery({
+    year,
+    month,
+    statusCode: "ALL",
+    page,
+    size: PAGE_SIZE,
+  });
 
   const handlePrevMonth = () => {
-    setSelectedMonthIndex((currentIndex) => Math.max(currentIndex - 1, 0));
+    setSelectedYearMonth(({ year, month }) => getPrevMonth(year, month));
+    setPage(0);
   };
 
   const handleNextMonth = () => {
-    setSelectedMonthIndex((currentIndex) =>
-      Math.min(currentIndex + 1, WORKTIME_HISTORY_RESPONSES.length - 1),
-    );
+    setSelectedYearMonth(({ year, month }) => getNextMonth(year, month));
+    setPage(0);
   };
 
   return (
@@ -55,10 +80,16 @@ export default function WorktimeHistoryScreen() {
 
       <div className="mx-1 mt-8.75">
         <WorktimeHistorySummaryCard
-          year={selectedHistory.year}
-          month={selectedHistory.month}
-          summary={selectedHistory.summary}
-          isPrevDisabled={isPrevDisabled}
+          year={workChangeRequestHistoryData?.year ?? year}
+          month={workChangeRequestHistoryData?.month ?? month}
+          summary={
+            workChangeRequestHistoryData?.summary ?? {
+              totalCount: 0,
+              approvedCount: 0,
+              pendingCount: 0,
+              rejectedCount: 0,
+            }
+          }
           isNextDisabled={isNextDisabled}
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
@@ -66,13 +97,30 @@ export default function WorktimeHistoryScreen() {
       </div>
 
       <div className="mt-14 flex flex-1 flex-col">
-        <WorktimeHistoryList
-          period={formatWorktimeHistoryPeriod(
-            selectedHistory.year,
-            selectedHistory.month,
-          )}
-          histories={selectedHistory.histories}
-        />
+        {isPendingWorkChangeRequestHistory ? (
+          <div className="flex flex-1 items-center justify-center">
+            <Spinner />
+          </div>
+        ) : isErrorWorkChangeRequestHistory ? (
+          <div className="flex flex-1 items-center justify-center px-6 text-center">
+            <p className="text-[12px] leading-4.5 font-medium whitespace-pre-line text-[#8892A6]">
+              {workChangeRequestHistoryError?.message ??
+                "근무시간 신청 내역을 불러오지 못했습니다."}
+            </p>
+          </div>
+        ) : (
+          <WorktimeHistoryList
+            period={formatWorktimeHistoryPeriod(
+              workChangeRequestHistoryData?.year ?? year,
+              workChangeRequestHistoryData?.month ?? month,
+            )}
+            histories={workChangeRequestHistoryData?.histories ?? []}
+            page={workChangeRequestHistoryData?.page ?? page}
+            totalPages={workChangeRequestHistoryData?.totalPages ?? 0}
+            onPrevPage={() => setPage((currentPage) => currentPage - 1)}
+            onNextPage={() => setPage((currentPage) => currentPage + 1)}
+          />
+        )}
       </div>
     </section>
   );

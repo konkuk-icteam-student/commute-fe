@@ -2,20 +2,43 @@
 
 import { useState } from "react";
 
-import { Alert, Toast } from "@/components/ui";
-import {
-  MenuCard,
-  MY_PAGE_USER,
-  MY_PAGE_WORK_SUMMARIES,
-  UserInfoCard,
-  WorkSummaryCard,
-} from "@/features/my-page";
+import { useGetMyPageQuery } from "@/apis/my-page";
+import { Alert, Spinner, Toast } from "@/components/ui";
+import { MenuCard, UserInfoCard, WorkSummaryCard } from "@/features/my-page";
 
 export default function MyPageScreen() {
   const [openAlert, setOpenAlert] = useState<"logout" | "withdraw" | null>(
     null,
   );
   const [toastMessage, setToastMessage] = useState("");
+  const { myPageData, isPendingMyPage } = useGetMyPageQuery();
+  const displayedMyPageData = myPageData ?? {
+    userName: "-",
+    roleName: "-",
+    organizationName: "-",
+    department: "-",
+    studentId: "-",
+    week: {
+      workedHours: 0,
+      limitHours: 0,
+    },
+    month: {
+      workedHours: 0,
+      limitHours: 0,
+    },
+  };
+  const workSummaries = [
+    {
+      title: "이번주 근무 시간",
+      currentHours: displayedMyPageData.week.workedHours,
+      totalHours: displayedMyPageData.week.limitHours,
+    },
+    {
+      title: "이번달 근무 시간",
+      currentHours: displayedMyPageData.month.workedHours,
+      totalHours: displayedMyPageData.month.limitHours,
+    },
+  ];
 
   const closeAlert = () => {
     setOpenAlert(null);
@@ -26,10 +49,13 @@ export default function MyPageScreen() {
     setToastMessage("로그아웃되었습니다.");
   };
 
-  const handleWithdrawConfirm = () => {
+  // 회원 탈퇴 관련 주석 처리
+  {
+    /*const handleWithdrawConfirm = () => {
     closeAlert();
     setToastMessage("회원 탈퇴되었습니다.");
-  };
+  };*/
+  }
 
   return (
     <section className="min-h-screen w-full bg-white px-4 pt-10.75 pb-20">
@@ -37,38 +63,46 @@ export default function MyPageScreen() {
         마이페이지
       </h1>
 
-      <div className="mt-6">
-        <UserInfoCard
-          name={MY_PAGE_USER.name}
-          role={MY_PAGE_USER.role}
-          department={MY_PAGE_USER.department}
-          studentId={MY_PAGE_USER.studentId}
-          major={MY_PAGE_USER.major}
-        />
-      </div>
+      {isPendingMyPage ? (
+        <div className="flex h-58 items-center justify-center">
+          <Spinner />
+        </div>
+      ) : (
+        <>
+          <div className="mt-6">
+            <UserInfoCard
+              name={displayedMyPageData.userName}
+              role={displayedMyPageData.roleName}
+              department={displayedMyPageData.organizationName}
+              studentId={displayedMyPageData.studentId}
+              major={displayedMyPageData.department}
+            />
+          </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        {MY_PAGE_WORK_SUMMARIES.map((summary) => (
-          <WorkSummaryCard
-            key={summary.title}
-            title={summary.title}
-            currentHours={summary.currentHours}
-            totalHours={summary.totalHours}
-          />
-        ))}
-      </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {workSummaries.map((summary) => (
+              <WorkSummaryCard
+                key={summary.title}
+                title={summary.title}
+                currentHours={summary.currentHours}
+                totalHours={summary.totalHours}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="mt-6">
         <MenuCard onLogout={() => setOpenAlert("logout")} />
       </div>
 
-      <button
+      {/* <button
         className="mx-auto mt-7 block cursor-pointer text-[10px] leading-4.5 font-medium text-[#FD7171] underline underline-offset-2"
         type="button"
         onClick={() => setOpenAlert("withdraw")}
       >
         회원 탈퇴
-      </button>
+      </button>*/}
 
       <Alert
         open={openAlert === "logout"}
@@ -77,7 +111,7 @@ export default function MyPageScreen() {
         onCancel={closeAlert}
         onConfirm={handleLogoutConfirm}
       />
-      <Alert
+      {/*<Alert
         open={openAlert === "withdraw"}
         title="탈퇴하시겠습니까?"
         message={"탈퇴 버튼 선택 시, 계정은 삭제되며\n복구되지 않습니다."}
@@ -85,7 +119,7 @@ export default function MyPageScreen() {
         onCancel={closeAlert}
         onConfirm={handleWithdrawConfirm}
         confirmButtonClassName="bg-[#FD7171]"
-      />
+      />*/}
       <Toast
         open={toastMessage.length > 0}
         message={toastMessage}
