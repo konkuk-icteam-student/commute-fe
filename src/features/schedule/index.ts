@@ -5,6 +5,7 @@ export {
   ScheduleGrid,
   ScheduleHeader,
   ScheduleApplySummary,
+  ScheduleErrorModal,
   ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
@@ -12,7 +13,12 @@ export {
 } from "./components";
 export type { ScheduleCell } from "./components";
 
-export { useScheduleDraft, useScheduleGrid, useScheduleWeek } from "./hooks";
+export {
+  useScheduleDraft,
+  useScheduleErrorModal,
+  useScheduleGrid,
+  useScheduleWeek,
+} from "./hooks";
 
 export {
   getAppliedSlotTimes,
