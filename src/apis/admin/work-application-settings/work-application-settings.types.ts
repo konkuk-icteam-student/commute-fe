@@ -1,4 +1,4 @@
-export interface SaveAdminWorkSchedulesSettingsRequest {
+export interface SaveWorkApplicationSettingsRequest {
   year: number;
   month: number;
   applyStartDate: string;
@@ -16,7 +16,7 @@ export interface SaveAdminWorkSchedulesSettingsRequest {
   monthlyMaxMinutes: number;
 }
 
-export interface SaveAdminWorkSchedulesSettingsResponse {
+export interface SaveWorkApplicationSettingsResponse {
   year: number;
   month: number;
   applyStartDate: string;
