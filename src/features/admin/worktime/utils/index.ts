@@ -1,3 +1,7 @@
+import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
+
+import type { WorktimeEditRequestItemType } from "../types";
+
 export interface WorktimeType {
   date: string;
   start: string;
@@ -32,4 +36,19 @@ export function formatWorktimeRequestDateTime(dateTime: string) {
 // WorktimeType 의 객체를 4월 6일 13:00-14:30 (0.5h) 형식으로 포맷
 export function formatWorktimeRequestSlot({ date, start, end }: WorktimeType) {
   return `${formatMonthDay(date)} ${start}-${end} (${formatDurationHour(start, end)}h)`;
+}
+
+export function toWorktimeEditRequestItems(
+  details: GetAdminWorkChangeRequestsResponse,
+): WorktimeEditRequestItemType[] {
+  return details.requests.map((request) => ({
+    requestId: request.requestId,
+    requestedAt: request.requestedAt,
+    name: request.userName,
+    deleteSlots: request.deleteSchedules,
+    addSlots: request.addSchedules,
+    reason: request.reason,
+    statusCode: request.statusCode,
+    rejectReason: request.rejectReason,
+  }));
 }

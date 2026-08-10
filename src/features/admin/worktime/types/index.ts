@@ -7,6 +7,17 @@ export interface WorktimeChangeRequestType {
   changeTypeCode: string;
 }
 
+export interface WorktimeEditRequestItemType {
+  requestId: number;
+  requestedAt: string;
+  name: string;
+  deleteSlots: WorktimeChangeRequestType[];
+  addSlots: WorktimeChangeRequestType[];
+  reason: string;
+  statusCode?: string;
+  rejectReason?: string | null;
+}
+
 export interface WorktimeDetailTableCellType {
   date: string;
   start: string;

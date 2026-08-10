@@ -1,3 +1,5 @@
+import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
+
 import type {
   DashboardAttendanceDetails,
   DashboardMemberAttendance,
@@ -8,6 +10,7 @@ import type {
   DashboardSummaryItem,
   DashboardTimePeriodCode,
   DashboardTimeRow,
+  DashboardWorkRequest,
 } from "../types";
 
 const getTimePeriodCode = (start: string): DashboardTimePeriodCode => {
@@ -50,6 +53,12 @@ const toDateLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${
     weekdayLabels[date.getDay()]
   })`;
+
+const formatMonthDay = (date: string) => {
+  const [, month, day] = date.split("-");
+
+  return `${Number(month)}월 ${Number(day)}일`;
+};
 
 const formatMemberMeta = ({
   department,
@@ -222,3 +231,21 @@ export const toDashboardMemberAttendanceRows = (
         user.monthlyLimitMinutes,
       ),
     }));
+
+export const toDashboardWorkRequests = (
+  details: GetAdminWorkChangeRequestsResponse,
+): DashboardWorkRequest[] =>
+  details.requests.map((request) => ({
+    id: request.requestId,
+    name: request.userName,
+    changes: [
+      ...request.deleteSchedules.map((schedule) => ({
+        type: "remove" as const,
+        text: `${formatMonthDay(schedule.date)} ${schedule.start}-${schedule.end}`,
+      })),
+      ...request.addSchedules.map((schedule) => ({
+        type: "add" as const,
+        text: `${formatMonthDay(schedule.date)} ${schedule.start}-${schedule.end}`,
+      })),
+    ],
+  }));

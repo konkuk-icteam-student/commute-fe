@@ -7,9 +7,9 @@ import {
   useGetAdminHomeAttendanceSummaryQuery,
 } from "@/apis/admin/home";
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
+import { useGetAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
 import {
   dashboardTimeRows,
-  dashboardWorkRequests,
   DateNavigator,
   MemberAttendancePanel,
   SummaryPanel,
@@ -18,9 +18,11 @@ import {
   getDashboardDates,
   toDashboardMemberAttendanceRows,
   toDashboardSummaryItems,
+  toDashboardWorkRequests,
 } from "@/features/admin/dashboard";
 
 const MEMBER_ATTENDANCE_PAGE_SIZE = 6;
+const WORK_CHANGE_REQUEST_PAGE_SIZE = 2;
 
 export default function AdminDashboardScreen() {
   const { adminSystemCreatedYearData } = useGetAdminSystemCreatedYearQuery();
@@ -42,6 +44,9 @@ export default function AdminDashboardScreen() {
     todayDateIndex,
   );
   const selectedDate = dashboardDates[selectedDateIndex]?.value ?? "";
+  const [selectedYear, selectedMonth] = selectedDate
+    .split("-")
+    .map((value) => Number(value));
   const trimmedMemberQuery = memberQuery.trim();
 
   const {
@@ -61,12 +66,26 @@ export default function AdminDashboardScreen() {
     size: MEMBER_ATTENDANCE_PAGE_SIZE,
     ...(trimmedMemberQuery ? { userName: trimmedMemberQuery } : {}),
   });
+  const {
+    adminWorkChangeRequestsData,
+    isPendingAdminWorkChangeRequests,
+    isErrorAdminWorkChangeRequests,
+  } = useGetAdminWorkChangeRequestsQuery({
+    year: selectedYear,
+    month: selectedMonth,
+    statusCode: "CS01",
+    page: 0,
+    size: WORK_CHANGE_REQUEST_PAGE_SIZE,
+  });
 
   const dashboardSummary = adminHomeAttendanceSummaryData
     ? toDashboardSummaryItems(adminHomeAttendanceSummaryData)
     : [];
   const dashboardMemberRows = adminHomeAttendanceStatusData
     ? toDashboardMemberAttendanceRows(adminHomeAttendanceStatusData)
+    : [];
+  const dashboardWorkRequestRows = adminWorkChangeRequestsData
+    ? toDashboardWorkRequests(adminWorkChangeRequestsData)
     : [];
 
   return (
@@ -90,7 +109,11 @@ export default function AdminDashboardScreen() {
         <div className="mt-13.25 grid grid-cols-[minmax(0,613px)_minmax(0,653px)] items-start gap-9.25">
           <TimeTablePanel rows={dashboardTimeRows} />
           <div className="space-y-6">
-            <WorkRequestPanel requests={dashboardWorkRequests} />
+            <WorkRequestPanel
+              requests={dashboardWorkRequestRows}
+              isLoading={isPendingAdminWorkChangeRequests}
+              isError={isErrorAdminWorkChangeRequests}
+            />
             <MemberAttendancePanel
               members={dashboardMemberRows}
               isLoading={isPendingAdminHomeAttendanceStatus}
