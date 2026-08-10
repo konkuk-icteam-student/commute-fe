@@ -9,6 +9,7 @@ import {
   ScheduleErrorModal,
   ScheduleGrid,
   ScheduleHeader,
+  ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
   useScheduleErrorModal,
@@ -48,6 +49,7 @@ export default function ScheduleViewScreen() {
     periodSchedulesData,
     isPendingPeriodSchedules,
     periodSchedulesError,
+    refetchPeriodSchedules,
   } = useGetPeriodSchedulesQuery({
     startDate,
     endDate,
@@ -58,12 +60,22 @@ export default function ScheduleViewScreen() {
     workSchedulesSummaryData,
     isPendingWorkSchedulesSummary,
     workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
   } = useGetWorkSchedulesSummaryQuery({
     startDate,
     endDate,
   });
 
-  const { myPageData, isPendingMyPage, myPageError } = useGetMyPageQuery();
+  const { myPageData, isPendingMyPage, myPageError, refetchMyPage } =
+    useGetMyPageQuery();
+
+  // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
+  // 근로시간 카드가 세 조회를 함께 쓰므로 셋 다 다시 요청한다.
+  const handleRefresh = () => {
+    void refetchPeriodSchedules();
+    void refetchWorkSchedulesSummary();
+    void refetchMyPage();
+  };
 
   // 조회에 실패하면 표가 회색으로만 남아 장애인지 알 수 없으므로 모달로 알린다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
@@ -103,13 +115,14 @@ export default function ScheduleViewScreen() {
           isNextWeekDisabled={isNextWeekDisabled}
           onPrevWeek={goPrevWeek}
           onNextWeek={goNextWeek}
-          action={
+          leadingAction={
             <Toggle
               checked={isDetailVisible}
               onCheckedChange={setIsDetailVisible}
               label="자세히"
             />
           }
+          action={<ScheduleRefreshButton onClick={handleRefresh} />}
         />
         <ScheduleGrid
           days={days}

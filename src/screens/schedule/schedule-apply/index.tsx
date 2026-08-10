@@ -64,17 +64,27 @@ export default function ScheduleApplyScreen() {
     periodSchedulesData,
     isPendingPeriodSchedules,
     periodSchedulesError,
+    refetchPeriodSchedules,
   } = useGetPeriodSchedulesQuery({
     startDate,
     endDate,
   });
 
   // 범례에 쓸 주·월 한도. 시간표와 따로 조회하며 서버가 계산해 준다.
-  const { workSchedulesSummaryData, workSchedulesSummaryError } =
-    useGetWorkSchedulesSummaryQuery({
-      startDate,
-      endDate,
-    });
+  const {
+    workSchedulesSummaryData,
+    workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
+  } = useGetWorkSchedulesSummaryQuery({
+    startDate,
+    endDate,
+  });
+
+  // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
+  const handleRefresh = () => {
+    void refetchPeriodSchedules();
+    void refetchWorkSchedulesSummary();
+  };
 
   // 조회 실패는 자동으로, 신청 실패는 showError로 알린다.
   const { errorMessage, showError, closeErrorModal } = useScheduleErrorModal([
@@ -185,7 +195,7 @@ export default function ScheduleApplyScreen() {
           isNextWeekDisabled={isNextWeekDisabled}
           onPrevWeek={goPrevWeek}
           onNextWeek={goNextWeek}
-          action={<ScheduleRefreshButton />}
+          action={<ScheduleRefreshButton onClick={handleRefresh} />}
         />
         <ScheduleGrid
           days={days}

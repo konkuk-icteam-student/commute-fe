@@ -20,6 +20,7 @@ export const useGetMyPageQuery = () => {
     isPending: isPendingMyPage,
     isError: isErrorMyPage,
     error: myPageError,
+    refetch: refetchMyPage,
   } = useQuery<GetMyPageResponse, ApiError>({
     queryKey: MY_PAGE_QUERY_KEY.DEFAULT,
     queryFn: getMyPageApi,
@@ -33,5 +34,6 @@ export const useGetMyPageQuery = () => {
     isPendingMyPage,
     isErrorMyPage,
     myPageError,
+    refetchMyPage,
   };
 };

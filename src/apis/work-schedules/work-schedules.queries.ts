@@ -84,6 +84,7 @@ export const useGetPeriodSchedulesQuery = ({
     isPending: isPendingPeriodSchedules,
     isError: isErrorPeriodSchedules,
     error: periodSchedulesError,
+    refetch: refetchPeriodSchedules,
   } = useQuery<GetPeriodWorkSchedulesResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.PERIOD(startDate, endDate),
     queryFn: () => getPeriodSchedulesApi({ startDate, endDate }),
@@ -98,6 +99,7 @@ export const useGetPeriodSchedulesQuery = ({
     isPendingPeriodSchedules,
     isErrorPeriodSchedules,
     periodSchedulesError,
+    refetchPeriodSchedules,
   };
 };
 
@@ -113,6 +115,7 @@ export const useGetWorkSchedulesSummaryQuery = ({
     isPending: isPendingWorkSchedulesSummary,
     isError: isErrorWorkSchedulesSummary,
     error: workSchedulesSummaryError,
+    refetch: refetchWorkSchedulesSummary,
   } = useQuery<GetWorkSchedulesSummaryResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.SUMMARY(startDate, endDate),
     queryFn: () => getWorkSchedulesSummaryApi({ startDate, endDate }),
@@ -127,6 +130,7 @@ export const useGetWorkSchedulesSummaryQuery = ({
     isPendingWorkSchedulesSummary,
     isErrorWorkSchedulesSummary,
     workSchedulesSummaryError,
+    refetchWorkSchedulesSummary,
   };
 };
 
