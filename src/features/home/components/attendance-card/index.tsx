@@ -12,7 +12,7 @@ export type AttendanceSummary = {
   description: string;
   buttonText: string;
   canClockIn: boolean;
-  clockInScheduleId?: number;
+  clockInScheduleIds?: number[];
 };
 
 const attendanceIcon = {

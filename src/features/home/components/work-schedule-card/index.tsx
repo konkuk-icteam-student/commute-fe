@@ -7,10 +7,13 @@ export type WorkScheduleStatus =
   | "completed";
 
 export type WorkSchedule = {
-  id: number;
+  id: string;
+  scheduleIds: number[];
   title: string;
   time: string;
   status: WorkScheduleStatus;
+  checkedIn: boolean;
+  checkInTime: string | null;
 };
 
 const statusVariant: Record<WorkScheduleStatus, BadgeVariant> = {

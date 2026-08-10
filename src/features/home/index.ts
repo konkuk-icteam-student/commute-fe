@@ -14,6 +14,7 @@ export { useClockInLocation } from "./hooks";
 
 export {
   formatCurrentDateTime,
+  formatScheduleTime,
   getDistanceInMeters,
   getAttendanceSummary,
   isWithinRadius,
