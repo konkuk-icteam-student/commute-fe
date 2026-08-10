@@ -9,7 +9,7 @@ import {
   SummaryPanel,
   useWorkRequestState,
 } from "@/features/admin/work-request";
-import { useSaveAdminWorkSchedulesSettingsMutation } from "@/apis/admin-work-schedules";
+import { useSaveWorkApplicationSettingsMutation } from "@/apis/admin/work-application-settings";
 
 type WorkRequestAction = "end" | "start" | "update";
 
@@ -77,9 +77,9 @@ export default function AdminWorkRequestScreen() {
   } = useWorkRequestState();
 
   const {
-    saveAdminWorkSchedulesSettings,
-    isPendingSaveAdminWorkSchedulesSettings,
-  } = useSaveAdminWorkSchedulesSettingsMutation();
+    saveWorkApplicationSettings,
+    isPendingSaveWorkApplicationSettings,
+  } = useSaveWorkApplicationSettingsMutation();
 
   const closeAlert = () => {
     setPendingAction(null);
@@ -100,7 +100,7 @@ export default function AdminWorkRequestScreen() {
       return;
     }
 
-    saveAdminWorkSchedulesSettings(
+    saveWorkApplicationSettings(
       {
         year: targetMonth.year,
         month: targetMonth.month,
@@ -132,7 +132,7 @@ export default function AdminWorkRequestScreen() {
           isActive={isActive}
           isDirty={isDirty}
           isEditing={isEditing}
-          isSaving={isPendingSaveAdminWorkSchedulesSettings}
+          isSaving={isPendingSaveWorkApplicationSettings}
           isStartReady={isStartReady}
           monthLabel={targetMonth.label}
           onAddUnavailableDate={addUnavailableDate}
@@ -170,7 +170,7 @@ export default function AdminWorkRequestScreen() {
       ) : null}
 
       <Toast
-        open={isPendingSaveAdminWorkSchedulesSettings}
+        open={isPendingSaveWorkApplicationSettings}
         message="요청 처리 중..."
         duration={0}
         panelClassName="w-82.5"
