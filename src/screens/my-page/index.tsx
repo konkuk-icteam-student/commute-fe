@@ -1,17 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { useLogoutMutation } from "@/apis/auth";
 import { useGetMyPageQuery } from "@/apis/my-page";
+import { deleteAuthToken } from "@/apis/token-storage";
 import { Alert, Spinner, Toast } from "@/components/ui";
 import { MenuCard, UserInfoCard, WorkSummaryCard } from "@/features/my-page";
 
 export default function MyPageScreen() {
+  const router = useRouter();
   const [openAlert, setOpenAlert] = useState<"logout" | "withdraw" | null>(
     null,
   );
   const [toastMessage, setToastMessage] = useState("");
   const { myPageData, isPendingMyPage } = useGetMyPageQuery();
+  const { logout, isPendingLogout } = useLogoutMutation();
   const displayedMyPageData = myPageData ?? {
     userName: "-",
     roleName: "-",
@@ -45,8 +50,21 @@ export default function MyPageScreen() {
   };
 
   const handleLogoutConfirm = () => {
-    closeAlert();
-    setToastMessage("로그아웃되었습니다.");
+    if (isPendingLogout) {
+      return;
+    }
+
+    logout(undefined, {
+      onSuccess: () => {
+        deleteAuthToken();
+        closeAlert();
+        setToastMessage("로그아웃되었습니다.");
+        router.replace("/login");
+      },
+      onError: () => {
+        setToastMessage("로그아웃에 실패했습니다. 다시 시도해 주세요.");
+      },
+    });
   };
 
   // 회원 탈퇴 관련 주석 처리
@@ -110,6 +128,7 @@ export default function MyPageScreen() {
         message="로그아웃 하시겠습니까?"
         onCancel={closeAlert}
         onConfirm={handleLogoutConfirm}
+        confirmText={isPendingLogout ? "로그아웃 중..." : "확인"}
       />
       {/*<Alert
         open={openAlert === "withdraw"}
