@@ -7,35 +7,35 @@ import {
   ApplyResultModal,
   EMPTY_SCHEDULE,
   getAppliedSlotTimes,
-  getConfirmedSlotTimes,
   getCurrentMonthDates,
   getCurrentMonthSlots,
   getFirstDateOfNextMonth,
-  getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,
   ScheduleApplySummary,
+  ScheduleErrorModal,
   ScheduleGrid,
   ScheduleHeader,
   ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
   useScheduleDraft,
+  useScheduleErrorModal,
   useScheduleGrid,
   useScheduleWeek,
 } from "@/features/schedule";
 import {
   useApplyWorkSchedulesMutation,
   useGetPeriodSchedulesQuery,
+  useGetWorkSchedulesSummaryQuery,
   type ApplyWorkSchedulesResponse,
 } from "@/apis/work-schedules";
 import { ApiError } from "@/apis/api-client";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
+// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다. api에 추가 필요
 const MIN_SESSION_HOURS = 1;
-const MAX_WEEK_HOURS = 13;
 
 // 결과 모달에 보여 줄 내용.
 // 전부 실패하면 서버가 구간 목록을 내려주지 않으므로 message만 채워진다.
@@ -60,16 +60,34 @@ export default function ScheduleApplyScreen() {
   const [applyResult, setApplyResult] = useState<ApplyResult | null>(null);
 
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
-  const { periodSchedulesData, isPendingPeriodSchedules } =
-    useGetPeriodSchedulesQuery({
+  const {
+    periodSchedulesData,
+    isPendingPeriodSchedules,
+    periodSchedulesError,
+  } = useGetPeriodSchedulesQuery({
+    startDate,
+    endDate,
+  });
+
+  // 범례에 쓸 주·월 한도. 시간표와 따로 조회하며 서버가 계산해 준다.
+  const { workSchedulesSummaryData, workSchedulesSummaryError } =
+    useGetWorkSchedulesSummaryQuery({
       startDate,
       endDate,
     });
 
+  // 조회 실패는 자동으로, 신청 실패는 showError로 알린다.
+  const { errorMessage, showError, closeErrorModal } = useScheduleErrorModal([
+    periodSchedulesError,
+    workSchedulesSummaryError,
+  ]);
+
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const monthLimitHours = periodSchedulesData?.totalLimitHours ?? 0;
-  const monthUsedHours = periodSchedulesData?.usedHours ?? 0;
+  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
+  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
 
   const { applyWorkSchedules, isPendingApplyWorkSchedules } =
     useApplyWorkSchedulesMutation();
@@ -101,10 +119,6 @@ export default function ScheduleApplyScreen() {
     onSlotClick: toggleSlot,
   });
 
-  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
-  const weekUsedHours = getSlotTimesTotalHours(
-    getConfirmedSlotTimes(getCurrentMonthSlots(days)),
-  );
   const currentWeekDates = getCurrentMonthDates(days);
   const weeklyAddRequestHours = getSlotTimesTotalHoursOnWeek(
     rawPayload.addSlots,
@@ -127,7 +141,7 @@ export default function ScheduleApplyScreen() {
 
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
-    weekTotalTimeAfterApply > MAX_WEEK_HOURS ||
+    weekTotalTimeAfterApply > weekLimitHours ||
     monthTotalTimeAfterApply > monthLimitHours ||
     isPendingApplyWorkSchedules;
 
@@ -149,11 +163,14 @@ export default function ScheduleApplyScreen() {
       },
       // 전부 실패하면 details 없이 메시지만 오므로 api 계층이 ApiError로 바꿔 던진다.
       // 이때는 서버 문구를 그대로 보여 주고, 고쳐서 다시 신청할 수 있도록 내역은 남긴다.
-      // 통신 자체가 실패한 경우는 ApiError가 아니며 #101에서 Toast로 다룬다.
+      // 통신 자체가 실패한 경우는 ApiError가 아니라 결과 목록이 없으므로 오류 모달로 알린다.
       onError: (error) => {
         if (error instanceof ApiError) {
           setApplyResult({ message: error.message, success: [], failure: [] });
+          return;
         }
+
+        showError(error);
       },
     });
   };
@@ -178,7 +195,7 @@ export default function ScheduleApplyScreen() {
         <ScheduleStatusLegend
           isApply
           minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={MAX_WEEK_HOURS}
+          weeklyMaxHours={weekLimitHours}
           monthlyTargetHours={monthLimitHours}
         />
       </div>
@@ -186,7 +203,7 @@ export default function ScheduleApplyScreen() {
         month={month}
         week={week}
         maxMonthHours={monthLimitHours}
-        maxWeekHours={MAX_WEEK_HOURS}
+        maxWeekHours={weekLimitHours}
         applyPayload={rawPayload}
         addRequestHours={addRequestHours}
         deleteRequestHours={deleteRequestHours}
@@ -224,6 +241,7 @@ export default function ScheduleApplyScreen() {
         successList={applyResult?.success ?? []}
         failureList={applyResult?.failure ?? []}
       />
+      <ScheduleErrorModal message={errorMessage} onClose={closeErrorModal} />
     </div>
   );
 }
