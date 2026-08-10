@@ -31,6 +31,58 @@ const getProgress = (workedMinutes: number, limitMinutes: number) => {
   return Math.min(Math.max((workedMinutes / limitMinutes) * 100, 0), 100);
 };
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"] as const;
+
+const toUtcDateStamp = (date: Date) =>
+  Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+
+const toDateValue = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const toDateLabel = (date: Date) =>
+  `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${
+    weekdayLabels[date.getDay()]
+  })`;
+
+const formatMemberMeta = ({
+  department,
+  studentId,
+}: {
+  department: string | null;
+  studentId: string | null;
+}) => {
+  const metaItems = [department, studentId].filter((item): item is string =>
+    Boolean(item),
+  );
+
+  return metaItems.length > 0 ? metaItems.join(" · ") : "정보 없음";
+};
+
+export const getDashboardDates = (startYear: number, today = new Date()) => {
+  const startDate = new Date(startYear, 0, 1);
+  const dateCount =
+    Math.floor(
+      (toUtcDateStamp(today) - toUtcDateStamp(startDate)) / MS_PER_DAY,
+    ) + 1;
+
+  return Array.from({ length: Math.max(dateCount, 1) }, (_, index) => {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + index);
+
+    return {
+      label: toDateLabel(date),
+      value: toDateValue(date),
+    };
+  });
+};
+
 const memberAttendanceOrder: Record<DashboardMemberWorkStatusCode, number> = {
   WORKING: 0,
   NOT_CHECKED_IN: 1,
@@ -43,6 +95,37 @@ const memberAttendanceIssueOrder: Partial<
   Record<DashboardMemberAttendanceIssueCode, number>
 > = {
   ABSENT: 4,
+};
+
+const toMemberWorkStatusCode = (
+  workStatusCode: DashboardAttendanceDetails["users"][number]["workStatusCode"],
+): DashboardMemberWorkStatusCode => {
+  switch (workStatusCode) {
+    case "WK01":
+      return "SCHEDULED";
+    case "WK02":
+      return "WORKING";
+    case "WK03":
+      return "COMPLETED";
+    case "WK04":
+      return "NOT_CHECKED_IN";
+    case null:
+      return "OFF";
+  }
+};
+
+const toMemberAttendanceIssueCode = (
+  attendanceStatusCode: DashboardAttendanceDetails["users"][number]["attendanceStatusCode"],
+): DashboardMemberAttendanceIssueCode | undefined => {
+  switch (attendanceStatusCode) {
+    case "AT02":
+      return "LATE";
+    case "AT03":
+      return "ABSENT";
+    case "AT01":
+    case null:
+      return undefined;
+  }
 };
 
 const getMemberAttendanceOrder = ({
@@ -94,9 +177,22 @@ export const toDashboardMemberAttendanceRows = (
   details: DashboardAttendanceDetails,
 ): DashboardMemberAttendance[] =>
   [...details.users]
+    .map((user) => ({
+      ...user,
+      attendanceIssueCode: toMemberAttendanceIssueCode(
+        user.attendanceStatusCode,
+      ),
+      workStatusCode: toMemberWorkStatusCode(user.workStatusCode),
+    }))
     .sort((firstUser, secondUser) => {
-      const firstOrder = getMemberAttendanceOrder(firstUser);
-      const secondOrder = getMemberAttendanceOrder(secondUser);
+      const firstOrder = getMemberAttendanceOrder({
+        attendanceIssueCode: firstUser.attendanceIssueCode,
+        workStatusCode: firstUser.workStatusCode,
+      });
+      const secondOrder = getMemberAttendanceOrder({
+        attendanceIssueCode: secondUser.attendanceIssueCode,
+        workStatusCode: secondUser.workStatusCode,
+      });
 
       if (firstOrder !== secondOrder) {
         return firstOrder - secondOrder;
@@ -109,7 +205,7 @@ export const toDashboardMemberAttendanceRows = (
       id: user.userId,
       name: user.userName,
       workStatusCode: user.workStatusCode,
-      meta: `${user.department} · ${user.studentId}`,
+      meta: formatMemberMeta(user),
       late: `${user.lateCount}회 (${user.lateMinutes}분)`,
       week: `${formatMinutes(user.weeklyWorkedMinutes)} / ${formatMinutes(
         user.weeklyLimitMinutes,

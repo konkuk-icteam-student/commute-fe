@@ -9,15 +9,21 @@ import chevronRightCircleDisabledIcon from "@/assets/icons/admin-common/ic_chevr
 export default function DateNavigator({
   dateLabels,
   initialIndex = 0,
+  selectedIndex,
+  onChange,
 }: {
   dateLabels: string[];
   initialIndex?: number;
+  selectedIndex?: number;
+  onChange?: (index: number) => void;
 }) {
   return (
     <DateNavigatorContent
-      key={`${initialIndex}-${dateLabels.join("|")}`}
+      key={`${initialIndex}-${dateLabels.length}`}
       dateLabels={dateLabels}
       initialIndex={initialIndex}
+      selectedIndex={selectedIndex}
+      onChange={onChange}
     />
   );
 }
@@ -25,16 +31,21 @@ export default function DateNavigator({
 function DateNavigatorContent({
   dateLabels,
   initialIndex,
+  selectedIndex,
+  onChange,
 }: {
   dateLabels: string[];
   initialIndex: number;
+  selectedIndex?: number;
+  onChange?: (index: number) => void;
 }) {
-  const [selectedIndex, setSelectedIndex] = useState(() =>
+  const [selectedIndexState, setSelectedIndexState] = useState(() =>
     Math.min(Math.max(initialIndex, 0), Math.max(dateLabels.length - 1, 0)),
   );
   const hasDates = dateLabels.length > 0;
+  const activeIndex = selectedIndex ?? selectedIndexState;
   const currentIndex = Math.min(
-    Math.max(selectedIndex, 0),
+    Math.max(activeIndex, 0),
     Math.max(dateLabels.length - 1, 0),
   );
   const isFirstDate = !hasDates || currentIndex === 0;
@@ -47,7 +58,11 @@ function DateNavigatorContent({
         className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
         aria-label="이전 날짜"
         disabled={isFirstDate}
-        onClick={() => setSelectedIndex(currentIndex - 1)}
+        onClick={() => {
+          const nextIndex = currentIndex - 1;
+          setSelectedIndexState(nextIndex);
+          onChange?.(nextIndex);
+        }}
       >
         <Image
           src={
@@ -69,7 +84,11 @@ function DateNavigatorContent({
         className="flex h-10 w-10 cursor-pointer items-center justify-center disabled:cursor-default"
         aria-label="다음 날짜"
         disabled={isLastDate}
-        onClick={() => setSelectedIndex(currentIndex + 1)}
+        onClick={() => {
+          const nextIndex = currentIndex + 1;
+          setSelectedIndexState(nextIndex);
+          onChange?.(nextIndex);
+        }}
       >
         <Image
           src={
