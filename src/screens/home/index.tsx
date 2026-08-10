@@ -2,59 +2,67 @@
 
 import { useEffect, useState } from "react";
 
+import { useCheckInHomeMutation, useGetHomeTodayQuery } from "@/apis/home";
 import { useGetNewNotificationsQuery } from "@/apis/notifications";
 import {
   AttendanceCard,
   DateRefreshButton,
   formatCurrentDateTime,
+  formatScheduleTime,
   getAttendanceSummary,
   HomeGreeting,
   HomeHeader,
-  syncSchedulesWithCurrentTime,
   useClockInLocation,
+  type WorkSchedule,
+  type WorkScheduleStatus,
   WorkScheduleCard,
 } from "@/features/home";
 
 const mockHomeData = {
   userName: "홍길동",
   teamName: "정보운영팀",
-  schedules: [
-    {
-      id: 1,
-      title: "오전 근무",
-      time: "09:30 - 11:30",
-    },
-    {
-      id: 2,
-      title: "오후 근무",
-      time: "13:30 - 16:30",
-    },
-  ],
 };
+
+const workStatusMap = {
+  WK01: "scheduled",
+  WK02: "working",
+  WK03: "completed",
+  WK04: "absent",
+} as const satisfies Record<string, WorkScheduleStatus>;
 
 export default function HomeScreen() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [clockedInScheduleId, setClockedInScheduleId] = useState<number | null>(
-    null,
-  );
-  const [clockedInAt, setClockedInAt] = useState<Date | null>(null);
   const { canClockInAtWorkLocation } = useClockInLocation();
   const { newNotificationsData } = useGetNewNotificationsQuery();
+  const {
+    homeTodayData,
+    isErrorHomeToday,
+    isPendingHomeToday,
+    refetchHomeToday,
+  } = useGetHomeTodayQuery();
+  const { checkInHome, isPendingCheckInHome } = useCheckInHomeMutation();
   const currentDateTime = formatCurrentDateTime(currentDate);
-  const schedules = syncSchedulesWithCurrentTime(
-    mockHomeData.schedules,
-    currentDate,
-    clockedInScheduleId,
-  );
+  const schedules: WorkSchedule[] =
+    homeTodayData?.schedules.map((schedule) => ({
+      id: schedule.scheduleIds.join("-"),
+      scheduleIds: schedule.scheduleIds,
+      title: schedule.label,
+      time: `${formatScheduleTime(schedule.start)} - ${formatScheduleTime(
+        schedule.end,
+      )}`,
+      status: workStatusMap[schedule.workStatusCode],
+      checkedIn: schedule.checkedIn,
+      checkInTime: schedule.checkInTime,
+    })) ?? [];
   const hasSchedules = schedules.length > 0;
   const attendance = hasSchedules
-    ? getAttendanceSummary(
-        schedules,
-        currentDate,
-        clockedInScheduleId,
-        clockedInAt,
-        { canClockInAtWorkLocation },
-      )
+    ? getAttendanceSummary(schedules, currentDate, { canClockInAtWorkLocation })
+    : null;
+  const attendanceForCard = attendance
+    ? {
+        ...attendance,
+        canClockIn: attendance.canClockIn && !isPendingCheckInHome,
+      }
     : null;
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -68,18 +76,26 @@ export default function HomeScreen() {
 
   const refreshCurrentDateTime = () => {
     setCurrentDate(new Date());
+    refetchHomeToday();
   };
 
   const clockIn = () => {
-    if (attendance?.clockInScheduleId == null || !canClockInAtWorkLocation) {
+    if (
+      !attendance?.clockInScheduleIds ||
+      !canClockInAtWorkLocation ||
+      isPendingCheckInHome
+    ) {
       return;
     }
 
-    const now = new Date();
-
-    setClockedInScheduleId(attendance.clockInScheduleId);
-    setClockedInAt(now);
-    setCurrentDate(now);
+    checkInHome(
+      { scheduleIds: attendance.clockInScheduleIds },
+      {
+        onSuccess: () => {
+          setCurrentDate(new Date());
+        },
+      },
+    );
   };
 
   return (
@@ -95,10 +111,22 @@ export default function HomeScreen() {
         currentDateTime={currentDateTime}
         onRefresh={refreshCurrentDateTime}
       />
-      {attendance && (
-        <AttendanceCard attendance={attendance} onClockIn={clockIn} />
+      {isPendingHomeToday && (
+        <div className="mt-5 rounded-[20px] border border-[#DDE3EF] px-4 py-8 text-center text-[12px] font-bold text-[#8892A6]">
+          오늘의 근무 현황을 불러오는 중입니다.
+        </div>
       )}
-      <WorkScheduleCard schedules={schedules} />
+      {isErrorHomeToday && (
+        <div className="mt-5 rounded-[20px] border border-[#DDE3EF] px-4 py-8 text-center text-[12px] font-bold text-[#8892A6]">
+          오늘의 근무 현황을 불러오지 못했습니다.
+        </div>
+      )}
+      {!isPendingHomeToday && !isErrorHomeToday && attendanceForCard && (
+        <AttendanceCard attendance={attendanceForCard} onClockIn={clockIn} />
+      )}
+      {!isPendingHomeToday && !isErrorHomeToday && (
+        <WorkScheduleCard schedules={schedules} />
+      )}
     </section>
   );
 }

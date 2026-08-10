@@ -1,78 +1,14 @@
 import type {
-  AttendanceSummary,
   WorkSchedule,
   WorkScheduleStatus,
 } from "@/features/home/components";
 
-const attendanceText = {
-  completed: {
-    title: "출근 완료!",
-    description: "에 출근했습니다",
-    buttonText: "출근 완료",
-  },
-  scheduled: {
-    title: "출근 예정",
-    description: "출근 예정입니다",
-    buttonText: "출근하기",
-  },
-  expired: {
-    title: "출근 예정",
-    description: "출근 시간이 지났습니다",
-    buttonText: "출근하기",
-  },
-};
+import { getScheduleTimeRange } from "./schedule-time";
 
-const CLOCK_IN_AVAILABLE_BEFORE_MINUTES = 10;
-
-export type BaseWorkSchedule = Omit<WorkSchedule, "status">;
-
-const parseTimeToMinutes = (time: string) => {
-  const match = time.trim().match(/^(\d{1,2}):(\d{2})$/);
-
-  if (!match) {
-    throw new Error(`Invalid schedule time: "${time}"`);
-  }
-
-  const [, hoursText, minutesText] = match;
-  const hours = Number(hoursText);
-  const minutes = Number(minutesText);
-
-  if (hours > 23 || minutes > 59) {
-    throw new Error(`Invalid schedule time: "${time}"`);
-  }
-
-  return hours * 60 + minutes;
-};
-
-const getScheduleTimeRange = (time: string) => {
-  const match = time.trim().match(/^(.+?)\s*-\s*(.+)$/);
-
-  if (!match) {
-    throw new Error(`Invalid schedule time range: "${time}"`);
-  }
-
-  const [, startTime, endTime] = match;
-  const startMinutes = parseTimeToMinutes(startTime);
-  const endMinutes = parseTimeToMinutes(endTime);
-
-  if (startMinutes > endMinutes) {
-    throw new Error(`Invalid schedule time range: "${time}"`);
-  }
-
-  return {
-    startMinutes,
-    endMinutes,
-  };
-};
-
-const formatTimeLabel = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const displayHours = hours % 12 || 12;
-  const displayMinutes = String(minutes % 60).padStart(2, "0");
-  const period = hours >= 12 ? "PM" : "AM";
-
-  return `${period} ${displayHours}:${displayMinutes}`;
-};
+export type BaseWorkSchedule = Omit<
+  WorkSchedule,
+  "checkedIn" | "checkInTime" | "status"
+>;
 
 const getCurrentMinutes = (date: Date) =>
   date.getHours() * 60 + date.getMinutes();
@@ -96,41 +32,6 @@ const getScheduleStatus = (
   return isClockedIn ? "completed" : "absent";
 };
 
-const createCompletedAttendanceSummary = ({
-  startMinutes,
-  clockedInAtMinutes = startMinutes,
-}: {
-  startMinutes: number;
-  clockedInAtMinutes?: number;
-}): AttendanceSummary => ({
-  status: "completed",
-  title: attendanceText.completed.title,
-  highlightTime: formatTimeLabel(clockedInAtMinutes),
-  description: attendanceText.completed.description,
-  buttonText: attendanceText.completed.buttonText,
-  canClockIn: false,
-});
-
-const createScheduledAttendanceSummary = ({
-  startMinutes,
-  description = attendanceText.scheduled.description,
-  canClockIn = false,
-  clockInScheduleId,
-}: {
-  startMinutes: number;
-  description?: string;
-  canClockIn?: boolean;
-  clockInScheduleId?: number;
-}): AttendanceSummary => ({
-  status: "scheduled",
-  title: attendanceText.scheduled.title,
-  highlightTime: formatTimeLabel(startMinutes),
-  description,
-  buttonText: attendanceText.scheduled.buttonText,
-  canClockIn,
-  clockInScheduleId,
-});
-
 export const syncSchedulesWithCurrentTime = (
   schedules: BaseWorkSchedule[],
   currentDate: Date,
@@ -138,104 +39,11 @@ export const syncSchedulesWithCurrentTime = (
 ): WorkSchedule[] =>
   schedules.map((schedule) => ({
     ...schedule,
+    checkedIn: false,
+    checkInTime: null,
     status: getScheduleStatus(
       schedule,
       currentDate,
-      schedule.id === clockedInScheduleId,
+      Number(schedule.id) === clockedInScheduleId,
     ),
   }));
-
-export const getAttendanceSummary = (
-  schedules: WorkSchedule[],
-  currentDate: Date,
-  clockedInScheduleId?: number | null,
-  clockedInAt?: Date | null,
-  options: {
-    canClockInAtWorkLocation?: boolean;
-  } = {},
-): AttendanceSummary | null => {
-  const canClockInAtWorkLocation = options.canClockInAtWorkLocation ?? true;
-  const currentMinutes = getCurrentMinutes(currentDate);
-  const clockedInAtMinutes = clockedInAt
-    ? getCurrentMinutes(clockedInAt)
-    : undefined;
-  const orderedSchedules = schedules
-    .map((schedule) => ({
-      ...schedule,
-      ...getScheduleTimeRange(schedule.time),
-    }))
-    .sort((a, b) => a.startMinutes - b.startMinutes);
-
-  if (orderedSchedules.length === 0) {
-    return null;
-  }
-
-  const completedSchedule = orderedSchedules.find(
-    (schedule) => schedule.status === "completed",
-  );
-
-  if (completedSchedule) {
-    return createCompletedAttendanceSummary({
-      startMinutes: completedSchedule.startMinutes,
-      clockedInAtMinutes:
-        completedSchedule.id === clockedInScheduleId
-          ? clockedInAtMinutes
-          : undefined,
-    });
-  }
-
-  const clockedInSchedule = orderedSchedules.find(
-    (schedule) => schedule.id === clockedInScheduleId,
-  );
-
-  if (clockedInSchedule) {
-    return createCompletedAttendanceSummary({
-      startMinutes: clockedInSchedule.startMinutes,
-      clockedInAtMinutes,
-    });
-  }
-
-  const activeSchedule = orderedSchedules.find(
-    (schedule) => schedule.status === "working",
-  );
-
-  if (activeSchedule) {
-    if (activeSchedule.id === clockedInScheduleId) {
-      return createCompletedAttendanceSummary({
-        startMinutes: activeSchedule.startMinutes,
-        clockedInAtMinutes,
-      });
-    }
-
-    return createScheduledAttendanceSummary({
-      startMinutes: activeSchedule.startMinutes,
-      description: attendanceText.expired.description,
-      canClockIn: canClockInAtWorkLocation,
-      clockInScheduleId: canClockInAtWorkLocation
-        ? activeSchedule.id
-        : undefined,
-    });
-  }
-
-  const nextSchedule = orderedSchedules.find(
-    (schedule) => currentMinutes < schedule.startMinutes,
-  );
-
-  if (nextSchedule) {
-    const canClockIn =
-      currentMinutes >=
-        nextSchedule.startMinutes - CLOCK_IN_AVAILABLE_BEFORE_MINUTES &&
-      canClockInAtWorkLocation;
-
-    return createScheduledAttendanceSummary({
-      startMinutes: nextSchedule.startMinutes,
-      canClockIn,
-      clockInScheduleId: canClockIn ? nextSchedule.id : undefined,
-    });
-  }
-
-  return createScheduledAttendanceSummary({
-    startMinutes: orderedSchedules.at(-1)?.startMinutes ?? currentMinutes,
-    description: attendanceText.expired.description,
-  });
-};
