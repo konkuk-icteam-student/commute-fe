@@ -35,6 +35,7 @@ export default function WorktimeHistoryScreen() {
   const [currentYearMonth] = useState(getCurrentYearMonth);
   const [selectedYearMonth, setSelectedYearMonth] =
     useState(getCurrentYearMonth);
+  const [page, setPage] = useState(0);
   const { year, month } = selectedYearMonth;
   const isNextDisabled =
     year === currentYearMonth.year && month === currentYearMonth.month;
@@ -48,16 +49,18 @@ export default function WorktimeHistoryScreen() {
     year,
     month,
     statusCode: "ALL",
-    page: 0,
+    page,
     size: PAGE_SIZE,
   });
 
   const handlePrevMonth = () => {
     setSelectedYearMonth(({ year, month }) => getPrevMonth(year, month));
+    setPage(0);
   };
 
   const handleNextMonth = () => {
     setSelectedYearMonth(({ year, month }) => getNextMonth(year, month));
+    setPage(0);
   };
 
   return (
@@ -120,6 +123,10 @@ export default function WorktimeHistoryScreen() {
               workChangeRequestHistoryData?.month ?? month,
             )}
             histories={workChangeRequestHistoryData?.histories ?? []}
+            page={workChangeRequestHistoryData?.page ?? page}
+            totalPages={workChangeRequestHistoryData?.totalPages ?? 0}
+            onPrevPage={() => setPage((currentPage) => currentPage - 1)}
+            onNextPage={() => setPage((currentPage) => currentPage + 1)}
           />
         )}
       </div>
