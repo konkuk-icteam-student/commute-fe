@@ -15,6 +15,7 @@ import type {
   GetWorkSchedulesSummaryResponse,
 } from "./work-schedules.types";
 
+// 근무 시간표 월별 조회
 export const getMonthlySchedulesApi = async ({
   year,
   month,
@@ -26,6 +27,7 @@ export const getMonthlySchedulesApi = async ({
   return response.details;
 };
 
+// 근무 시간표 기간별 조회
 // startDate ~ endDate 범위의 근무 시간표를 30분 단위 슬롯으로 조회한다.
 export const getPeriodSchedulesApi = async ({
   startDate,
@@ -39,6 +41,7 @@ export const getPeriodSchedulesApi = async ({
   return response.details;
 };
 
+// 근로시간 요약 조회
 // 이 주차의 주간·월간 근로시간 요약. 사용 시간과 한도를 서버가 계산해 준다.
 export const getWorkSchedulesSummaryApi = async ({
   startDate,
@@ -52,7 +55,7 @@ export const getWorkSchedulesSummaryApi = async ({
   return response.details;
 };
 
-// 해당 연월의 최대 동시 근무 인원.
+// 월별 스케줄 동시 근무 제한 조회
 export const getMonthlyLimitApi = async ({
   year,
   month,
@@ -64,7 +67,7 @@ export const getMonthlyLimitApi = async ({
   return response.details;
 };
 
-// 고른 슬롯을 근로 일정으로 신청한다. 구간별 성공·실패가 나뉘어 돌아온다.
+// 근무 일정 신청
 export const applyWorkSchedulesApi = async (
   body: ApplyWorkSchedulesRequest,
 ) => {
@@ -76,7 +79,7 @@ export const applyWorkSchedulesApi = async (
   return response.details;
 };
 
-// 초기 신청 기간이 지난 뒤의 시간표 수정을 요청한다. 관리자 승인 후 반영된다.
+// 근무 시간표 수정 요청
 export const editWorkSchedulesApi = async (body: EditWorkSchedulesRequest) => {
   const response = await apiClient.post<EditWorkSchedulesResponse>(
     WORK_SCHEDULES_URL.EDIT,
