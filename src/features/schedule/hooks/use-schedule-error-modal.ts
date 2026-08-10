@@ -37,8 +37,15 @@ export const useScheduleErrorModal = (errors: unknown[]) => {
     setRequestErrorMessage(getApiErrorMessage(error));
   };
 
+  // 지금 화면에 떠 있는 것만 닫는다.
+  // 제출 실패에 가려져 있던 조회 실패까지 함께 닫으면,
+  // 문구가 다른 경우 사용자가 보지 못한 오류를 본 것으로 기록하게 된다.
   const closeErrorModal = () => {
-    setRequestErrorMessage("");
+    if (requestErrorMessage) {
+      setRequestErrorMessage("");
+      return;
+    }
+
     setDismissedError(queryError ?? null);
   };
 
