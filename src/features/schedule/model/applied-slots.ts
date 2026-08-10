@@ -13,10 +13,3 @@ export const getAppliedSlotTimes = (
   slots
     .filter((slot) => applyPolicy.resolveStatus(slot, draft) === "MY_SCHEDULE")
     .map(({ date, start, end }) => ({ date, start, end }));
-
-// 서버가 확정해 준 내 근무 슬롯. 아직 고르기만 한 내역은 빼고 센다.
-// 응답에 주 단위 근무시간이 없어서 이 주차의 슬롯으로 직접 계산한다.
-export const getConfirmedSlotTimes = (slots: WeekSlot[]): ScheduleSlotTime[] =>
-  slots
-    .filter((slot) => slot.status === "MY_SCHEDULE")
-    .map(({ date, start, end }) => ({ date, start, end }));

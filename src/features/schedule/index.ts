@@ -20,10 +20,7 @@ export {
   useScheduleWeek,
 } from "./hooks";
 
-export {
-  getAppliedSlotTimes,
-  getConfirmedSlotTimes,
-} from "./model/applied-slots";
+export { getAppliedSlotTimes } from "./model/applied-slots";
 export { getDraftSlotTimes } from "./model/draft";
 export type { DraftKind, ScheduleDraft } from "./model/draft";
 export {

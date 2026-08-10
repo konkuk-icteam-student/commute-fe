@@ -140,7 +140,6 @@ export default function ScheduleEditScreen() {
     onSlotClick: toggleSlot,
   });
 
-  // 주 단위 근무시간은 응답에 없어서 이 주차의 확정 슬롯으로 직접 계산한다.
   const ableToAddHours = getAbleToAddHours(
     monthLimitHours,
     monthUsedHours,
