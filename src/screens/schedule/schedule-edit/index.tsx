@@ -82,7 +82,7 @@ export default function ScheduleEditScreen() {
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const {
     periodSchedulesData,
-    isPendingPeriodSchedules,
+    isFetchingPeriodSchedules,
     periodSchedulesError,
     refetchPeriodSchedules,
   } = useGetPeriodSchedulesQuery({
@@ -207,7 +207,7 @@ export default function ScheduleEditScreen() {
         <ScheduleGrid
           days={days}
           cells={cells}
-          isLoading={isPendingPeriodSchedules}
+          isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}

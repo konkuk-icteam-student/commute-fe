@@ -62,7 +62,7 @@ export default function ScheduleApplyScreen() {
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const {
     periodSchedulesData,
-    isPendingPeriodSchedules,
+    isFetchingPeriodSchedules,
     periodSchedulesError,
     refetchPeriodSchedules,
   } = useGetPeriodSchedulesQuery({
@@ -200,7 +200,7 @@ export default function ScheduleApplyScreen() {
         <ScheduleGrid
           days={days}
           cells={cells}
-          isLoading={isPendingPeriodSchedules}
+          isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
           isApply

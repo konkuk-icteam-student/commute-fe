@@ -18,6 +18,8 @@ export const useGetMyPageQuery = () => {
   const {
     data: myPageData,
     isPending: isPendingMyPage,
+    // 최초 조회와 새로고침을 모두 덮는다. 로딩 UI는 이 값을 쓴다.
+    isFetching: isFetchingMyPage,
     isError: isErrorMyPage,
     error: myPageError,
     refetch: refetchMyPage,
@@ -32,6 +34,7 @@ export const useGetMyPageQuery = () => {
   return {
     myPageData,
     isPendingMyPage,
+    isFetchingMyPage,
     isErrorMyPage,
     myPageError,
     refetchMyPage,

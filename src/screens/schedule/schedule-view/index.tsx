@@ -47,7 +47,7 @@ export default function ScheduleViewScreen() {
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const {
     periodSchedulesData,
-    isPendingPeriodSchedules,
+    isFetchingPeriodSchedules,
     periodSchedulesError,
     refetchPeriodSchedules,
   } = useGetPeriodSchedulesQuery({
@@ -58,7 +58,7 @@ export default function ScheduleViewScreen() {
   // 근로시간은 시간표와 따로 조회한다. 주간·월간 합계와 한도를 서버가 계산해 준다.
   const {
     workSchedulesSummaryData,
-    isPendingWorkSchedulesSummary,
+    isFetchingWorkSchedulesSummary,
     workSchedulesSummaryError,
     refetchWorkSchedulesSummary,
   } = useGetWorkSchedulesSummaryQuery({
@@ -66,8 +66,12 @@ export default function ScheduleViewScreen() {
     endDate,
   });
 
-  const { myPageData, isPendingMyPage, myPageError, refetchMyPage } =
+  const { myPageData, isFetchingMyPage, myPageError, refetchMyPage } =
     useGetMyPageQuery();
+
+  // 근로시간 카드는 요약과 마이페이지를 함께 쓰므로 둘 중 하나라도 받는 중이면 로딩이다.
+  const isFetchingWorkingHours =
+    isFetchingWorkSchedulesSummary || isFetchingMyPage;
 
   // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
   // 근로시간 카드가 세 조회를 함께 쓰므로 셋 다 다시 요청한다.
@@ -120,6 +124,7 @@ export default function ScheduleViewScreen() {
               checked={isDetailVisible}
               onCheckedChange={setIsDetailVisible}
               label="자세히"
+              className="ml-5"
             />
           }
           action={<ScheduleRefreshButton onClick={handleRefresh} />}
@@ -127,7 +132,7 @@ export default function ScheduleViewScreen() {
         <ScheduleGrid
           days={days}
           cells={cells}
-          isLoading={isPendingPeriodSchedules}
+          isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
           minSessionHours={MIN_SESSION_HOURS}
@@ -141,7 +146,7 @@ export default function ScheduleViewScreen() {
           label={`${week}주차 총 시간`}
           hours={weekWorkedHours}
           maxHours={weekUsedHours}
-          isLoading={isPendingWorkSchedulesSummary || isPendingMyPage}
+          isLoading={isFetchingWorkingHours}
         />
         {/* hours는 실 근무 시간, maxHours는 신청한 시간 */}
         <WorkingHoursCard
@@ -149,7 +154,7 @@ export default function ScheduleViewScreen() {
           hours={monthWorkedHours}
           maxHours={monthUsedHours}
           withProgressBar
-          isLoading={isPendingWorkSchedulesSummary || isPendingMyPage}
+          isLoading={isFetchingWorkingHours}
         />
         <ScheduleChangeHistoryPreview
           histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
