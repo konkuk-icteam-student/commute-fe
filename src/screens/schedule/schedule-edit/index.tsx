@@ -161,7 +161,11 @@ export default function ScheduleEditScreen() {
     minWorkUnitHours,
   );
 
+  // 요약을 못 받으면 한도가 0으로 내려앉는다. 서버 기준 없이 요청이 나가지 않게 막는다.
+  const isSummaryReady = workSchedulesSummaryData !== undefined;
+
   const buttonDisabled =
+    !isSummaryReady ||
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     deleteRequestHours > monthUsedHours ||
     addRequestHours > ableToAddHours ||

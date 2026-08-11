@@ -248,6 +248,10 @@ export function createWorkRequestSettingsPayload({
   const monthlyMaxMinutes = parseWorkRequestMinutes(
     formValues.monthlyMaxMinutes,
   );
+  // 검증과 전송이 같은 값을 쓰도록 정규화 결과를 그대로 담아 보낸다.
+  const unavailableTimeRanges = formValues.unavailableTimeRanges.map(
+    parseTimeRangeInput,
+  );
 
   if (
     !applyStartDate ||
@@ -262,9 +266,7 @@ export function createWorkRequestSettingsPayload({
     weeklyMinMinutes > weeklyMaxMinutes ||
     monthlyMinMinutes > monthlyMaxMinutes ||
     !formValues.unavailableDates.every(isValidDateString) ||
-    !formValues.unavailableTimeRanges.every((timeRange) =>
-      parseTimeRangeInput(timeRange),
-    )
+    !unavailableTimeRanges.every((timeRange) => timeRange !== null)
   ) {
     return null;
   }
@@ -277,7 +279,7 @@ export function createWorkRequestSettingsPayload({
     monthlyMaxMinutes,
     monthlyMinMinutes,
     unavailableDates: formValues.unavailableDates,
-    unavailableTimeRanges: formValues.unavailableTimeRanges,
+    unavailableTimeRanges,
     weeklyMaxMinutes,
     weeklyMinMinutes,
   };

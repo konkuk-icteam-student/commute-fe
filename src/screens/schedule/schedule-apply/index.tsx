@@ -148,7 +148,11 @@ export default function ScheduleApplyScreen() {
     minWorkUnitHours,
   );
 
+  // 요약을 못 받으면 한도가 0으로 내려앉아 삭제만 담긴 초안이 검사를 그냥 통과한다.
+  const isSummaryReady = workSchedulesSummaryData !== undefined;
+
   const buttonDisabled =
+    !isSummaryReady ||
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     weekTotalTimeAfterApply > weekMaxHours ||
     monthTotalTimeAfterApply > monthMaxHours ||
