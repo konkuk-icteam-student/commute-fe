@@ -34,9 +34,6 @@ import { ApiError } from "@/apis/api-client";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다. api에 추가 필요
-const MIN_SESSION_HOURS = 1;
-
 // 결과 모달에 보여 줄 내용.
 // 전부 실패하면 서버가 구간 목록을 내려주지 않으므로 message만 채워진다.
 type ApplyResult = ApplyWorkSchedulesResponse & { message?: string };
@@ -94,10 +91,12 @@ export default function ScheduleApplyScreen() {
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthMaxHours = workSchedulesSummaryData?.month.maxHours ?? 0;
   const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
-  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekMaxHours = workSchedulesSummaryData?.week.maxHours ?? 0;
   const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
+  const minWorkUnitHours =
+    (workSchedulesSummaryData?.minWorkUnitMinutes ?? 0) / 60;
 
   const { applyWorkSchedules, isPendingApplyWorkSchedules } =
     useApplyWorkSchedulesMutation();
@@ -146,13 +145,13 @@ export default function ScheduleApplyScreen() {
 
   const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
     getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
-    MIN_SESSION_HOURS,
+    minWorkUnitHours,
   );
 
   const buttonDisabled =
     (deleteRequestHours === 0 && addRequestHours === 0) ||
-    weekTotalTimeAfterApply > weekLimitHours ||
-    monthTotalTimeAfterApply > monthLimitHours ||
+    weekTotalTimeAfterApply > weekMaxHours ||
+    monthTotalTimeAfterApply > monthMaxHours ||
     isPendingApplyWorkSchedules;
 
   const handleClickButton = () => {
@@ -204,16 +203,16 @@ export default function ScheduleApplyScreen() {
         />
         <ScheduleStatusLegend
           isApply
-          minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={weekLimitHours}
-          monthlyTargetHours={monthLimitHours}
+          minSessionHours={minWorkUnitHours}
+          weeklyMaxHours={weekMaxHours}
+          monthlyTargetHours={monthMaxHours}
         />
       </div>
       <ScheduleApplySummary
         month={month}
         week={week}
-        maxMonthHours={monthLimitHours}
-        maxWeekHours={weekLimitHours}
+        maxMonthHours={monthMaxHours}
+        maxWeekHours={weekMaxHours}
         applyPayload={rawPayload}
         addRequestHours={addRequestHours}
         deleteRequestHours={deleteRequestHours}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import {
@@ -32,21 +33,18 @@ import {
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
-// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다!
-const MIN_SESSION_HOURS = 1;
-
 // 이번 달에 추가로 신청할 수 있는 시간. 삭제를 신청한 만큼 다시 채워 넣을 수 있다.
 const getAbleToAddHours = (
-  monthLimitHours: number,
+  monthMaxHours: number,
   monthUsedHours: number,
   deleteRequestHours: number,
-) => monthLimitHours - monthUsedHours + deleteRequestHours;
+) => monthMaxHours - monthUsedHours + deleteRequestHours;
 
 // 칸을 누르는 시점의 내역으로 한도를 다시 계산한다.
 const createResolveEditContext =
   (
     maxConcurrentWorkers: number,
-    monthLimitHours: number,
+    monthMaxHours: number,
     monthUsedHours: number,
   ) =>
   (draft: ScheduleDraft) => ({
@@ -54,7 +52,7 @@ const createResolveEditContext =
     editLimit: {
       addHours: getSlotTimesTotalHours(getDraftSlotTimes(draft, "ADD")),
       maxAddHours: getAbleToAddHours(
-        monthLimitHours,
+        monthMaxHours,
         monthUsedHours,
         getSlotTimesTotalHours(getDraftSlotTimes(draft, "DELETE")),
       ),
@@ -62,6 +60,7 @@ const createResolveEditContext =
   });
 
 export default function ScheduleEditScreen() {
+  const router = useRouter();
   // 수정 요청은 이번 달 전체에 대해 가능하다.
   // 지난 주차도 열어 둔다 — 제때 수정하지 못하고 넘어간 근무를 정정할 수 있어야 한다.
   const [today] = useState(() => new Date());
@@ -117,10 +116,12 @@ export default function ScheduleEditScreen() {
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekMaxHours = workSchedulesSummaryData?.week.maxHours ?? 0;
   const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
-  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthMaxHours = workSchedulesSummaryData?.month.maxHours ?? 0;
   const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
+  const minWorkUnitHours =
+    (workSchedulesSummaryData?.minWorkUnitMinutes ?? 0) / 60;
 
   const {
     draft,
@@ -134,7 +135,7 @@ export default function ScheduleEditScreen() {
     policy: editPolicy,
     resolveContext: createResolveEditContext(
       schedule.maxConcurrentWorkers,
-      monthLimitHours,
+      monthMaxHours,
       monthUsedHours,
     ),
   });
@@ -151,13 +152,13 @@ export default function ScheduleEditScreen() {
   });
 
   const ableToAddHours = getAbleToAddHours(
-    monthLimitHours,
+    monthMaxHours,
     monthUsedHours,
     deleteRequestHours,
   );
   const isBelowMinSessionHours = hasSlotTimesBelowMinSessionHours(
     getAppliedSlotTimes(getCurrentMonthSlots(days), draft),
-    MIN_SESSION_HOURS,
+    minWorkUnitHours,
   );
 
   const buttonDisabled =
@@ -182,9 +183,11 @@ export default function ScheduleEditScreen() {
     editWorkSchedules(
       { ...payload, reason },
       {
+        // 요청이 접수되면 시간표 화면으로 돌려보낸다. 처리 내역은 거기서 확인한다.
         onSuccess: () => {
           resetDraft();
           setReason("");
+          router.push("/schedule");
         },
         // 실패하면 입력한 내역과 사유는 그대로 두고 서버 문구만 보여 준다.
         onError: showError,
@@ -210,9 +213,9 @@ export default function ScheduleEditScreen() {
           isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
-          minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={weekLimitHours}
-          monthlyTargetHours={monthLimitHours}
+          minSessionHours={minWorkUnitHours}
+          weeklyMaxHours={weekMaxHours}
+          monthlyTargetHours={monthMaxHours}
         />
       </div>
       <div className="flex flex-col gap-2">
