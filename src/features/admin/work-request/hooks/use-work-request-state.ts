@@ -31,11 +31,8 @@ export default function useWorkRequestState({
     [settings],
   );
   const [isEditing, setIsEditing] = useState(false);
-  // 종료는 아직 별도 API가 없어 화면 안에서만 유지한다.
-  const [isEnded, setIsEnded] = useState(false);
 
-  const baseValues =
-    savedValues && !isEnded ? savedValues : initialWorkRequestFormValues;
+  const baseValues = savedValues ?? initialWorkRequestFormValues;
   const [formValues, setFormValues] =
     useState<WorkRequestFormValues>(baseValues);
   const [syncedValues, setSyncedValues] =
@@ -48,7 +45,7 @@ export default function useWorkRequestState({
     setFormValues(baseValues);
   }
 
-  const isActive = applyStarted && !isEnded;
+  const isActive = applyStarted;
   const canEditSettings = !isActive || isEditing;
   const isDirty = useMemo(
     () => JSON.stringify(formValues) !== JSON.stringify(baseValues),
@@ -135,18 +132,12 @@ export default function useWorkRequestState({
     setIsEditing(false);
   };
 
-  const endRequest = () => {
-    setIsEnded(true);
-    setIsEditing(false);
-  };
-
   return {
     addUnavailableDate,
     addUnavailableTimeRange,
     cancelEditRequest,
     canEditSettings,
     editRequest,
-    endRequest,
     finishEditRequest,
     formValues,
     isActive,

@@ -26,7 +26,6 @@ export default function SettingsPanel({
   onAddUnavailableTimeRange,
   onCancelEdit,
   onEdit,
-  onEnd,
   onFieldChange,
   onStart,
   onUpdate,
@@ -44,7 +43,6 @@ export default function SettingsPanel({
   onAddUnavailableTimeRange: () => void;
   onCancelEdit: () => void;
   onEdit: () => void;
-  onEnd: () => void;
   onFieldChange: WorkRequestFieldChangeHandler;
   onStart: () => void;
   onUpdate: () => void;
@@ -98,7 +96,6 @@ export default function SettingsPanel({
           isStartReady={isStartReady}
           onCancelEdit={onCancelEdit}
           onEdit={onEdit}
-          onEnd={onEnd}
           onFieldChange={onFieldChange}
           onStart={onStart}
           onUpdate={onUpdate}

@@ -16,7 +16,7 @@ import {
   useSaveWorkApplicationSettingsMutation,
 } from "@/apis/admin/work-application-settings";
 
-type WorkRequestAction = "end" | "start" | "update";
+type WorkRequestAction = "start" | "update";
 
 const actionAlertContent: Record<
   WorkRequestAction,
@@ -28,14 +28,6 @@ const actionAlertContent: Record<
     title: string;
   }
 > = {
-  end: {
-    cancelText: "취소",
-    confirmButtonClassName: "bg-[#FD7171]",
-    confirmText: "종료하기",
-    message:
-      "신청내용은 다음달 근로시간표로 적용되며\n변경은 ‘근로시간관리’ 화면에서 가능합니다.",
-    title: "신청받기를 종료하시겠습니까?",
-  },
   start: {
     cancelText: "이전",
     confirmText: "신청받기",
@@ -52,7 +44,6 @@ const actionAlertContent: Record<
 };
 
 const completionMessage: Record<WorkRequestAction, string> = {
-  end: "신청이 종료되었습니다.",
   start: "근로신청을 시작했습니다.",
   update: "수정이 완료되었습니다.",
 };
@@ -92,7 +83,6 @@ export default function AdminWorkRequestScreen() {
     cancelEditRequest,
     canEditSettings,
     editRequest,
-    endRequest,
     finishEditRequest,
     formValues,
     isActive,
@@ -116,13 +106,6 @@ export default function AdminWorkRequestScreen() {
 
   const handleConfirmAction = (action: WorkRequestAction) => {
     setPendingAction(null);
-
-    // 종료는 아직 API가 없어 화면 상태만 되돌린다.
-    if (action === "end") {
-      endRequest();
-      setNotificationMessage(completionMessage.end);
-      return;
-    }
 
     // 입력값("4명", "2시간", 시간 단위 숫자, "MM.DD")을 서버 스펙(분 단위 숫자, "YYYY-MM-DD")으로 변환
     const payload = createWorkRequestSettingsPayload({
@@ -181,7 +164,6 @@ export default function AdminWorkRequestScreen() {
           onAddUnavailableTimeRange={addUnavailableTimeRange}
           onCancelEdit={cancelEditRequest}
           onEdit={editRequest}
-          onEnd={() => setPendingAction("end")}
           onFieldChange={updateField}
           onStart={() => setPendingAction("start")}
           onUpdate={() => setPendingAction("update")}
