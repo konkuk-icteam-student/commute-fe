@@ -10,7 +10,6 @@ export default function SettingsActionButtons({
   isStartReady,
   onCancelEdit,
   onEdit,
-  onEnd,
   onStart,
   onUpdate,
 }: {
@@ -21,7 +20,6 @@ export default function SettingsActionButtons({
   isStartReady: boolean;
   onCancelEdit: () => void;
   onEdit: () => void;
-  onEnd: () => void;
   onStart: () => void;
   onUpdate: () => void;
 }) {
@@ -55,9 +53,11 @@ export default function SettingsActionButtons({
         <ActionButton
           className={cn(
             "max-w-36.5",
-            isDirty ? "bg-[#2076FF] text-white" : "bg-[#EFEFF1] text-[#6D7882]",
+            isDirty && isStartReady
+              ? "bg-[#2076FF] text-white"
+              : "bg-[#EFEFF1] text-[#6D7882]",
           )}
-          disabled={!isDirty || isSaving}
+          disabled={!isDirty || !isStartReady || isSaving}
           onClick={onUpdate}
         >
           {isSaving ? "저장중" : "수정 완료"}
@@ -67,20 +67,12 @@ export default function SettingsActionButtons({
   }
 
   return (
-    <>
-      <ActionButton
-        className="max-w-36.5 bg-[#2076FF] text-white"
-        onClick={onEdit}
-      >
-        수정하기
-      </ActionButton>
-      <ActionButton
-        className="max-w-27.75 bg-[#F84D4D] text-white"
-        onClick={onEnd}
-      >
-        종료
-      </ActionButton>
-    </>
+    <ActionButton
+      className="max-w-36.5 bg-[#2076FF] text-white"
+      onClick={onEdit}
+    >
+      수정하기
+    </ActionButton>
   );
 }
 

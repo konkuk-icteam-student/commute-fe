@@ -16,7 +16,6 @@ export default function WorkHourSettingsCard({
   isStartReady,
   onCancelEdit,
   onEdit,
-  onEnd,
   onFieldChange,
   onStart,
   onUpdate,
@@ -30,7 +29,6 @@ export default function WorkHourSettingsCard({
   isStartReady: boolean;
   onCancelEdit: () => void;
   onEdit: () => void;
-  onEnd: () => void;
   onFieldChange: WorkRequestFieldChangeHandler;
   onStart: () => void;
   onUpdate: () => void;
@@ -67,7 +65,6 @@ export default function WorkHourSettingsCard({
           isStartReady={isStartReady}
           onCancelEdit={onCancelEdit}
           onEdit={onEdit}
-          onEnd={onEnd}
           onStart={onStart}
           onUpdate={onUpdate}
         />

@@ -1,4 +1,10 @@
 import type {
+  ConfiguredWorkApplicationSettings,
+  GetWorkApplicationSettingsResponse,
+  WorkApplicationSettings,
+} from "@/apis/admin/work-application-settings";
+
+import type {
   WorkRequestFormValues,
   WorkRequestSettingsPayload,
 } from "../types";
@@ -101,6 +107,78 @@ export function parseWorkRequestMinutes(value: string) {
   return totalMinutes || null;
 }
 
+// 아래 format* 함수들은 parseWorkRequest* 의 역방향이다. 서버가 준 분 단위 숫자를
+// 그대로 입력창에 넣으면 다시 저장할 때 값이 달라지므로, 파서가 읽을 수 있는 표기로 되돌린다.
+export function formatWorkRequestWorkerCount(count: number) {
+  return `${count}명`;
+}
+
+// 최소 근무시간 단위는 minimumUnitOptions 의 라벨과 정확히 같아야 선택 상태로 보인다.
+export function formatWorkRequestUnitLabel(minutes: number) {
+  if (minutes <= 60) {
+    return `${minutes}분`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+
+  return restMinutes ? `${hours}시간 ${restMinutes}분` : `${hours}시간`;
+}
+
+// 주별·월별 근무 시간 입력창은 "시간" 단위 숫자를 받는다.
+export function formatWorkRequestHours(minutes: number) {
+  if (minutes % 60 === 0) {
+    return String(minutes / 60);
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+
+  return hours ? `${hours}시간 ${restMinutes}분` : `${restMinutes}분`;
+}
+
+// 서버는 시간을 "HH:mm:ss"로 준다. 입력창과 파서는 "HH:mm"만 다루므로 초를 떼어 낸다.
+export function formatWorkRequestTime(value: string) {
+  const match = value.match(/^(\d{2}:\d{2})(?::\d{2})?$/);
+
+  return match ? match[1] : value;
+}
+
+// useQuery가 돌려준 값을 그 자리에서 isConfigured로 판별하면 타입이 좁혀지지 않는다.
+// 인자 타입을 명시한 함수 안에서 한 번 걸러 낸다.
+export function pickConfiguredWorkApplicationSettings(
+  response: GetWorkApplicationSettingsResponse | undefined,
+): ConfiguredWorkApplicationSettings | null {
+  return response && response.isConfigured ? response : null;
+}
+
+export function toWorkRequestFormValues(
+  settings: WorkApplicationSettings,
+): WorkRequestFormValues {
+  return {
+    applyEndDate: settings.applyEndDate,
+    applyStartDate: settings.applyStartDate,
+    maxConcurrentWorkers: formatWorkRequestWorkerCount(
+      settings.maxConcurrentWorkers,
+    ),
+    minWorkUnitMinutes: formatWorkRequestUnitLabel(settings.minWorkUnitMinutes),
+    monthlyMaxMinutes: formatWorkRequestHours(settings.monthlyMaxMinutes),
+    monthlyMinMinutes: formatWorkRequestHours(settings.monthlyMinMinutes),
+    unavailableDateInput: "",
+    unavailableDates: settings.unavailableDates,
+    unavailableTimeRangeEndInput: "",
+    unavailableTimeRangeStartInput: "",
+    unavailableTimeRanges: settings.unavailableTimeRanges.map(
+      ({ end, start }) => ({
+        end: formatWorkRequestTime(end),
+        start: formatWorkRequestTime(start),
+      }),
+    ),
+    weeklyMaxMinutes: formatWorkRequestHours(settings.weeklyMaxMinutes),
+    weeklyMinMinutes: formatWorkRequestHours(settings.weeklyMinMinutes),
+  };
+}
+
 export function parseWorkRequestWorkerCount(value: string) {
   const count = Number(value.replace(/[^0-9]/g, ""));
 
@@ -114,8 +192,9 @@ export function parseTimeRangeInput({
   end: string;
   start: string;
 }) {
-  const trimmedStart = start.trim();
-  const trimmedEnd = end.trim();
+  // 어느 경로로 들어온 값이든 초가 붙어 있으면 걸러지지 않도록 여기서도 떼어 낸다.
+  const trimmedStart = formatWorkRequestTime(start.trim());
+  const trimmedEnd = formatWorkRequestTime(end.trim());
 
   if (
     !timePattern.test(trimmedStart) ||
@@ -169,6 +248,10 @@ export function createWorkRequestSettingsPayload({
   const monthlyMaxMinutes = parseWorkRequestMinutes(
     formValues.monthlyMaxMinutes,
   );
+  // 검증과 전송이 같은 값을 쓰도록 정규화 결과를 그대로 담아 보낸다.
+  const unavailableTimeRanges = formValues.unavailableTimeRanges.map(
+    parseTimeRangeInput,
+  );
 
   if (
     !applyStartDate ||
@@ -183,9 +266,7 @@ export function createWorkRequestSettingsPayload({
     weeklyMinMinutes > weeklyMaxMinutes ||
     monthlyMinMinutes > monthlyMaxMinutes ||
     !formValues.unavailableDates.every(isValidDateString) ||
-    !formValues.unavailableTimeRanges.every((timeRange) =>
-      parseTimeRangeInput(timeRange),
-    )
+    !unavailableTimeRanges.every((timeRange) => timeRange !== null)
   ) {
     return null;
   }
@@ -198,7 +279,7 @@ export function createWorkRequestSettingsPayload({
     monthlyMaxMinutes,
     monthlyMinMinutes,
     unavailableDates: formValues.unavailableDates,
-    unavailableTimeRanges: formValues.unavailableTimeRanges,
+    unavailableTimeRanges,
     weeklyMaxMinutes,
     weeklyMinMinutes,
   };

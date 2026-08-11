@@ -40,32 +40,3 @@ export interface WorkRequestSettingsPayload {
   weeklyMaxMinutes: number;
   weeklyMinMinutes: number;
 }
-
-export interface WorkRequestSettingsDetails extends WorkRequestSettingsPayload {
-  affectedScheduleCount: number;
-  affectedUserCount: number;
-  month: number;
-  year: number;
-}
-
-export interface WorkRequestSaveSuccessResponse {
-  details: WorkRequestSettingsDetails;
-  isSuccess: true;
-  message: string;
-}
-
-export interface WorkRequestSaveErrorResponse {
-  details: null;
-  isSuccess: false;
-  message: string;
-}
-
-export type WorkRequestSaveResult =
-  | {
-      data: WorkRequestSaveSuccessResponse;
-      status: "success";
-    }
-  | {
-      data: WorkRequestSaveErrorResponse;
-      status: "error";
-    };

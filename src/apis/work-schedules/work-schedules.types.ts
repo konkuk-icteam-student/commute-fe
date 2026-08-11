@@ -44,16 +44,19 @@ export interface GetWorkSchedulesSummaryRequest {
 }
 
 // 근로시간 한 칸. label은 서버가 만든 표시용 문구다. 예: "1주차", "4월 전체"
+// 한도가 최소~최대 범위로 바뀌었다. 기존 limitHours에 해당하는 값은 maxHours다.
 export interface WorkSchedulesSummaryEntryType {
   label: string;
   usedHours: number;
-  limitHours: number;
+  minHours: number;
+  maxHours: number;
 }
 
 // 주간과 월간 근로시간을 나눠서 내려준다.
 export interface GetWorkSchedulesSummaryResponse {
   startDate: string;
   endDate: string;
+  minWorkUnitMinutes: number;
   week: WorkSchedulesSummaryEntryType;
   month: WorkSchedulesSummaryEntryType;
 }

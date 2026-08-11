@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import {
-  DUMMY_SCHEDULE_CHANGE_HISTORY,
   EMPTY_SCHEDULE,
   ScheduleChangeHistoryPreview,
   ScheduleErrorModal,
@@ -25,9 +24,10 @@ import {
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
 import { useGetMyPageQuery } from "@/apis/my-page";
+import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
 
-// TODO: 응답에 대응하는 값이 없어 아직 화면에 둔다
-const MIN_SESSION_HOURS = 1;
+// 미리보기라 최근 것만 보여 준다. 전체는 '처리내역 자세히보기'로 넘어간다.
+const CHANGE_HISTORY_PREVIEW_SIZE = 4;
 
 export default function ScheduleViewScreen() {
   // 조회는 이번 달 안에서만 이동할 수 있다.
@@ -69,16 +69,30 @@ export default function ScheduleViewScreen() {
   const { myPageData, isFetchingMyPage, myPageError, refetchMyPage } =
     useGetMyPageQuery();
 
+  // 아직 처리되지 않은 요청만 미리 보여 준다. 이 칸의 빈 상태 문구도 '처리 중인 내역'을 가리킨다.
+  const {
+    workChangeRequestHistoryData,
+    workChangeRequestHistoryError,
+    refetchWorkChangeRequestHistory,
+  } = useGetWorkChangeRequestHistoryQuery({
+    year,
+    month,
+    statusCode: "CS01",
+    page: 0,
+    size: CHANGE_HISTORY_PREVIEW_SIZE,
+  });
+
   // 근로시간 카드는 요약과 마이페이지를 함께 쓰므로 둘 중 하나라도 받는 중이면 로딩이다.
   const isFetchingWorkingHours =
     isFetchingWorkSchedulesSummary || isFetchingMyPage;
 
   // 조회에 실패하면 표가 잠긴 채로 남는다. 새로고침이 다시 시도할 유일한 통로다.
-  // 근로시간 카드가 세 조회를 함께 쓰므로 셋 다 다시 요청한다.
+  // 근로시간 카드가 세 조회를 함께 쓰므로 셋 다 다시 요청한다. 처리 내역도 같이 받아 온다.
   const handleRefresh = () => {
     void refetchPeriodSchedules();
     void refetchWorkSchedulesSummary();
     void refetchMyPage();
+    void refetchWorkChangeRequestHistory();
   };
 
   // 조회에 실패하면 표가 회색으로만 남아 장애인지 알 수 없으므로 모달로 알린다.
@@ -86,16 +100,19 @@ export default function ScheduleViewScreen() {
     periodSchedulesError,
     workSchedulesSummaryError,
     myPageError,
+    workChangeRequestHistoryError,
   ]);
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
   const schedule = periodSchedulesData ?? EMPTY_SCHEDULE;
-  const weekLimitHours = workSchedulesSummaryData?.week.limitHours ?? 0;
+  const weekMaxHours = workSchedulesSummaryData?.week.maxHours ?? 0;
   const weekUsedHours = workSchedulesSummaryData?.week.usedHours ?? 0;
   const weekWorkedHours = myPageData?.week.workedHours ?? 0;
-  const monthLimitHours = workSchedulesSummaryData?.month.limitHours ?? 0;
+  const monthMaxHours = workSchedulesSummaryData?.month.maxHours ?? 0;
   const monthUsedHours = workSchedulesSummaryData?.month.usedHours ?? 0;
   const monthWorkedHours = myPageData?.month.workedHours ?? 0;
+  const minWorkUnitHours =
+    (workSchedulesSummaryData?.minWorkUnitMinutes ?? 0) / 60;
 
   const { days, cells } = useScheduleGrid({
     data: schedule,
@@ -135,9 +152,9 @@ export default function ScheduleViewScreen() {
           isLoading={isFetchingPeriodSchedules}
         />
         <ScheduleStatusLegend
-          minSessionHours={MIN_SESSION_HOURS}
-          weeklyMaxHours={weekLimitHours}
-          monthlyTargetHours={monthLimitHours}
+          minSessionHours={minWorkUnitHours}
+          weeklyMaxHours={weekMaxHours}
+          monthlyTargetHours={monthMaxHours}
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -157,7 +174,7 @@ export default function ScheduleViewScreen() {
           isLoading={isFetchingWorkingHours}
         />
         <ScheduleChangeHistoryPreview
-          histories={DUMMY_SCHEDULE_CHANGE_HISTORY}
+          histories={workChangeRequestHistoryData?.histories ?? []}
         />
       </div>
 

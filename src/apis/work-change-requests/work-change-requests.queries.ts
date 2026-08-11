@@ -25,6 +25,7 @@ export const useGetWorkChangeRequestHistoryQuery = (
     isPending: isPendingWorkChangeRequestHistory,
     isError: isErrorWorkChangeRequestHistory,
     error: workChangeRequestHistoryError,
+    refetch: refetchWorkChangeRequestHistory,
   } = useQuery<WorkChangeRequestHistoryResponse, ApiError>({
     queryKey: WORK_CHANGE_REQUESTS_QUERY_KEY.HISTORY(params),
     queryFn: () => getWorkChangeRequestHistoryApi(params),
@@ -38,5 +39,6 @@ export const useGetWorkChangeRequestHistoryQuery = (
     isPendingWorkChangeRequestHistory,
     isErrorWorkChangeRequestHistory,
     workChangeRequestHistoryError,
+    refetchWorkChangeRequestHistory,
   };
 };
