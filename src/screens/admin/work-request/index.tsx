@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Alert, Modal, Toast } from "@/components/ui";
 import {
   createWorkRequestSettingsPayload,
+  getNextWorkRequestMonth,
+  pickConfiguredWorkApplicationSettings,
   SettingsPanel,
   SummaryPanel,
   useWorkRequestState,
 } from "@/features/admin/work-request";
-import { useSaveWorkApplicationSettingsMutation } from "@/apis/admin/work-application-settings";
+import {
+  useGetWorkApplicationSettingsQuery,
+  useSaveWorkApplicationSettingsMutation,
+} from "@/apis/admin/work-application-settings";
 
 type WorkRequestAction = "end" | "start" | "update";
 
@@ -52,6 +57,8 @@ const completionMessage: Record<WorkRequestAction, string> = {
   update: "수정이 완료되었습니다.",
 };
 const failureMessage = "요청 처리에 실패했습니다.";
+const invalidInputMessage = "입력값을 다시 확인해주세요.";
+const loadFailureMessage = "근로신청 설정을 불러오지 못했습니다.";
 
 export default function AdminWorkRequestScreen() {
   const [pendingAction, setPendingAction] = useState<WorkRequestAction | null>(
@@ -59,12 +66,34 @@ export default function AdminWorkRequestScreen() {
   );
 
   const [notificationMessage, setNotificationMessage] = useState("");
+  const targetMonth = useMemo(() => getNextWorkRequestMonth(), []);
+
+  const {
+    workApplicationSettingsData,
+    isPendingWorkApplicationSettings,
+    isErrorWorkApplicationSettings,
+  } = useGetWorkApplicationSettingsQuery({
+    year: targetMonth.year,
+    month: targetMonth.month,
+  });
+
+  const { saveWorkApplicationSettings, isPendingSaveWorkApplicationSettings } =
+    useSaveWorkApplicationSettingsMutation();
+
+  // isConfigured=false면 아직 이번 달 설정이 없다는 뜻이라 빈 폼에서 시작한다.
+  const savedSettings = pickConfiguredWorkApplicationSettings(
+    workApplicationSettingsData,
+  );
+  const applyStarted = workApplicationSettingsData?.applyStarted ?? false;
+
   const {
     addUnavailableDate,
     addUnavailableTimeRange,
     cancelEditRequest,
     canEditSettings,
     editRequest,
+    endRequest,
+    finishEditRequest,
     formValues,
     isActive,
     isDirty,
@@ -72,14 +101,12 @@ export default function AdminWorkRequestScreen() {
     isStartReady,
     removeUnavailableDate,
     removeUnavailableTimeRange,
-    targetMonth,
     updateField,
-  } = useWorkRequestState();
-
-  const {
-    saveWorkApplicationSettings,
-    isPendingSaveWorkApplicationSettings,
-  } = useSaveWorkApplicationSettingsMutation();
+  } = useWorkRequestState({
+    applyStarted,
+    settings: savedSettings,
+    targetMonth,
+  });
 
   const closeAlert = () => {
     setPendingAction(null);
@@ -87,16 +114,25 @@ export default function AdminWorkRequestScreen() {
 
   const alertContent = pendingAction ? actionAlertContent[pendingAction] : null;
 
-  const handleSaveApplication = (action: WorkRequestAction) => {
+  const handleConfirmAction = (action: WorkRequestAction) => {
     setPendingAction(null);
+
+    // 종료는 아직 API가 없어 화면 상태만 되돌린다.
+    if (action === "end") {
+      endRequest();
+      setNotificationMessage(completionMessage.end);
+      return;
+    }
+
     // 입력값("4명", "2시간", 시간 단위 숫자, "MM.DD")을 서버 스펙(분 단위 숫자, "YYYY-MM-DD")으로 변환
     const payload = createWorkRequestSettingsPayload({
       formValues,
       target: targetMonth,
     });
 
-    // 유효하지 않은 값이면 요청을 보내지 않는다 (버튼 활성화 조건인 isStartReady에서 이미 걸러짐)
+    // 버튼 활성화 조건에서 이미 걸러지지만, 여기까지 왔다면 조용히 끝내지 않고 이유를 알린다.
     if (!payload) {
+      setNotificationMessage(invalidInputMessage);
       return;
     }
 
@@ -110,6 +146,7 @@ export default function AdminWorkRequestScreen() {
       },
       {
         onSuccess: () => {
+          finishEditRequest();
           setNotificationMessage(completionMessage[action]);
         },
         onError: () => {
@@ -126,9 +163,14 @@ export default function AdminWorkRequestScreen() {
   return (
     <div className="flex-1 bg-[#F4F5F7] px-10 py-11.5">
       <div className="mx-auto w-full max-w-373.5">
+        {isErrorWorkApplicationSettings ? (
+          <p className="mb-4 rounded-md bg-white px-4 py-3 text-[15px] font-medium text-[#F84D4D]">
+            {loadFailureMessage}
+          </p>
+        ) : null}
         <SettingsPanel
           formValues={formValues}
-          isEditable={canEditSettings}
+          isEditable={canEditSettings && !isPendingWorkApplicationSettings}
           isActive={isActive}
           isDirty={isDirty}
           isEditing={isEditing}
@@ -163,15 +205,22 @@ export default function AdminWorkRequestScreen() {
           cancelText={alertContent.cancelText}
           confirmText={alertContent.confirmText}
           onCancel={closeAlert}
-          onConfirm={() => void handleSaveApplication(pendingAction!)}
+          onConfirm={() => handleConfirmAction(pendingAction!)}
           panelClassName="w-82.5"
           confirmButtonClassName={alertContent.confirmButtonClassName}
         />
       ) : null}
 
       <Toast
-        open={isPendingSaveWorkApplicationSettings}
-        message="요청 처리 중..."
+        open={
+          isPendingSaveWorkApplicationSettings ||
+          isPendingWorkApplicationSettings
+        }
+        message={
+          isPendingWorkApplicationSettings
+            ? "설정을 불러오는 중..."
+            : "요청 처리 중..."
+        }
         duration={0}
         panelClassName="w-82.5"
         contentClassName="min-h-31.5"

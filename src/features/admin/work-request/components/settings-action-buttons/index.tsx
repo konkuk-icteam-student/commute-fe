@@ -55,9 +55,11 @@ export default function SettingsActionButtons({
         <ActionButton
           className={cn(
             "max-w-36.5",
-            isDirty ? "bg-[#2076FF] text-white" : "bg-[#EFEFF1] text-[#6D7882]",
+            isDirty && isStartReady
+              ? "bg-[#2076FF] text-white"
+              : "bg-[#EFEFF1] text-[#6D7882]",
           )}
-          disabled={!isDirty || isSaving}
+          disabled={!isDirty || !isStartReady || isSaving}
           onClick={onUpdate}
         >
           {isSaving ? "저장중" : "수정 완료"}
