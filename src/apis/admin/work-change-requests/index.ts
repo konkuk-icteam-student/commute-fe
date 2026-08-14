@@ -29,6 +29,7 @@ export {
 
 export {
   useBulkApproveAdminWorkChangeRequestsMutation,
+  useGetAllAdminWorkChangeRequestsQuery,
   useGetAdminWorkChangeRequestsQuery,
   useUpdateAdminWorkChangeRequestMutation,
 } from "./work-change-requests.queries";

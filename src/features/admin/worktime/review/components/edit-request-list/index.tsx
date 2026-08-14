@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useGetAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
+import { useGetAllAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
 import { cn } from "@/lib/utils";
 
 import { WorktimeEditRequestItem } from "../../../components";
@@ -14,18 +14,17 @@ interface EditRequestListProps {
 export default function EditRequestList({ year, month }: EditRequestListProps) {
   const [tabType, setTabType] = useState<"PENDING" | "COMPLETED">("PENDING");
   const {
-    adminWorkChangeRequestsData,
-    isPendingAdminWorkChangeRequests,
-    isErrorAdminWorkChangeRequests,
-  } = useGetAdminWorkChangeRequestsQuery({
+    allAdminWorkChangeRequestsData,
+    isPendingAllAdminWorkChangeRequests,
+    isErrorAllAdminWorkChangeRequests,
+  } = useGetAllAdminWorkChangeRequestsQuery({
     year,
     month,
     statusCode: tabType === "PENDING" ? "CS01" : "ALL",
-    page: 0,
-    size: 20,
+    size: 100,
   });
-  const editRequestList = adminWorkChangeRequestsData
-    ? toWorktimeEditRequestItems(adminWorkChangeRequestsData).filter((item) =>
+  const editRequestList = allAdminWorkChangeRequestsData
+    ? toWorktimeEditRequestItems(allAdminWorkChangeRequestsData).filter((item) =>
         tabType === "PENDING"
           ? item.statusCode === "CS01"
           : item.statusCode !== "CS01",
@@ -60,20 +59,16 @@ export default function EditRequestList({ year, month }: EditRequestListProps) {
           <span className="text-lg font-bold">처리된 요청</span>
         </button>
       </div>
-      {isPendingAdminWorkChangeRequests ? (
+      {isPendingAllAdminWorkChangeRequests ? (
         <p className="py-8 text-base text-[#6B7280]">
           수정 요청을 불러오는 중입니다.
         </p>
-      ) : isErrorAdminWorkChangeRequests ? (
+      ) : isErrorAllAdminWorkChangeRequests ? (
         <p className="py-8 text-base text-[#FD7171]">
           수정 요청을 불러오지 못했습니다.
         </p>
       ) : editRequestList.length === 0 ? (
-        <p className="py-8 text-base text-[#6B7280]">
-          {tabType === "PENDING"
-            ? "대기 중인 수정 요청이 없습니다."
-            : "처리된 수정 요청이 없습니다."}
-        </p>
+        <p className="py-8 text-base text-[#6B7280]">처리할 요청이 없습니다.</p>
       ) : null}
       {editRequestList.map((item, index) => (
         <div key={item.requestId} className="w-full">

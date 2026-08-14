@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
+import { Toast } from "@/components/ui";
 import rightGrayIcon from "@/assets/icons/admin-common/ic_chevron_right_gray.svg";
 import minusFilledIcon from "@/assets/icons/common/ic_minus_filled.svg";
 import plusFilledIcon from "@/assets/icons/common/ic_plus_filled.svg";
@@ -21,6 +23,7 @@ export default function WorkRequestPanel({
   isLoading?: boolean;
   requests: DashboardWorkRequest[];
 }) {
+  const [toastMessage, setToastMessage] = useState("");
   const {
     updateAdminWorkChangeRequest,
     isPendingUpdateAdminWorkChangeRequest,
@@ -37,6 +40,10 @@ export default function WorkRequestPanel({
       requestId,
       statusCode: "CS03",
       rejectReason: rejectReason.trim(),
+    }, {
+      onError: () => {
+        setToastMessage("반려 처리에 실패했습니다. 다시 시도해 주세요.");
+      },
     });
   };
 
@@ -45,6 +52,10 @@ export default function WorkRequestPanel({
       requestId,
       statusCode: "CS02",
       rejectReason: null,
+    }, {
+      onError: () => {
+        setToastMessage("승인 처리에 실패했습니다. 다시 시도해 주세요.");
+      },
     });
   };
 
@@ -64,7 +75,7 @@ export default function WorkRequestPanel({
           </p>
         ) : requests.length === 0 ? (
           <p className="col-span-2 py-8 text-center text-[15px] text-[#6B7280]">
-            대기 중인 요청이 없습니다.
+            처리할 요청이 없습니다.
           </p>
         ) : null}
         {requests.map((request) => (
@@ -125,6 +136,11 @@ export default function WorkRequestPanel({
           </article>
         ))}
       </div>
+      <Toast
+        open={toastMessage.length > 0}
+        message={toastMessage}
+        onDismiss={() => setToastMessage("")}
+      />
     </DashboardPanel>
   );
 }

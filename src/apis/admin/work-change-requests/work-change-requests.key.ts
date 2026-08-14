@@ -7,4 +7,9 @@ export const ADMIN_WORK_CHANGE_REQUESTS_QUERY_KEY = {
     "list",
     params,
   ],
+  ALL_LIST: (params: GetAdminWorkChangeRequestsRequest) => [
+    "admin-work-change-requests",
+    "all-list",
+    params,
+  ],
 } as const;

@@ -1,4 +1,4 @@
-import { useGetAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
+import { useGetAllAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
 
 import { toWorktimeEditRequestItems } from "../../utils";
 import WorktimeEditRequestHeader from "../worktime-edit-request-header";
@@ -15,18 +15,17 @@ export default function WorktimeEditRequestSection({
 }: WorktimeEditRequestSectionProps) {
   const date = new Date();
   const {
-    adminWorkChangeRequestsData,
-    isPendingAdminWorkChangeRequests,
-    isErrorAdminWorkChangeRequests,
-  } = useGetAdminWorkChangeRequestsQuery({
+    allAdminWorkChangeRequestsData,
+    isPendingAllAdminWorkChangeRequests,
+    isErrorAllAdminWorkChangeRequests,
+  } = useGetAllAdminWorkChangeRequestsQuery({
     year: date.getFullYear(),
     month: date.getMonth() + 1,
     statusCode: "CS01",
-    page: 0,
-    size: 10,
+    size: 100,
   });
-  const editRequests = adminWorkChangeRequestsData
-    ? toWorktimeEditRequestItems(adminWorkChangeRequestsData)
+  const editRequests = allAdminWorkChangeRequestsData
+    ? toWorktimeEditRequestItems(allAdminWorkChangeRequestsData)
     : [];
   const requestIds = editRequests.map((request) => request.requestId);
 
@@ -34,17 +33,17 @@ export default function WorktimeEditRequestSection({
     <div className="flex flex-col gap-4 rounded-xl bg-[#F4F5F6] p-6">
       <WorktimeEditRequestHeader requestIds={requestIds} />
       <div className="flex max-h-200 flex-col gap-4 overflow-auto">
-        {isPendingAdminWorkChangeRequests ? (
+        {isPendingAllAdminWorkChangeRequests ? (
           <p className="py-8 text-center text-base text-[#6B7280]">
             수정 요청을 불러오는 중입니다.
           </p>
-        ) : isErrorAdminWorkChangeRequests ? (
+        ) : isErrorAllAdminWorkChangeRequests ? (
           <p className="py-8 text-center text-base text-[#FD7171]">
             수정 요청을 불러오지 못했습니다.
           </p>
         ) : editRequests.length === 0 ? (
           <p className="py-8 text-center text-base text-[#6B7280]">
-            대기 중인 수정 요청이 없습니다.
+            처리할 요청이 없습니다.
           </p>
         ) : null}
         {editRequests.map((item) => (

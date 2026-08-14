@@ -50,6 +50,59 @@ export const useGetAdminWorkChangeRequestsQuery = (
   };
 };
 
+const getAllAdminWorkChangeRequests = async (
+  params: GetAdminWorkChangeRequestsRequest,
+) => {
+  const size = params.size ?? 100;
+  const firstPage = await getAdminWorkChangeRequestsApi({
+    ...params,
+    page: 0,
+    size,
+  });
+  const requests = [...firstPage.requests];
+
+  for (let page = 1; page < firstPage.totalPages; page += 1) {
+    const nextPage = await getAdminWorkChangeRequestsApi({
+      ...params,
+      page,
+      size,
+    });
+
+    requests.push(...nextPage.requests);
+  }
+
+  return {
+    ...firstPage,
+    requests,
+    page: 0,
+    size,
+  };
+};
+
+export const useGetAllAdminWorkChangeRequestsQuery = (
+  params: GetAdminWorkChangeRequestsRequest,
+) => {
+  const {
+    data: allAdminWorkChangeRequestsData,
+    isPending: isPendingAllAdminWorkChangeRequests,
+    isError: isErrorAllAdminWorkChangeRequests,
+    error: allAdminWorkChangeRequestsError,
+  } = useQuery<GetAdminWorkChangeRequestsResponse, ApiError>({
+    queryKey: ADMIN_WORK_CHANGE_REQUESTS_QUERY_KEY.ALL_LIST(params),
+    queryFn: () => getAllAdminWorkChangeRequests(params),
+    retry: 1,
+    staleTime: ADMIN_WORK_CHANGE_REQUESTS_CACHE_TIME.LIST.STALE,
+    gcTime: ADMIN_WORK_CHANGE_REQUESTS_CACHE_TIME.LIST.GC,
+  });
+
+  return {
+    allAdminWorkChangeRequestsData,
+    isPendingAllAdminWorkChangeRequests,
+    isErrorAllAdminWorkChangeRequests,
+    allAdminWorkChangeRequestsError,
+  };
+};
+
 const useInvalidateAdminWorkChangeRequests = () => {
   const queryClient = useQueryClient();
 
