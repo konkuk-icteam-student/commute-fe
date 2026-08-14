@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import informIcon from "@/assets/icons/common/ic_inform_blue.svg";
 import icRight from "@/assets/icons/common/ic_chevron_right.svg";
 import { SLOT_STATUS_CLASS_NAME } from "@/features/schedule";
+import { useBulkApproveAdminWorkChangeRequestsMutation } from "@/apis/admin/work-change-requests";
 
 const SCHEDULE_STATUS_LEGEND_ITEMS = [
   {
@@ -25,9 +26,24 @@ const SCHEDULE_STATUS_LEGEND_ITEMS = [
   },
 ];
 
-export default function WorktimeEditRequestHeader() {
+interface WorktimeEditRequestHeaderProps {
+  requestIds: number[];
+}
+
+export default function WorktimeEditRequestHeader({
+  requestIds,
+}: WorktimeEditRequestHeaderProps) {
+  const {
+    bulkApproveAdminWorkChangeRequests,
+    isPendingBulkApproveAdminWorkChangeRequests,
+  } = useBulkApproveAdminWorkChangeRequestsMutation();
+
   const handleConfirmAll = () => {
-    console.log("일괄 승인");
+    if (requestIds.length === 0) {
+      return;
+    }
+
+    bulkApproveAdminWorkChangeRequests({ requestIds });
   };
 
   return (
@@ -47,8 +63,12 @@ export default function WorktimeEditRequestHeader() {
           />
         </Link>
         <button
-          className="cursor-pointer rounded-md bg-[#256EF4] px-4 py-2 text-base text-white"
+          className="cursor-pointer rounded-md bg-[#256EF4] px-4 py-2 text-base text-white disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
+          disabled={
+            requestIds.length === 0 ||
+            isPendingBulkApproveAdminWorkChangeRequests
+          }
           onClick={handleConfirmAll}
         >
           일괄 승인

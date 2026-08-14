@@ -1,12 +1,10 @@
 import { useState } from "react";
 
+import { useGetAllAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
 import { cn } from "@/lib/utils";
 
-import {
-  DUMMY_WORKTIME_EDIT_REQUEST,
-  DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST,
-} from "../../../constants";
 import { WorktimeEditRequestItem } from "../../../components";
+import { toWorktimeEditRequestItems } from "../../../utils";
 
 interface EditRequestListProps {
   year: number;
@@ -15,13 +13,23 @@ interface EditRequestListProps {
 
 export default function EditRequestList({ year, month }: EditRequestListProps) {
   const [tabType, setTabType] = useState<"PENDING" | "COMPLETED">("PENDING");
-
-  console.log(year, month, tabType, "로 서버에 요청");
-
-  const editRequestList =
-    tabType === "PENDING"
-      ? DUMMY_WORKTIME_EDIT_REQUEST
-      : DUMMY_WORKTIME_COMPLETE_EDIT_REQUEST;
+  const {
+    allAdminWorkChangeRequestsData,
+    isPendingAllAdminWorkChangeRequests,
+    isErrorAllAdminWorkChangeRequests,
+  } = useGetAllAdminWorkChangeRequestsQuery({
+    year,
+    month,
+    statusCode: tabType === "PENDING" ? "CS01" : "ALL",
+    size: 100,
+  });
+  const editRequestList = allAdminWorkChangeRequestsData
+    ? toWorktimeEditRequestItems(allAdminWorkChangeRequestsData).filter((item) =>
+        tabType === "PENDING"
+          ? item.statusCode === "CS01"
+          : item.statusCode !== "CS01",
+      )
+    : [];
 
   return (
     <div className="flex w-full max-w-250 flex-col items-center gap-4 rounded-xl bg-white shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
@@ -51,6 +59,17 @@ export default function EditRequestList({ year, month }: EditRequestListProps) {
           <span className="text-lg font-bold">처리된 요청</span>
         </button>
       </div>
+      {isPendingAllAdminWorkChangeRequests ? (
+        <p className="py-8 text-base text-[#6B7280]">
+          수정 요청을 불러오는 중입니다.
+        </p>
+      ) : isErrorAllAdminWorkChangeRequests ? (
+        <p className="py-8 text-base text-[#FD7171]">
+          수정 요청을 불러오지 못했습니다.
+        </p>
+      ) : editRequestList.length === 0 ? (
+        <p className="py-8 text-base text-[#6B7280]">처리할 요청이 없습니다.</p>
+      ) : null}
       {editRequestList.map((item, index) => (
         <div key={item.requestId} className="w-full">
           <WorktimeEditRequestItem type="LIST" {...item} />
