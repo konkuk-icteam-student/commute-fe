@@ -20,7 +20,9 @@ export default function WorktimeScheduleTable({
               <span className="text-[11px] font-bold text-[#1A2236]">
                 {day.label}
               </span>
-              <span className="text-[10px] text-[#2563EB]">{day.date}</span>
+              <span className="text-[10px] text-[#2563EB]">
+                {day.dateLabel}
+              </span>
               <div className="flex w-full flex-col items-center gap-1 pt-1">
                 {day.slots.map((slot) => (
                   <div className="relative w-full" key={slot.key}>
