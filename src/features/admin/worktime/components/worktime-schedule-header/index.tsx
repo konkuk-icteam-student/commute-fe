@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import icRightButton from "@/assets/icons/common/ic_right_button.svg";
 import icSearch from "@/assets/icons/common/ic_search.svg";
 
+import { formatAdminUserDetail } from "../../utils";
+
 interface WorktimeScheduleHeaderProps {
   year: number;
   month: number;
@@ -20,10 +22,6 @@ interface WorktimeScheduleHeaderProps {
   handleGetMemberSchedule: (name: string) => void;
   handleReset: () => void;
 }
-
-// 학과·학번은 없을 수 있어 있는 것만 이어 붙인다.
-const formatUserDetail = ({ department, studentId }: AdminSearchedUser) =>
-  [department, studentId].filter(Boolean).join(" | ");
 
 export default function WorktimeScheduleHeader({
   year,
@@ -89,7 +87,7 @@ export default function WorktimeScheduleHeader({
                 </div>
               ) : (
                 searchedUsers.map((user, index) => {
-                  const detail = formatUserDetail(user);
+                  const detail = formatAdminUserDetail(user);
 
                   return (
                     <button

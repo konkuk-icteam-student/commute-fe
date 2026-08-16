@@ -1,3 +1,4 @@
+import type { AdminSearchedUser } from "@/apis/admin/users";
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
 import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
 import {
@@ -11,6 +12,14 @@ import type {
   WorktimeDetailTableCellType,
   WorktimeEditRequestItemType,
 } from "../types";
+
+// 검색 결과에 붙이는 부가 정보. 학과·학번은 없을 수 있어 자리를 비우지 않고 표시한다.
+export function formatAdminUserDetail({
+  department,
+  studentId,
+}: AdminSearchedUser) {
+  return [department ?? "학과 미설정", studentId ?? "학번 미설정"].join(" | ");
+}
 
 export interface WorktimeType {
   date: string;

@@ -4,6 +4,7 @@ import { ChangeEvent, useState } from "react";
 
 import { useGetAdminUserSearchQuery } from "@/apis/admin/users";
 import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useDebouncedValue } from "@/hooks";
 import {
   buildWeekSchedule,
   ScheduleErrorModal,
@@ -40,11 +41,16 @@ export default function WorktimeScreen() {
     ...(userResult ? { userName: userResult } : {}),
   });
 
+  const debouncedSearchText = useDebouncedValue(searchText);
   const {
     adminUserSearchData,
     isFetchingAdminUserSearch,
     isErrorAdminUserSearch,
-  } = useGetAdminUserSearchQuery({ keyword: searchText });
+  } = useGetAdminUserSearchQuery({ keyword: debouncedSearchText });
+
+  // 입력이 멎기 전에는 아직 조회 전이라 결과가 비어 있다. 없음이 아니라 로딩으로 본다.
+  const isSearching =
+    isFetchingAdminUserSearch || debouncedSearchText !== searchText;
 
   // 조회에 실패하면 표가 잠긴 채로 남아 장애인지 알 수 없으므로 모달로 알린다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
@@ -93,7 +99,7 @@ export default function WorktimeScreen() {
         maxConcurrentWorkers={adminWorkSchedulesData?.maxConcurrentWorkers ?? 0}
         searchText={searchText}
         searchedUsers={adminUserSearchData?.users ?? []}
-        isSearching={isFetchingAdminUserSearch}
+        isSearching={isSearching}
         isSearchError={isErrorAdminUserSearch}
         userResult={userResult}
         handlePrevWeek={handlePrevWeek}

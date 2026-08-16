@@ -1,11 +1,12 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import type { AdminSearchedUser } from "@/apis/admin/users";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui";
 
 import type { WorktimeDetailTableCellType } from "../../types";
-import { DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD } from "../../constants";
 import WorktimeDeleteMemberAlert from "./worktime-delete-member-alert";
+import WorktimeDetailMemberSearch from "./worktime-detail-member-search";
 
 interface WorktimeDetailTableCellProps {
   slot: WorktimeDetailTableCellType;
@@ -28,7 +29,6 @@ export default function WorktimeDetailTableCell({
 
   const [isOpenSearch, setIsOpenSearch] = useState(false);
   const [shouldOpenUpward, setShouldOpenUpward] = useState(false);
-  const [searchText, setSearchText] = useState("");
   const searchAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,9 +47,9 @@ export default function WorktimeDetailTableCell({
     };
   }, [isOpenSearch]);
 
-  // TODO: 추후 파라미터 수정
-  const handleAdd = (name: string) => {
-    console.log(name, " 추가");
+  // TODO: 인원 추가 api 연동
+  const handleAdd = (user: AdminSearchedUser) => {
+    console.log(user.userName, " 추가");
     setIsOpenSearch(false);
   };
 
@@ -91,10 +91,6 @@ export default function WorktimeDetailTableCell({
     }
 
     setIsOpenSearch(true);
-  };
-
-  const handleChangeSearchText = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
   };
 
   const isFull = slot.currentCount >= maxConcurrentWorkers;
@@ -158,45 +154,10 @@ export default function WorktimeDetailTableCell({
             + 추가
           </button>
           {isOpenSearch && (
-            <div
-              className={cn(
-                "absolute left-1/2 z-20 flex -translate-x-1/2 flex-col gap-1.5 rounded-xl border border-[#E5E5EA] bg-white p-2 shadow-[0_10px_25px_0_rgba(0,0,0,0.12),0_3px_10px_0_rgba(0,0,0,0.04)]",
-                shouldOpenUpward ? "bottom-0" : "top-0",
-              )}
-            >
-              <input
-                type="text"
-                className="w-45 rounded-md border border-[#E5E5EA] bg-[#F2F2F7] px-2.5 py-2 text-xs font-medium"
-                value={searchText}
-                onChange={handleChangeSearchText}
-                placeholder="이름을 입력하세요."
-              />
-              {searchText.trim() !== "" && (
-                <div className="flex flex-col gap-0.5">
-                  {DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.length === 0 ? (
-                    <span className="py-5 text-center text-sm text-[#8A949E]">
-                      검색결과가 없습니다.
-                    </span>
-                  ) : (
-                    DUMMY_WORKTIME_DETAIL_SEARCH_TO_ADD.map((user) => (
-                      <button
-                        key={user.userId}
-                        type="button"
-                        className="flex cursor-pointer flex-col rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
-                        onClick={() => handleAdd(user.name)}
-                      >
-                        <span className="text-[13px] font-semibold">
-                          {user.name}
-                        </span>
-                        <span className="text-[13px] text-[#8A949E]">
-                          {user.department} | {user.studentNumber}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+            <WorktimeDetailMemberSearch
+              shouldOpenUpward={shouldOpenUpward}
+              handleAdd={handleAdd}
+            />
           )}
         </div>
       )}
