@@ -24,10 +24,11 @@ export default function EditRequestList({ year, month }: EditRequestListProps) {
     size: 100,
   });
   const editRequestList = allAdminWorkChangeRequestsData
-    ? toWorktimeEditRequestItems(allAdminWorkChangeRequestsData).filter((item) =>
-        tabType === "PENDING"
-          ? item.statusCode === "CS01"
-          : item.statusCode !== "CS01",
+    ? toWorktimeEditRequestItems(allAdminWorkChangeRequestsData).filter(
+        (item) =>
+          tabType === "PENDING"
+            ? item.statusCode === "CS01"
+            : item.statusCode !== "CS01",
       )
     : [];
 

@@ -32,6 +32,7 @@ export default function WorktimeScreen() {
 
   const {
     adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
     adminWorkSchedulesError,
     refetchAdminWorkSchedules,
   } = useGetAdminWorkSchedulesQuery({
@@ -97,6 +98,7 @@ export default function WorktimeScreen() {
         week={week}
         days={days}
         maxConcurrentWorkers={adminWorkSchedulesData?.maxConcurrentWorkers ?? 0}
+        isLoading={isFetchingAdminWorkSchedules}
         searchText={searchText}
         searchedUsers={adminUserSearchData?.users ?? []}
         isSearching={isSearching}

@@ -22,8 +22,11 @@ export default function WorktimeDetailScreen() {
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
 
-  const { adminWorkSchedulesData, adminWorkSchedulesError } =
-    useGetAdminWorkSchedulesQuery({ startDate, endDate });
+  const {
+    adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
+    adminWorkSchedulesError,
+  } = useGetAdminWorkSchedulesQuery({ startDate, endDate });
 
   // 조회에 실패하면 표가 잠긴 채로 남아 장애인지 알 수 없으므로 모달로 알린다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
@@ -51,6 +54,7 @@ export default function WorktimeDetailScreen() {
         week={week}
         slotsByDay={slotsByDay}
         maxConcurrentWorkers={adminWorkSchedulesData?.maxConcurrentWorkers ?? 0}
+        isLoading={isFetchingAdminWorkSchedules}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
       />

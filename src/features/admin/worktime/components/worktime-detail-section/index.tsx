@@ -10,6 +10,7 @@ interface WorktimeDetailSectionProps {
   week: number;
   slotsByDay: WorktimeDetailTableCellType[][];
   maxConcurrentWorkers: number;
+  isLoading: boolean;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
 }
@@ -20,6 +21,7 @@ export default function WorktimeDetailSection({
   week,
   slotsByDay,
   maxConcurrentWorkers,
+  isLoading,
   handlePrevWeek,
   handleNextWeek,
 }: WorktimeDetailSectionProps) {
@@ -44,6 +46,7 @@ export default function WorktimeDetailSection({
         slotsByDay={slotsByDay}
         maxConcurrentWorkers={maxConcurrentWorkers}
         isEditMode={isEditMode}
+        isLoading={isLoading}
       />
     </div>
   );
