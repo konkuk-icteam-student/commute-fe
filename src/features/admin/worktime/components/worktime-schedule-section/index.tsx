@@ -1,40 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
 
-import { DUMMY_GET_SCHEDULE } from "@/features/schedule";
-import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
+import type { AdminSearchedUser } from "@/apis/admin/users";
+import type { WeekDay } from "@/features/schedule";
 
 import WorktimeScheduleTable from "../worktime-schedule-table";
 import WorktimeScheduleHeader from "../worktime-schedule-header";
 
 interface WorktimeScheduleSectionProps {
+  year: number;
+  month: number;
+  week: number;
+  days: WeekDay[];
+  maxConcurrentWorkers: number;
+  isLoading: boolean;
   searchText: string;
+  searchedUsers: AdminSearchedUser[];
+  isSearching: boolean;
+  isSearchError: boolean;
   userResult: string;
+  handlePrevWeek: () => void;
+  handleNextWeek: () => void;
   handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
   handleGetMemberSchedule: (name: string) => void;
   handleReset: () => void;
 }
 
 export default function WorktimeScheduleSection({
+  year,
+  month,
+  week,
+  days,
+  maxConcurrentWorkers,
+  isLoading,
   searchText,
+  searchedUsers,
+  isSearching,
+  isSearchError,
   userResult,
+  handlePrevWeek,
+  handleNextWeek,
   handleChangeText,
   handleGetMemberSchedule,
   handleReset,
 }: WorktimeScheduleSectionProps) {
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { year, month, week } = getMonthWeekOfDate(selectedDate);
-
-  const handlePrevWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, -1));
-  };
-
-  const handleNextWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, 1));
-  };
-
   return (
     <div className="flex w-full max-w-160 flex-col gap-6 rounded-xl bg-[#F4F5F6] p-6">
       <WorktimeScheduleHeader
@@ -42,6 +53,9 @@ export default function WorktimeScheduleSection({
         month={month}
         week={week}
         searchText={searchText}
+        searchedUsers={searchedUsers}
+        isSearching={isSearching}
+        isSearchError={isSearchError}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         handleChangeText={handleChangeText}
@@ -53,10 +67,9 @@ export default function WorktimeScheduleSection({
           <h2 className="text-lg font-bold">{userResult}님의 시간표</h2>
         )}
         <WorktimeScheduleTable
-          year={year}
-          month={month}
-          week={week}
-          scheduleData={DUMMY_GET_SCHEDULE}
+          days={days}
+          maxConcurrentWorkers={maxConcurrentWorkers}
+          isLoading={isLoading}
         />
         <Link
           href="/admin/worktime/detail"

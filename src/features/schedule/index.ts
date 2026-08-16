@@ -24,11 +24,13 @@ export { getAppliedSlotTimes } from "./model/applied-slots";
 export { getDraftSlotTimes } from "./model/draft";
 export type { DraftKind, ScheduleDraft } from "./model/draft";
 export {
+  buildWeekSchedule,
   EMPTY_SCHEDULE,
   getCurrentMonthDates,
   getCurrentMonthSlots,
 } from "./model/week-schedule";
 export type {
+  Weekday,
   WeekDay,
   WeekScheduleSource,
   WeekSlot,
@@ -41,6 +43,7 @@ export {
   DUMMY_SCHEDULE_CHANGE_HISTORY,
   SLOTS_PER_DAY,
   SLOT_STATUS_CLASS_NAME,
+  SLOT_TIMES,
 } from "./constants";
 
 export {

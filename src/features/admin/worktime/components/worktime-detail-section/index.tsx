@@ -1,22 +1,31 @@
 import { useState } from "react";
 
-import { getMonthWeekOfDate, shiftDateByWeeks } from "@/lib/date-formatter";
-
+import type { WorktimeDetailTableCellType } from "../../types";
 import WorktimeDetailHeader from "../worktime-detail-header";
 import WorktimeDetailTable from "../worktime-detail-table";
 
-export default function WorktimeDetailSection() {
+interface WorktimeDetailSectionProps {
+  year: number;
+  month: number;
+  week: number;
+  slotsByDay: WorktimeDetailTableCellType[][];
+  maxConcurrentWorkers: number;
+  isLoading: boolean;
+  handlePrevWeek: () => void;
+  handleNextWeek: () => void;
+}
+
+export default function WorktimeDetailSection({
+  year,
+  month,
+  week,
+  slotsByDay,
+  maxConcurrentWorkers,
+  isLoading,
+  handlePrevWeek,
+  handleNextWeek,
+}: WorktimeDetailSectionProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { year, month, week } = getMonthWeekOfDate(selectedDate);
-
-  const handlePrevWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, -1));
-  };
-
-  const handleNextWeek = () => {
-    setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, 1));
-  };
 
   const handleChangeEditMode = () => {
     setIsEditMode((prev) => !prev);
@@ -33,7 +42,12 @@ export default function WorktimeDetailSection() {
         handleNextWeek={handleNextWeek}
         handleChangeEditMode={handleChangeEditMode}
       />
-      <WorktimeDetailTable isEditMode={isEditMode} />
+      <WorktimeDetailTable
+        slotsByDay={slotsByDay}
+        maxConcurrentWorkers={maxConcurrentWorkers}
+        isEditMode={isEditMode}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

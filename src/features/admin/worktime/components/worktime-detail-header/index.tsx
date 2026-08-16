@@ -65,7 +65,7 @@ export default function WorktimeDetailHeader({
             className="w-40 cursor-pointer rounded-md border border-[#8E8E93] py-1.5 text-lg font-semibold"
             onClick={handleChangeEditMode}
           >
-            취소하기
+            조회하기
           </button>
         ) : (
           <button

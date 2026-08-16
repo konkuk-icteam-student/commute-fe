@@ -1,17 +1,21 @@
 import { ChangeEvent } from "react";
 import Image from "next/image";
 
+import type { AdminSearchedUser } from "@/apis/admin/users";
 import { cn } from "@/lib/utils";
 import icRightButton from "@/assets/icons/common/ic_right_button.svg";
 import icSearch from "@/assets/icons/common/ic_search.svg";
 
-import { DUMMY_WORKTIME_SEARCH_RESULT } from "../../constants/dummy";
+import { formatAdminUserDetail } from "../../utils";
 
 interface WorktimeScheduleHeaderProps {
   year: number;
   month: number;
   week: number;
   searchText: string;
+  searchedUsers: AdminSearchedUser[];
+  isSearching: boolean;
+  isSearchError: boolean;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
   handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -24,6 +28,9 @@ export default function WorktimeScheduleHeader({
   month,
   week,
   searchText,
+  searchedUsers,
+  isSearching,
+  isSearchError,
   handlePrevWeek,
   handleNextWeek,
   handleChangeText,
@@ -68,31 +75,38 @@ export default function WorktimeScheduleHeader({
           <Image src={icSearch} alt="검색" aria-hidden="true" />
           {cleanedSearchText.length !== 0 && (
             <div className="absolute top-13 left-0 z-10 flex w-full flex-col rounded-lg bg-white shadow-[0_8px_24px_rgba(5,43,87,0.12)]">
-              {DUMMY_WORKTIME_SEARCH_RESULT.length === 0 ? (
+              {isSearching || isSearchError || searchedUsers.length === 0 ? (
                 <div className="flex h-25 items-center justify-center rounded-lg bg-white">
                   <span className="text-sm text-[#8A949E]">
-                    검색결과가 없습니다.
+                    {isSearching
+                      ? "검색 중입니다."
+                      : isSearchError
+                        ? "검색에 실패했습니다."
+                        : "검색결과가 없습니다."}
                   </span>
                 </div>
               ) : (
-                DUMMY_WORKTIME_SEARCH_RESULT.map((member, index) => (
-                  <button
-                    key={member.userId}
-                    type="button"
-                    className={cn(
-                      "flex flex-col bg-white px-4 py-2 text-start hover:bg-[#E9F2FF] hover:text-[#2D81FF]",
-                      index === 0 && "rounded-t-lg",
-                      index === DUMMY_WORKTIME_SEARCH_RESULT.length - 1 &&
-                        "rounded-b-lg",
-                    )}
-                    onClick={() => handleGetMemberSchedule(member.name)}
-                  >
-                    <span className="font-medium">{member.name}</span>
-                    <span className="text-sm text-[#8A949E]">
-                      {member.department} | {member.studentNumber}
-                    </span>
-                  </button>
-                ))
+                searchedUsers.map((user, index) => {
+                  const detail = formatAdminUserDetail(user);
+
+                  return (
+                    <button
+                      key={user.userId}
+                      type="button"
+                      className={cn(
+                        "flex flex-col bg-white px-4 py-2 text-start hover:bg-[#E9F2FF] hover:text-[#2D81FF]",
+                        index === 0 && "rounded-t-lg",
+                        index === searchedUsers.length - 1 && "rounded-b-lg",
+                      )}
+                      onClick={() => handleGetMemberSchedule(user.userName)}
+                    >
+                      <span className="font-medium">{user.userName}</span>
+                      {detail && (
+                        <span className="text-sm text-[#8A949E]">{detail}</span>
+                      )}
+                    </button>
+                  );
+                })
               )}
             </div>
           )}
