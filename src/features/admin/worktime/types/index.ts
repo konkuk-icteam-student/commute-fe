@@ -1,5 +1,7 @@
 // TODO: 추후 api 연동 시 정리
 
+import type { AdminWorkScheduleUser } from "@/apis/admin/work-schedules";
+
 export interface WorktimeChangeRequestType {
   date: string;
   start: string;
@@ -25,8 +27,5 @@ export interface WorktimeDetailTableCellType {
   currentCount: number;
   isOverLimit: boolean;
   isUnavailable: boolean;
-  users: {
-    userId: string;
-    userName: string;
-  }[];
+  users: AdminWorkScheduleUser[];
 }

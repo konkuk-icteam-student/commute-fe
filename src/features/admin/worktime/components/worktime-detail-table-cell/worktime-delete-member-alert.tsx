@@ -1,3 +1,4 @@
+import type { AdminWorkScheduleUser } from "@/apis/admin/work-schedules";
 import { Alert } from "@/components/ui";
 
 interface WorktimeDeleteMemberAlertProps {
@@ -5,9 +6,9 @@ interface WorktimeDeleteMemberAlertProps {
   date: string;
   start: string;
   end: string;
-  user: { userId: string; userName: string } | null;
+  user: AdminWorkScheduleUser | null;
   handleClose: () => void;
-  handleDelete: (userId: string) => void;
+  handleDelete: (scheduleId: number) => void;
 }
 
 export default function WorktimeDeleteMemberAlert({
@@ -30,7 +31,7 @@ export default function WorktimeDeleteMemberAlert({
       confirmText="삭제하기"
       confirmButtonClassName="bg-[#FD7171]"
       onCancel={handleClose}
-      onConfirm={() => handleDelete(user.userId)}
+      onConfirm={() => handleDelete(user.scheduleId)}
     />
   );
 }

@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { AdminSearchedUser } from "@/apis/admin/users";
+import {
+  useCreateAdminWorkScheduleMutation,
+  useDeleteAdminWorkScheduleMutation,
+  type AdminWorkScheduleUser,
+} from "@/apis/admin/work-schedules";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui";
 
@@ -20,10 +25,8 @@ export default function WorktimeDetailTableCell({
   isEditMode,
 }: WorktimeDetailTableCellProps) {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const [deleteUserInfo, setDeleteUserInfo] = useState<{
-    userId: string;
-    userName: string;
-  } | null>(null);
+  const [deleteUserInfo, setDeleteUserInfo] =
+    useState<AdminWorkScheduleUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
 
@@ -47,14 +50,34 @@ export default function WorktimeDetailTableCell({
     };
   }, [isOpenSearch]);
 
-  // TODO: 인원 추가 api 연동
+  const { createAdminWorkSchedule, isPendingCreateAdminWorkSchedule } =
+    useCreateAdminWorkScheduleMutation();
+  const { deleteAdminWorkSchedule } = useDeleteAdminWorkScheduleMutation();
+
   const handleAdd = (user: AdminSearchedUser) => {
-    console.log(user.userName, " 추가");
-    setIsOpenSearch(false);
+    createAdminWorkSchedule(
+      {
+        userId: user.userId,
+        date: slot.date,
+        startTime: slot.start,
+        endTime: slot.end,
+      },
+      {
+        // 성공하면 시간표를 다시 받아 인원이 반영되므로 따로 알리지 않는다.
+        onSuccess: () => {
+          setIsOpenSearch(false);
+        },
+        onError: (error) => {
+          setIsOpenSearch(false);
+          handleOpenModal();
+          setModalText(error.message);
+        },
+      },
+    );
   };
 
-  const handleOpenDeleteAlert = (userId: string, userName: string) => {
-    setDeleteUserInfo({ userId, userName });
+  const handleOpenDeleteAlert = (user: AdminWorkScheduleUser) => {
+    setDeleteUserInfo(user);
     setIsDeleteAlertOpen(true);
   };
 
@@ -62,14 +85,20 @@ export default function WorktimeDetailTableCell({
     setIsDeleteAlertOpen(false);
   };
 
-  // TODO: 추후 파라미터 수정
-  const handleDelete = (userId: string) => {
-    console.log(userId, "번 인원 삭제");
+  const handleDelete = (scheduleId: number) => {
     setIsDeleteAlertOpen(false);
 
-    // TODO: 서버 연동 후 요청 실패 시 알리기 / 성공 시에는 따로 알림 없고 그냥 화면에 인원이 삭제됨.
-    handleOpenModal();
-    setModalText("~~~에러로 인해 삭제에 실패했습니디. 이건 예시!");
+    deleteAdminWorkSchedule(
+      { scheduleId },
+      {
+        // 성공하면 시간표를 다시 받아 인원이 빠지므로 따로 알리지 않는다.
+        // 출퇴근 기록이 있어 지울 수 없는 경우 등은 서버 메시지를 그대로 보여 준다.
+        onError: (error) => {
+          handleOpenModal();
+          setModalText(error.message);
+        },
+      },
+    );
   };
 
   const handleOpenModal = () => {
@@ -134,9 +163,7 @@ export default function WorktimeDetailTableCell({
               <button
                 type="button"
                 className="cursor-pointer px-0.5 pb-0.5 font-bold text-[#FF3B30]"
-                onClick={() =>
-                  handleOpenDeleteAlert(user.userId, user.userName)
-                }
+                onClick={() => handleOpenDeleteAlert(user)}
               >
                 x
               </button>
@@ -156,6 +183,7 @@ export default function WorktimeDetailTableCell({
           {isOpenSearch && (
             <WorktimeDetailMemberSearch
               shouldOpenUpward={shouldOpenUpward}
+              isAdding={isPendingCreateAdminWorkSchedule}
               handleAdd={handleAdd}
             />
           )}
