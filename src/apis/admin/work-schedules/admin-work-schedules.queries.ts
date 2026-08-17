@@ -7,6 +7,7 @@ import { type ApiError } from "@/apis/api-client";
 import {
   createAdminWorkScheduleApi,
   deleteAdminWorkScheduleApi,
+  getAdminWorkScheduleQuickSearchApi,
   getAdminWorkSchedulesApi,
 } from "./admin-work-schedules.api";
 import { ADMIN_WORK_SCHEDULES_QUERY_KEY } from "./admin-work-schedules.key";
@@ -15,12 +16,18 @@ import type {
   CreateAdminWorkScheduleResponse,
   DeleteAdminWorkScheduleRequest,
   DeleteAdminWorkScheduleResponse,
+  GetAdminWorkScheduleQuickSearchRequest,
+  GetAdminWorkScheduleQuickSearchResponse,
   GetAdminWorkSchedulesRequest,
   GetAdminWorkSchedulesResponse,
 } from "./admin-work-schedules.types";
 
 const ADMIN_WORK_SCHEDULES_CACHE_TIME = {
   SCHEDULES: {
+    STALE: 1000 * 30,
+    GC: 1000 * 60 * 5,
+  },
+  QUICK_SEARCH: {
     STALE: 1000 * 30,
     GC: 1000 * 60 * 5,
   },
@@ -105,5 +112,39 @@ export const useDeleteAdminWorkScheduleMutation = () => {
   return {
     deleteAdminWorkSchedule,
     isPendingDeleteAdminWorkSchedule,
+  };
+};
+
+// 조회할 사용자를 고르기 전에는 보낼 userId가 없으므로 요청하지 않는다.
+export const useGetAdminWorkScheduleQuickSearchQuery = ({
+  userId,
+  startDate,
+  endDate,
+  enabled = true,
+}: GetAdminWorkScheduleQuickSearchRequest & { enabled?: boolean }) => {
+  const params = { userId, startDate, endDate };
+
+  const {
+    data: adminWorkScheduleQuickSearchData,
+    isPending: isPendingAdminWorkScheduleQuickSearch,
+    // 최초 조회와 다시 받아 오는 경우를 모두 덮는다. 로딩 UI는 이 값을 쓴다.
+    isFetching: isFetchingAdminWorkScheduleQuickSearch,
+    isError: isErrorAdminWorkScheduleQuickSearch,
+    error: adminWorkScheduleQuickSearchError,
+  } = useQuery<GetAdminWorkScheduleQuickSearchResponse, ApiError>({
+    queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.QUICK_SEARCH(params),
+    queryFn: () => getAdminWorkScheduleQuickSearchApi(params),
+    enabled: enabled && userId !== "",
+    retry: 1,
+    staleTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.QUICK_SEARCH.STALE,
+    gcTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.QUICK_SEARCH.GC,
+  });
+
+  return {
+    adminWorkScheduleQuickSearchData,
+    isPendingAdminWorkScheduleQuickSearch,
+    isFetchingAdminWorkScheduleQuickSearch,
+    isErrorAdminWorkScheduleQuickSearch,
+    adminWorkScheduleQuickSearchError,
   };
 };
