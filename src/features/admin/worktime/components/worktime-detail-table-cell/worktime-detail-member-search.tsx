@@ -13,6 +13,8 @@ import { formatAdminUserDetail } from "../../utils";
 
 interface WorktimeDetailMemberSearchProps {
   shouldOpenUpward: boolean;
+  // 배치 요청이 도는 중. 같은 칸에 두 번 넣지 않도록 잠근다.
+  isAdding: boolean;
   handleAdd: (user: AdminSearchedUser) => void;
 }
 
@@ -20,6 +22,7 @@ interface WorktimeDetailMemberSearchProps {
 // 열렸을 때만 이 컴포넌트가 붙으므로 실제로 도는 조회는 하나다.
 export default function WorktimeDetailMemberSearch({
   shouldOpenUpward,
+  isAdding,
   handleAdd,
 }: WorktimeDetailMemberSearchProps) {
   const [searchText, setSearchText] = useState("");
@@ -74,7 +77,8 @@ export default function WorktimeDetailMemberSearch({
                 <button
                   key={user.userId}
                   type="button"
-                  className="flex cursor-pointer flex-col rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF]"
+                  className="flex cursor-pointer flex-col rounded-md px-2.5 py-1.5 text-start text-xs font-medium hover:bg-[#E9F2FF] hover:text-[#2D81FF] disabled:cursor-default"
+                  disabled={isAdding}
                   onClick={() => handleAdd(user)}
                 >
                   <span className="text-[13px] font-semibold">

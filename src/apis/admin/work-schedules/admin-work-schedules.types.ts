@@ -12,9 +12,11 @@ export interface GetAdminWorkSchedulesRequest {
   userName?: string;
 }
 
+// scheduleId는 그 사용자의 배치 건을 가리킨다. 삭제할 때 이 값을 보낸다.
 export interface AdminWorkScheduleUser {
   userId: string;
   userName: string;
+  scheduleId: number;
 }
 
 // 30분 단위 슬롯 하나. currentCount는 그 시간대에 배정된 인원 수다.
@@ -40,4 +42,39 @@ export interface GetAdminWorkSchedulesResponse {
   hasPrev: boolean;
   hasNext: boolean;
   days: AdminWorkScheduleDay[];
+}
+
+// 30분 슬롯에 사용자를 직접 배치한다.
+// 승인 절차 없이 바로 승인 상태가 되고, 최대 동시 근무 인원을 넘겨도 배치된다.
+export interface CreateAdminWorkScheduleRequest {
+  userId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
+// currentCount·maxConcurrentWorkers는 배치 후 그 슬롯의 인원 현황이다.
+export interface CreateAdminWorkScheduleResponse {
+  scheduleId: number;
+  userId: string;
+  userName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  currentCount: number;
+  maxConcurrentWorkers: number;
+}
+
+// 행을 지우지 않고 상태만 취소로 바꾼다. 출퇴근 기록이 있으면 삭제할 수 없다.
+export interface DeleteAdminWorkScheduleRequest {
+  scheduleId: number;
+}
+
+export interface DeleteAdminWorkScheduleResponse {
+  scheduleId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  currentCount: number;
+  maxConcurrentWorkers: number;
 }
