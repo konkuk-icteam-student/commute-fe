@@ -4,7 +4,7 @@ export interface GetAdminUserSearchRequest {
 }
 
 export interface AdminSearchedUser {
-  userId: string;
+  userId: number;
   userName: string;
   department: string | null;
   studentId: string | null;

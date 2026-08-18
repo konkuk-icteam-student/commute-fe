@@ -6,6 +6,8 @@ import type {
   CreateAdminWorkScheduleResponse,
   DeleteAdminWorkScheduleRequest,
   DeleteAdminWorkScheduleResponse,
+  GetAdminUserWorkSchedulesRequest,
+  GetAdminUserWorkSchedulesResponse,
   GetAdminWorkScheduleQuickSearchRequest,
   GetAdminWorkScheduleQuickSearchResponse,
   GetAdminWorkSchedulesRequest,
@@ -19,6 +21,17 @@ export const getAdminWorkSchedulesApi = async ({
   const response = await apiClient.get<GetAdminWorkSchedulesResponse>(
     ADMIN_WORK_SCHEDULES_URL.DEFAULT,
     { params: { ...params, ...(userName ? { userName } : {}) } },
+  );
+
+  return response.details;
+};
+
+export const getAdminUserWorkSchedulesApi = async (
+  params: GetAdminUserWorkSchedulesRequest,
+) => {
+  const response = await apiClient.get<GetAdminUserWorkSchedulesResponse>(
+    ADMIN_WORK_SCHEDULES_URL.USER,
+    { params },
   );
 
   return response.details;

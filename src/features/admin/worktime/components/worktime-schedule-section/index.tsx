@@ -25,8 +25,9 @@ interface WorktimeScheduleSectionProps {
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
   handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleGetMemberSchedule: (name: string) => void;
+  handleGetMemberSchedule: (user: AdminSearchedUser) => void;
   handleReset: () => void;
+  handleRefresh: () => void;
 }
 
 export default function WorktimeScheduleSection({
@@ -46,6 +47,7 @@ export default function WorktimeScheduleSection({
   handleChangeText,
   handleGetMemberSchedule,
   handleReset,
+  handleRefresh,
 }: WorktimeScheduleSectionProps) {
   return (
     <div className="flex w-full max-w-160 flex-col gap-8 rounded-xl bg-[#F4F5F6] p-6">
@@ -66,6 +68,7 @@ export default function WorktimeScheduleSection({
           week={week}
           handlePrevWeek={handlePrevWeek}
           handleNextWeek={handleNextWeek}
+          handleRefresh={handleRefresh}
         />
         <WorktimeScheduleTable
           days={days}

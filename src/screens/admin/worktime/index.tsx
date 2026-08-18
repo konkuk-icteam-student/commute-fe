@@ -2,8 +2,12 @@
 
 import { ChangeEvent, useState } from "react";
 
+import type { AdminSearchedUser } from "@/apis/admin/users";
 import { useGetAdminUserSearchQuery } from "@/apis/admin/users";
-import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
+import {
+  useGetAdminUserWorkSchedulesQuery,
+  useGetAdminWorkSchedulesQuery,
+} from "@/apis/admin/work-schedules";
 import { useDebouncedValue } from "@/hooks";
 import {
   buildWeekSchedule,
@@ -11,6 +15,7 @@ import {
   useScheduleErrorModal,
 } from "@/features/schedule";
 import {
+  toAdminUserWeekScheduleSource,
   toAdminWeekScheduleSource,
   WorktimeEditRequestSection,
   WorktimeScheduleSection,
@@ -22,13 +27,27 @@ import {
   shiftDateByWeeks,
 } from "@/lib/date-formatter";
 
+// 시간표를 조회할 대상. 검색 결과와 수정요청 카드 양쪽에서 정해진다.
+interface SelectedWorktimeUser {
+  userId: number;
+  userName: string;
+}
+
 export default function WorktimeScreen() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [searchText, setSearchText] = useState("");
-  const [userResult, setUserResult] = useState("");
+  const [selectedUser, setSelectedUser] = useState<SelectedWorktimeUser | null>(
+    null,
+  );
+
+  // 검색 결과 아래와 수정요청 카드 강조에 쓰는 표시용 이름.
+  const userResult = selectedUser?.userName ?? "";
 
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
+
+  // 조회할 사용자가 정해진 동안에는 사용자별 조회를, 그 외에는 전체 조회를 쓴다.
+  const isUserSelected = selectedUser !== null;
 
   const {
     adminWorkSchedulesData,
@@ -38,8 +57,19 @@ export default function WorktimeScreen() {
   } = useGetAdminWorkSchedulesQuery({
     startDate,
     endDate,
-    // 이름을 고르지 않았으면 전체 시간표를 본다.
-    ...(userResult ? { userName: userResult } : {}),
+    enabled: !isUserSelected,
+  });
+
+  const {
+    adminUserWorkSchedulesData,
+    isFetchingAdminUserWorkSchedules,
+    adminUserWorkSchedulesError,
+    refetchAdminUserWorkSchedules,
+  } = useGetAdminUserWorkSchedulesQuery({
+    userId: selectedUser?.userId ?? 0,
+    startDate,
+    endDate,
+    enabled: isUserSelected,
   });
 
   const debouncedSearchText = useDebouncedValue(searchText);
@@ -54,12 +84,17 @@ export default function WorktimeScreen() {
     isFetchingAdminUserSearch || debouncedSearchText !== searchText;
 
   // 조회에 실패하면 표가 잠긴 채로 남아 장애인지 알 수 없으므로 모달로 알린다.
+  // 지금 돌지 않는 조회의 실패는 남은 값이므로 화면에 쓰는 쪽만 본다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
-    adminWorkSchedulesError,
+    isUserSelected ? adminUserWorkSchedulesError : adminWorkSchedulesError,
   ]);
 
+  const scheduleSource = isUserSelected
+    ? toAdminUserWeekScheduleSource(adminUserWorkSchedulesData)
+    : toAdminWeekScheduleSource(adminWorkSchedulesData);
+
   const days = buildWeekSchedule(
-    toAdminWeekScheduleSource(adminWorkSchedulesData),
+    scheduleSource,
     getWeekdaysOfMonthWeek(year, month, week),
   );
 
@@ -75,19 +110,31 @@ export default function WorktimeScreen() {
     setSearchText(e.target.value);
   };
 
-  const handleGetMemberSchedule = (name: string) => {
+  const handleGetMemberSchedule = (user: AdminSearchedUser) => {
     setSearchText("");
-    setUserResult(name);
+    setSelectedUser({ userId: user.userId, userName: user.userName });
   };
 
   const handleReset = () => {
     setSearchText("");
-    setUserResult("");
+    setSelectedUser(null);
     void refetchAdminWorkSchedules();
   };
 
-  const handleClickRequestCard = (name: string) => {
-    setUserResult(name);
+  // 조회에 실패했거나 다른 관리자가 배치를 바꿨을 때 지금 보고 있는 주차를 다시 받아 온다.
+  const handleRefresh = () => {
+    if (isUserSelected) {
+      void refetchAdminUserWorkSchedules();
+
+      return;
+    }
+
+    void refetchAdminWorkSchedules();
+  };
+
+  // 카드도 userId를 실어 보내므로 검색으로 고른 것과 같은 조회를 쓴다.
+  const handleClickRequestCard = (userId: number, name: string) => {
+    setSelectedUser({ userId, userName: name });
   };
 
   return (
@@ -97,8 +144,12 @@ export default function WorktimeScreen() {
         month={month}
         week={week}
         days={days}
-        maxConcurrentWorkers={adminWorkSchedulesData?.maxConcurrentWorkers ?? 0}
-        isLoading={isFetchingAdminWorkSchedules}
+        maxConcurrentWorkers={scheduleSource.maxConcurrentWorkers}
+        isLoading={
+          isUserSelected
+            ? isFetchingAdminUserWorkSchedules
+            : isFetchingAdminWorkSchedules
+        }
         searchText={searchText}
         searchedUsers={adminUserSearchData?.users ?? []}
         isSearching={isSearching}
@@ -109,6 +160,7 @@ export default function WorktimeScreen() {
         handleChangeText={handleChangeText}
         handleGetMemberSchedule={handleGetMemberSchedule}
         handleReset={handleReset}
+        handleRefresh={handleRefresh}
       />
       <WorktimeEditRequestSection
         userResult={userResult}

@@ -6,7 +6,7 @@ import WorktimeEditRequestItem from "../worktime-edit-request-item";
 
 interface WorktimeEditRequestSectionProps {
   userResult: string;
-  handleClickRequestCard: (name: string) => void;
+  handleClickRequestCard: (userId: number, name: string) => void;
 }
 
 export default function WorktimeEditRequestSection({

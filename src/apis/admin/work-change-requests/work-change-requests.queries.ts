@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ADMIN_WORK_SCHEDULES_QUERY_KEY } from "@/apis/admin/work-schedules/admin-work-schedules.key";
 import { type ApiError } from "@/apis/api-client";
 
 import {
@@ -113,9 +114,22 @@ const useInvalidateAdminWorkChangeRequests = () => {
   };
 };
 
+// 요청을 승인하거나 반려하면 그 사용자의 시간표와 슬롯 인원 수가 함께 바뀐다.
+// 어느 사용자의 어느 기간이 떠 있는지 알 수 없으므로 시간표 조회를 한꺼번에 무효화한다.
+const useInvalidateAdminWorkSchedules = () => {
+  const queryClient = useQueryClient();
+
+  return () => {
+    queryClient.invalidateQueries({
+      queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.ALL,
+    });
+  };
+};
+
 export const useUpdateAdminWorkChangeRequestMutation = () => {
   const invalidateAdminWorkChangeRequests =
     useInvalidateAdminWorkChangeRequests();
+  const invalidateAdminWorkSchedules = useInvalidateAdminWorkSchedules();
 
   const {
     mutate: updateAdminWorkChangeRequest,
@@ -126,7 +140,10 @@ export const useUpdateAdminWorkChangeRequestMutation = () => {
     UpdateAdminWorkChangeRequestRequest
   >({
     mutationFn: updateAdminWorkChangeRequestApi,
-    onSuccess: invalidateAdminWorkChangeRequests,
+    onSuccess: () => {
+      invalidateAdminWorkChangeRequests();
+      invalidateAdminWorkSchedules();
+    },
     onError: () => {
       // TODO: 사용하는 화면에서 토스트 메시지 사용
     },
@@ -141,6 +158,7 @@ export const useUpdateAdminWorkChangeRequestMutation = () => {
 export const useBulkApproveAdminWorkChangeRequestsMutation = () => {
   const invalidateAdminWorkChangeRequests =
     useInvalidateAdminWorkChangeRequests();
+  const invalidateAdminWorkSchedules = useInvalidateAdminWorkSchedules();
 
   const {
     mutate: bulkApproveAdminWorkChangeRequests,
@@ -151,7 +169,10 @@ export const useBulkApproveAdminWorkChangeRequestsMutation = () => {
     BulkApproveAdminWorkChangeRequestsRequest
   >({
     mutationFn: bulkApproveAdminWorkChangeRequestsApi,
-    onSuccess: invalidateAdminWorkChangeRequests,
+    onSuccess: () => {
+      invalidateAdminWorkChangeRequests();
+      invalidateAdminWorkSchedules();
+    },
     onError: () => {
       // TODO: 사용하는 화면에서 토스트 메시지 사용
     },

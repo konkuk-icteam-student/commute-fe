@@ -8,6 +8,7 @@ import { WORK_SCHEDULES_QUERY_KEY } from "@/apis/work-schedules";
 import {
   createAdminWorkScheduleApi,
   deleteAdminWorkScheduleApi,
+  getAdminUserWorkSchedulesApi,
   getAdminWorkScheduleQuickSearchApi,
   getAdminWorkSchedulesApi,
 } from "./admin-work-schedules.api";
@@ -17,6 +18,8 @@ import type {
   CreateAdminWorkScheduleResponse,
   DeleteAdminWorkScheduleRequest,
   DeleteAdminWorkScheduleResponse,
+  GetAdminUserWorkSchedulesRequest,
+  GetAdminUserWorkSchedulesResponse,
   GetAdminWorkScheduleQuickSearchRequest,
   GetAdminWorkScheduleQuickSearchResponse,
   GetAdminWorkSchedulesRequest,
@@ -28,15 +31,21 @@ const ADMIN_WORK_SCHEDULES_CACHE_TIME = {
     STALE: 1000 * 30,
     GC: 1000 * 60 * 5,
   },
+  USER_SCHEDULES: {
+    STALE: 1000 * 30,
+    GC: 1000 * 60 * 5,
+  },
   QUICK_SEARCH: {
     STALE: 1000 * 30,
     GC: 1000 * 60 * 5,
   },
 } as const;
 
-export const useGetAdminWorkSchedulesQuery = (
-  params: GetAdminWorkSchedulesRequest,
-) => {
+// 사용자를 검색해 고른 동안에는 사용자별 조회가 대신 돌므로 enabled로 끈다.
+export const useGetAdminWorkSchedulesQuery = ({
+  enabled = true,
+  ...params
+}: GetAdminWorkSchedulesRequest & { enabled?: boolean }) => {
   const {
     data: adminWorkSchedulesData,
     isPending: isPendingAdminWorkSchedules,
@@ -47,6 +56,7 @@ export const useGetAdminWorkSchedulesQuery = (
   } = useQuery<GetAdminWorkSchedulesResponse, ApiError>({
     queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.SCHEDULES(params),
     queryFn: () => getAdminWorkSchedulesApi(params),
+    enabled,
     retry: 1,
     staleTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.SCHEDULES.STALE,
     gcTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.SCHEDULES.GC,
@@ -59,6 +69,43 @@ export const useGetAdminWorkSchedulesQuery = (
     isErrorAdminWorkSchedules,
     adminWorkSchedulesError,
     refetchAdminWorkSchedules,
+  };
+};
+
+// 근로시간 관리 화면에서 사용자를 검색해 고른 동안에만 쓴다.
+// 고르기 전에는 보낼 userId가 없으므로 요청하지 않고 전체 조회를 그대로 둔다.
+// 화면에서는 사용자를 고르지 않은 상태를 enabled false로 넘긴다.
+export const useGetAdminUserWorkSchedulesQuery = ({
+  userId,
+  startDate,
+  endDate,
+  enabled = true,
+}: GetAdminUserWorkSchedulesRequest & { enabled?: boolean }) => {
+  const params = { userId, startDate, endDate };
+
+  const {
+    data: adminUserWorkSchedulesData,
+    isPending: isPendingAdminUserWorkSchedules,
+    isFetching: isFetchingAdminUserWorkSchedules,
+    isError: isErrorAdminUserWorkSchedules,
+    error: adminUserWorkSchedulesError,
+    refetch: refetchAdminUserWorkSchedules,
+  } = useQuery<GetAdminUserWorkSchedulesResponse, ApiError>({
+    queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.USER(params),
+    queryFn: () => getAdminUserWorkSchedulesApi(params),
+    enabled: enabled && userId > 0,
+    retry: 1,
+    staleTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.USER_SCHEDULES.STALE,
+    gcTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.USER_SCHEDULES.GC,
+  });
+
+  return {
+    adminUserWorkSchedulesData,
+    isPendingAdminUserWorkSchedules,
+    isFetchingAdminUserWorkSchedules,
+    isErrorAdminUserWorkSchedules,
+    adminUserWorkSchedulesError,
+    refetchAdminUserWorkSchedules,
   };
 };
 
@@ -138,7 +185,7 @@ export const useGetAdminWorkScheduleQuickSearchQuery = ({
   } = useQuery<GetAdminWorkScheduleQuickSearchResponse, ApiError>({
     queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.QUICK_SEARCH(params),
     queryFn: () => getAdminWorkScheduleQuickSearchApi(params),
-    enabled: enabled && userId !== "",
+    enabled: enabled && userId > 0,
     retry: 1,
     staleTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.QUICK_SEARCH.STALE,
     gcTime: ADMIN_WORK_SCHEDULES_CACHE_TIME.QUICK_SEARCH.GC,

@@ -47,7 +47,7 @@ export interface GetAdminWorkSchedulesResponse {
 // 30분 슬롯에 사용자를 직접 배치한다.
 // 승인 절차 없이 바로 승인 상태가 되고, 최대 동시 근무 인원을 넘겨도 배치된다.
 export interface CreateAdminWorkScheduleRequest {
-  userId: string;
+  userId: number;
   date: string;
   startTime: string;
   endTime: string;
@@ -56,7 +56,7 @@ export interface CreateAdminWorkScheduleRequest {
 // currentCount·maxConcurrentWorkers는 배치 후 그 슬롯의 인원 현황이다.
 export interface CreateAdminWorkScheduleResponse {
   scheduleId: number;
-  userId: string;
+  userId: number;
   userName: string;
   date: string;
   startTime: string;
@@ -79,9 +79,39 @@ export interface DeleteAdminWorkScheduleResponse {
   maxConcurrentWorkers: number;
 }
 
+// 같은 조직에 속한 사용자 한 명의 시간표를 기간으로 조회한다.
+export interface GetAdminUserWorkSchedulesRequest {
+  userId: number;
+  startDate: string;
+  endDate: string;
+}
+
+// 전체 조회 슬롯과 달리 배치 인원 목록(users)과 isOverLimit이 없다.
+// status는 사용자 시간표와 같은 값 집합이라 AdminWorkScheduleSlotStatus를 쓰지 않는다.
+export interface AdminUserWorkScheduleSlot {
+  start: string;
+  end: string;
+  status: ScheduleStatusType;
+  currentCount: number;
+}
+
+export interface AdminUserWorkScheduleDay {
+  date: string;
+  slots: AdminUserWorkScheduleSlot[];
+}
+
+export interface GetAdminUserWorkSchedulesResponse {
+  startDate: string;
+  endDate: string;
+  maxConcurrentWorkers: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+  days: AdminUserWorkScheduleDay[];
+}
+
 // 한 사용자의 승인된 근로 시간표를 기간 내에서 조회한다.
 export interface GetAdminWorkScheduleQuickSearchRequest {
-  userId: string;
+  userId: number;
   startDate: string;
   endDate: string;
 }
@@ -102,7 +132,7 @@ export interface AdminWorkScheduleQuickSearchDay {
 
 // 배치가 없는 날짜는 days에서 빠진다. 조회 기간의 모든 날짜가 오지 않는다.
 export interface GetAdminWorkScheduleQuickSearchResponse {
-  userId: string;
+  userId: number;
   userName: string;
   days: AdminWorkScheduleQuickSearchDay[];
 }

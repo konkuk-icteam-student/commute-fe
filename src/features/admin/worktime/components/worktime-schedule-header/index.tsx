@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import icRightButton from "@/assets/icons/common/ic_right_button.svg";
+import { ScheduleRefreshButton } from "@/features/schedule";
 
 interface WorktimeScheduleHeaderProps {
   year: number;
@@ -8,6 +9,7 @@ interface WorktimeScheduleHeaderProps {
   week: number;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
+  handleRefresh: () => void;
 }
 
 export default function WorktimeScheduleHeader({
@@ -16,10 +18,12 @@ export default function WorktimeScheduleHeader({
   week,
   handlePrevWeek,
   handleNextWeek,
+  handleRefresh,
 }: WorktimeScheduleHeaderProps) {
   return (
-    <header className="flex flex-col gap-3">
-      <div className="flex w-full flex-row items-center justify-center gap-6">
+    <header className="flex flex-row items-center">
+      <div className="flex-1" />
+      <div className="flex flex-row items-center justify-center gap-6">
         <button
           className="flex cursor-pointer items-center justify-center rounded-full"
           type="button"
@@ -41,6 +45,9 @@ export default function WorktimeScheduleHeader({
         >
           <Image className="h-9 w-9" src={icRightButton} alt="다음주차" />
         </button>
+      </div>
+      <div className="flex flex-1 justify-end">
+        <ScheduleRefreshButton className="bg-white" onClick={handleRefresh} />
       </div>
     </header>
   );

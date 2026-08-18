@@ -14,7 +14,7 @@ interface WorktimeSearchUserProps {
   isSearchError: boolean;
   userResult: string;
   handleChangeText: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleGetMemberSchedule: (name: string) => void;
+  handleGetMemberSchedule: (user: AdminSearchedUser) => void;
   handleReset: () => void;
 }
 
@@ -67,7 +67,7 @@ export default function WorktimeSearchUser({
                         index === 0 && "rounded-t-lg",
                         index === searchedUsers.length - 1 && "rounded-b-lg",
                       )}
-                      onClick={() => handleGetMemberSchedule(user.userName)}
+                      onClick={() => handleGetMemberSchedule(user)}
                     >
                       <span className="font-medium">{user.userName}</span>
                       {detail && (

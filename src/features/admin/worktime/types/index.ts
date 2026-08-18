@@ -11,6 +11,7 @@ export interface WorktimeChangeRequestType {
 
 export interface WorktimeEditRequestItemType {
   requestId: number;
+  userId: number;
   requestedAt: string;
   name: string;
   deleteSlots: WorktimeChangeRequestType[];

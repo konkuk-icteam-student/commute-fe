@@ -12,6 +12,7 @@ import {
 interface WorktimeEditRequestItemProps {
   type: "CARD" | "LIST";
   requestId: number;
+  userId: number;
   requestedAt: string;
   name: string;
   deleteSlots: WorktimeChangeRequestType[];
@@ -20,12 +21,13 @@ interface WorktimeEditRequestItemProps {
   statusCode?: string;
   rejectReason?: string | null;
   userResult?: string;
-  handleClickRequestCard?: (name: string) => void;
+  handleClickRequestCard?: (userId: number, name: string) => void;
 }
 
 export default function WorktimeEditRequestItem({
   type = "CARD",
   requestId,
+  userId,
   requestedAt,
   name,
   deleteSlots,
@@ -78,7 +80,9 @@ export default function WorktimeEditRequestItem({
             : "border border-[#B1B8BE]"
           : "",
       )}
-      onClick={() => handleClickRequestCard && handleClickRequestCard(name)}
+      onClick={() =>
+        handleClickRequestCard && handleClickRequestCard(userId, name)
+      }
     >
       <div className="flex flex-row items-center justify-between">
         <h3 className="text-lg font-bold">{name}</h3>
