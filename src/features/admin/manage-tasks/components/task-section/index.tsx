@@ -10,6 +10,7 @@ export default function TaskSection({
   hasBottomBorder,
   isDeletingTask,
   isSavingEdit,
+  isTogglingTask,
   onCancelDelete,
   onCancelEdit,
   onDelete,
@@ -20,7 +21,6 @@ export default function TaskSection({
   onToggle,
   period,
   tasks,
-  togglingTaskId,
 }: {
   deletingTaskId: number | null;
   editingTaskId: number | null;
@@ -28,6 +28,7 @@ export default function TaskSection({
   hasBottomBorder: boolean;
   isDeletingTask: boolean;
   isSavingEdit: boolean;
+  isTogglingTask: boolean;
   onCancelDelete: () => void;
   onCancelEdit: () => void;
   onDelete: (taskId: number) => void;
@@ -38,7 +39,6 @@ export default function TaskSection({
   onToggle: (taskId: number) => void;
   period: string;
   tasks: ManageTaskItem[];
-  togglingTaskId?: number;
 }) {
   return (
     <div>
@@ -55,6 +55,7 @@ export default function TaskSection({
             editingTitle={editingTitle}
             isDeletingTask={isDeletingTask}
             isSavingEdit={isSavingEdit}
+            isTogglingTask={isTogglingTask}
             key={task.id}
             onCancelDelete={onCancelDelete}
             onCancelEdit={onCancelEdit}
@@ -65,7 +66,6 @@ export default function TaskSection({
             onSaveEdit={onSaveEdit}
             onToggle={onToggle}
             task={task}
-            togglingTaskId={togglingTaskId}
           />
         ))}
       </ul>

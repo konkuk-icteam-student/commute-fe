@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 import type { DailyTaskItem } from "../../types";
 
 type TaskChecklistProps = {
-  togglingTaskId?: number;
+  isTogglingTask?: boolean;
   tasks: DailyTaskItem[];
   onToggleTask: (taskId: number) => void;
 };
 
 export default function TaskChecklist({
-  togglingTaskId,
+  isTogglingTask = false,
   tasks,
   onToggleTask,
 }: TaskChecklistProps) {
@@ -23,7 +23,7 @@ export default function TaskChecklist({
         >
           <CheckButton
             checked={task.completed}
-            disabled={togglingTaskId === task.id}
+            disabled={isTogglingTask}
             label={`${task.title} 완료 여부`}
             onClick={() => onToggleTask(task.id)}
           />

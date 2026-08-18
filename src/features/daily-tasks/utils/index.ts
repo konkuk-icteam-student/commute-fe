@@ -1,4 +1,4 @@
-import type { GetPeriodWorkSchedulesResponse } from "@/apis/work-schedules";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/work-schedules";
 import type { BadgeVariant } from "@/components/ui";
 
 import type { DailyTaskPeriod, WorkTimeSlot, WorkTimeWorker } from "../types";
@@ -46,7 +46,7 @@ export const formatDailyTaskDate = (date: Date) => {
 };
 
 export const toDailyTaskWorkTimeSlots = (
-  response: GetPeriodWorkSchedulesResponse | undefined,
+  response: GetAdminWorkSchedulesResponse | undefined,
   period: DailyTaskPeriod,
 ): WorkTimeSlot[] => {
   const slots = response?.days[0]?.slots ?? [];

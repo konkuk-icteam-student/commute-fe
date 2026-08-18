@@ -30,11 +30,8 @@ export default function TaskListPanel({
     useUpdateAdminTodoMutation();
   const { deleteAdminTodo, isPendingDeleteAdminTodo } =
     useDeleteAdminTodoMutation();
-  const {
-    updateTodoCompletion,
-    isPendingUpdateTodoCompletion,
-    pendingTodoCompletionId,
-  } = useUpdateTodoCompletionMutation();
+  const { updateTodoCompletion, isPendingUpdateTodoCompletion } =
+    useUpdateTodoCompletionMutation();
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
@@ -119,7 +116,7 @@ export default function TaskListPanel({
       {
         onSuccess: () => {
           setDeletingTaskId(null);
-          setToastMessage("업무가 삭제 되었습니다.");
+          setToastMessage("업무가 삭제되었습니다.");
         },
         onError: (error) => {
           setToastMessage(error.message);
@@ -153,6 +150,7 @@ export default function TaskListPanel({
               hasBottomBorder={groupIndex < groupedTasks.length - 1}
               isDeletingTask={isPendingDeleteAdminTodo}
               isSavingEdit={isPendingUpdateAdminTodo}
+              isTogglingTask={isPendingUpdateTodoCompletion}
               key={group.period}
               onCancelDelete={cancelDeleteTask}
               onCancelEdit={cancelEditTask}
@@ -164,7 +162,6 @@ export default function TaskListPanel({
               onToggle={toggleTask}
               period={group.period}
               tasks={group.tasks}
-              togglingTaskId={pendingTodoCompletionId}
             />
           ))}
         </div>

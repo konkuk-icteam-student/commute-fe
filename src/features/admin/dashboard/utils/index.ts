@@ -1,5 +1,5 @@
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
-import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/work-schedules";
 
 import type {
   DashboardAttendanceDetails,

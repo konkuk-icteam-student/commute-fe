@@ -9,6 +9,7 @@ import { getAccessToken } from "./token-storage";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
+    allowNoContent?: boolean;
     skipAuth?: boolean;
   }
 }
@@ -42,22 +43,19 @@ export type ApiClientResponse<T> = ApiSuccessResponse<T>;
 export class ApiError extends Error {
   readonly isSuccess = false;
   readonly details = null;
+  readonly status?: number;
 
-  constructor(
-    response: ApiErrorResponse,
-    readonly status?: number,
-  ) {
+  constructor(response: ApiErrorResponse, status?: number) {
     super(response.message);
     this.name = "ApiError";
+    this.status = status;
   }
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-export const isApiErrorResponse = (
-  value: unknown,
-): value is ApiErrorResponse =>
+export const isApiErrorResponse = (value: unknown): value is ApiErrorResponse =>
   isRecord(value) &&
   value.isSuccess === false &&
   typeof value.message === "string" &&
@@ -109,7 +107,7 @@ const request = async <T>(
     const response = await axiosInstance.request<ApiResponse<T>>(config);
     const responseData = response.data;
 
-    if (response.status === 204) {
+    if (response.status === 204 && config.allowNoContent) {
       return {
         isSuccess: true,
         message: "",
@@ -166,5 +164,5 @@ export const apiClient = {
     request<T>({ ...config, method: "PATCH", url, data }),
 
   delete: <T>(url: string, config?: AxiosRequestConfig) =>
-    request<T>({ ...config, method: "DELETE", url }),
+    request<T>({ ...config, allowNoContent: true, method: "DELETE", url }),
 };

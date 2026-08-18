@@ -14,7 +14,7 @@ export default function TaskRow({
   editingTitle,
   isDeletingTask,
   isSavingEdit,
-  togglingTaskId,
+  isTogglingTask,
   onCancelDelete,
   onCancelEdit,
   onDelete,
@@ -30,7 +30,7 @@ export default function TaskRow({
   editingTitle: string;
   isDeletingTask: boolean;
   isSavingEdit: boolean;
-  togglingTaskId?: number;
+  isTogglingTask: boolean;
   onCancelDelete: () => void;
   onCancelEdit: () => void;
   onDelete: (taskId: number) => void;
@@ -67,7 +67,7 @@ export default function TaskRow({
         <>
           <CheckButton
             checked={task.completed}
-            disabled={togglingTaskId === task.id}
+            disabled={isTogglingTask}
             label={`${task.title} 완료 여부`}
             onClick={() => onToggle(task.id)}
           />

@@ -5,6 +5,52 @@ export type ScheduleStatusType =
   | "UNAVAILABLE"
   | "EMPTY";
 
+// 공용 근무자 포함 시간표 조회는 /api/v1/admin/work-schedules 응답을 사용한다.
+// 관리자·사용자 업무 화면에서 함께 근무하는 사람 목록을 표시할 때 필요하다.
+export type WorkSchedulesWithUsersSlotStatus = ScheduleStatusType | "AVAILABLE";
+
+export interface GetWorkSchedulesWithUsersRequest {
+  startDate: string;
+  endDate: string;
+  userName?: string;
+}
+
+export interface WorkScheduleUser {
+  userId: string;
+  userName: string;
+  scheduleId: number;
+}
+
+export interface WorkScheduleWithUsersSlot {
+  start: string;
+  end: string;
+  status: WorkSchedulesWithUsersSlotStatus;
+  currentCount: number;
+  isOverLimit: boolean;
+  users: WorkScheduleUser[];
+}
+
+export interface WorkScheduleWithUsersDay {
+  date: string;
+  slots: WorkScheduleWithUsersSlot[];
+}
+
+export interface GetWorkSchedulesWithUsersResponse {
+  startDate: string;
+  endDate: string;
+  maxConcurrentWorkers: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+  days: WorkScheduleWithUsersDay[];
+}
+
+export type AdminWorkScheduleSlotStatus = WorkSchedulesWithUsersSlotStatus;
+export type GetAdminWorkSchedulesRequest = GetWorkSchedulesWithUsersRequest;
+export type AdminWorkScheduleUser = WorkScheduleUser;
+export type AdminWorkScheduleSlot = WorkScheduleWithUsersSlot;
+export type AdminWorkScheduleDay = WorkScheduleWithUsersDay;
+export type GetAdminWorkSchedulesResponse = GetWorkSchedulesWithUsersResponse;
+
 export interface GetMonthlyWorkSchedulesRequest {
   year: number;
   month: number;

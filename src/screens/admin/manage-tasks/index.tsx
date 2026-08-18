@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import { useGetTodosQuery } from "@/apis/todos";
 import {
   CalendarPanel,

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { type ApiError } from "@/apis/api-client";
+import { WORK_SCHEDULES_QUERY_KEY } from "@/apis/work-schedules";
 
 import {
   createAdminWorkScheduleApi,
@@ -69,6 +70,9 @@ const useInvalidateAdminWorkSchedules = () => {
   return () => {
     queryClient.invalidateQueries({
       queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.ALL,
+    });
+    queryClient.invalidateQueries({
+      queryKey: WORK_SCHEDULES_QUERY_KEY.ALL,
     });
   };
 };

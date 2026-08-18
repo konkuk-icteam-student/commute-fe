@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import {
   useGetTodosQuery,
   useUpdateTodoCompletionMutation,
 } from "@/apis/todos";
-import { useGetPeriodSchedulesQuery } from "@/apis/work-schedules";
 import { Toast } from "@/components/ui";
 import {
   formatDailyTaskDate,
@@ -51,10 +51,10 @@ export default function DailyTasksScreen() {
     memo: false,
   });
   const {
-    periodSchedulesData,
-    isFetchingPeriodSchedules,
-    isErrorPeriodSchedules,
-  } = useGetPeriodSchedulesQuery({
+    adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
+    isErrorAdminWorkSchedules,
+  } = useGetAdminWorkSchedulesQuery({
     startDate: todayDate,
     endDate: todayDate,
   });
@@ -62,11 +62,8 @@ export default function DailyTasksScreen() {
     useGetTodosQuery({
       date: todayDate,
     });
-  const {
-    updateTodoCompletion,
-    isPendingUpdateTodoCompletion,
-    pendingTodoCompletionId,
-  } = useUpdateTodoCompletionMutation();
+  const { updateTodoCompletion, isPendingUpdateTodoCompletion } =
+    useUpdateTodoCompletionMutation();
   const tasksByPeriod = useMemo(
     () => ({
       morning: (todosData?.morningTodos ?? []).map(toDailyTaskItem),
@@ -78,7 +75,7 @@ export default function DailyTasksScreen() {
   const handoverMemos = handoverMemosByPeriod[selectedPeriod];
   const memo = memoByPeriod[selectedPeriod];
   const workTimeSlots = toDailyTaskWorkTimeSlots(
-    periodSchedulesData,
+    adminWorkSchedulesData,
     selectedPeriod,
   );
   const completedTaskCount = useMemo(
@@ -191,9 +188,9 @@ export default function DailyTasksScreen() {
             </p>
           ) : tasks.length > 0 ? (
             <TaskChecklist
+              isTogglingTask={isPendingUpdateTodoCompletion}
               tasks={tasks}
               onToggleTask={toggleTask}
-              togglingTaskId={pendingTodoCompletionId}
             />
           ) : (
             <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
@@ -208,11 +205,11 @@ export default function DailyTasksScreen() {
           title="근로 시간"
           onToggle={() => toggleSection("workTime")}
         >
-          {isFetchingPeriodSchedules ? (
+          {isFetchingAdminWorkSchedules ? (
             <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
               근로 시간을 불러오는 중입니다.
             </p>
-          ) : isErrorPeriodSchedules ? (
+          ) : isErrorAdminWorkSchedules ? (
             <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
               근로 시간을 불러오지 못했습니다.
             </p>

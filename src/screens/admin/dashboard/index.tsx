@@ -8,7 +8,7 @@ import {
 } from "@/apis/admin/home";
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
 import { useGetAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import {
   DateNavigator,
   MemberAttendancePanel,

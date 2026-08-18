@@ -1,6 +1,6 @@
 // TODO: 추후 api 연동 시 정리
 
-import type { AdminWorkScheduleUser } from "@/apis/admin/work-schedules";
+import type { AdminWorkScheduleUser } from "@/apis/work-schedules";
 
 export interface WorktimeChangeRequestType {
   date: string;

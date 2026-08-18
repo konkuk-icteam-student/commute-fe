@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 
 import { useGetAdminUserSearchQuery } from "@/apis/admin/users";
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import { useDebouncedValue } from "@/hooks";
 import {
   buildWeekSchedule,
