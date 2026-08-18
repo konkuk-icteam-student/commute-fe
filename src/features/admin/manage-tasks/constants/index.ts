@@ -1,8 +1,4 @@
-import type {
-  ManageTaskDailyData,
-  ManageTaskItem,
-  ManageTaskMemo,
-} from "../types";
+import type { ManageTaskItem } from "../types";
 
 const july26Tasks: ManageTaskItem[] = [
   {
@@ -123,62 +119,8 @@ const july28Tasks: ManageTaskItem[] = [
   },
 ];
 
-const july26Memos: ManageTaskMemo[] = [
-  {
-    id: 101,
-    author: "김길동",
-    createdAt: "07.26 09:22",
-    content: "오전 근무자가 신문지 위치를 창고 안쪽으로 옮겨두었습니다.",
-    isMine: false,
-  },
-];
-
-const july27Memos: ManageTaskMemo[] = [
-  {
-    id: 201,
-    author: "홍길동A",
-    createdAt: "07.27 10:36",
-    content: "다음 근무자가 쓰레기통도 꼭 갈아주세요.",
-    isMine: false,
-  },
-  {
-    id: 202,
-    author: "관리자",
-    createdAt: "07.27 14:09",
-    content: "오후 근무자는 회의실 청소 후 문단속 확인해주세요.",
-    isMine: true,
-  },
-];
-
-const july28Memos: ManageTaskMemo[] = [
-  {
-    id: 301,
-    author: "박길동",
-    createdAt: "07.28 11:18",
-    content: "복사실 토너가 부족해서 관리자 확인이 필요합니다.",
-    isMine: false,
-  },
-];
-
-export const emptyManageTaskDailyData: ManageTaskDailyData = {
-  memos: [],
-  tasks: [],
+export const manageTaskItemsByDate: Record<string, ManageTaskItem[]> = {
+  "2026-07-26": july26Tasks,
+  "2026-07-27": july27Tasks,
+  "2026-07-28": july28Tasks,
 };
-
-export const manageTaskDataByDate: Record<string, ManageTaskDailyData> = {
-  "2026-07-26": {
-    memos: july26Memos,
-    tasks: july26Tasks,
-  },
-  "2026-07-27": {
-    memos: july27Memos,
-    tasks: july27Tasks,
-  },
-  "2026-07-28": {
-    memos: july28Memos,
-    tasks: july28Tasks,
-  },
-};
-
-export const getManageTaskDailyData = (date: string) =>
-  manageTaskDataByDate[date] ?? emptyManageTaskDailyData;
