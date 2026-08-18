@@ -144,7 +144,7 @@ function TaskEditContent({
         </button>
         <button
           type="button"
-          className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236]"
+          className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236] disabled:cursor-not-allowed disabled:bg-[#F0F2F8] disabled:text-[#8892A6]"
           disabled={isSaving}
           onClick={onCancel}
         >
@@ -198,7 +198,7 @@ function TaskDeleteActions({
       </button>
       <button
         type="button"
-        className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236]"
+        className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236] disabled:cursor-not-allowed disabled:bg-[#F0F2F8] disabled:text-[#8892A6]"
         disabled={isDeleting}
         onClick={onCancel}
       >
