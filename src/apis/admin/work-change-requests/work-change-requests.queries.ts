@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ADMIN_WORK_SCHEDULES_QUERY_KEY } from "@/apis/admin/work-schedules";
 import { type ApiError } from "@/apis/api-client";
 
 import {
@@ -113,9 +114,25 @@ const useInvalidateAdminWorkChangeRequests = () => {
   };
 };
 
-export const useUpdateAdminWorkChangeRequestMutation = () => {
+// 요청을 승인하거나 반려하면 그 사용자의 시간표가 바뀐다.
+// 어느 기간을 보고 있는지 알 수 없으므로 그 사용자의 조회만 통째로 무효화한다.
+const useInvalidateAdminUserWorkSchedules = () => {
+  const queryClient = useQueryClient();
+
+  return (userId: number) => {
+    queryClient.invalidateQueries({
+      queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.USER_ALL(userId),
+    });
+  };
+};
+
+// userId를 넘기면 그 사용자의 시간표 조회까지 다시 받아 온다.
+// 대시보드처럼 여러 사람의 요청을 한 훅으로 처리하는 곳은 넘기지 않는다.
+export const useUpdateAdminWorkChangeRequestMutation = (userId?: number) => {
   const invalidateAdminWorkChangeRequests =
     useInvalidateAdminWorkChangeRequests();
+  const invalidateAdminUserWorkSchedules =
+    useInvalidateAdminUserWorkSchedules();
 
   const {
     mutate: updateAdminWorkChangeRequest,
@@ -126,7 +143,13 @@ export const useUpdateAdminWorkChangeRequestMutation = () => {
     UpdateAdminWorkChangeRequestRequest
   >({
     mutationFn: updateAdminWorkChangeRequestApi,
-    onSuccess: invalidateAdminWorkChangeRequests,
+    onSuccess: () => {
+      invalidateAdminWorkChangeRequests();
+
+      if (userId !== undefined) {
+        invalidateAdminUserWorkSchedules(userId);
+      }
+    },
     onError: () => {
       // TODO: 사용하는 화면에서 토스트 메시지 사용
     },

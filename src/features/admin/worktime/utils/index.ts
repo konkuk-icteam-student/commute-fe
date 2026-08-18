@@ -2,6 +2,7 @@ import type { AdminSearchedUser } from "@/apis/admin/users";
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
 import type {
   AdminWorkScheduleQuickSearchSlot,
+  GetAdminUserWorkSchedulesResponse,
   GetAdminWorkSchedulesResponse,
 } from "@/apis/admin/work-schedules";
 import {
@@ -48,6 +49,29 @@ export function toAdminWeekScheduleSource(
         end,
         currentCount,
         status: status === "AVAILABLE" ? "EMPTY" : status,
+      })),
+    })),
+  };
+}
+
+// 사용자 한 명을 조회한 응답. 상태 값이 사용자 시간표와 같아 AVAILABLE 보정이 필요 없고,
+// 슬롯에 인원 목록도 오지 않는다.
+export function toAdminUserWeekScheduleSource(
+  response?: GetAdminUserWorkSchedulesResponse,
+): WeekScheduleSource {
+  if (!response) {
+    return EMPTY_SCHEDULE;
+  }
+
+  return {
+    maxConcurrentWorkers: response.maxConcurrentWorkers,
+    days: response.days.map(({ date, slots }) => ({
+      date,
+      slots: slots.map(({ start, end, status, currentCount }) => ({
+        start,
+        end,
+        status,
+        currentCount,
       })),
     })),
   };
@@ -115,6 +139,7 @@ export function toWorktimeEditRequestItems(
 ): WorktimeEditRequestItemType[] {
   return details.requests.map((request) => ({
     requestId: request.requestId,
+    userId: request.userId,
     requestedAt: request.requestedAt,
     name: request.userName,
     deleteSlots: request.deleteSchedules,

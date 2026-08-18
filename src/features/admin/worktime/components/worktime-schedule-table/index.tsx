@@ -46,7 +46,13 @@ export default function WorktimeScheduleTable({
                       className={`flex h-8 w-full items-center justify-center rounded-sm ${SLOT_STATUS_CLASS_NAME[slot.status]}`}
                     >
                       {slot.status !== "UNAVAILABLE" && (
-                        <span className="text-base">
+                        <span
+                          className={cn(
+                            "text-base text-[#8892A6]",
+                            // 파란 칸 위에서는 회색 글씨가 묻힌다.
+                            slot.status === "MY_SCHEDULE" && "text-white",
+                          )}
+                        >
                           {slot.currentCount}/{maxConcurrentWorkers}
                         </span>
                       )}

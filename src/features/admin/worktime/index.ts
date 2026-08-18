@@ -13,4 +13,8 @@ export {
 
 export { EditRequestList, EditRequestStatus } from "./review";
 
-export { toAdminWeekScheduleSource, toWorktimeDetailSlotsByDay } from "./utils";
+export {
+  toAdminUserWeekScheduleSource,
+  toAdminWeekScheduleSource,
+  toWorktimeDetailSlotsByDay,
+} from "./utils";
