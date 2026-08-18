@@ -35,13 +35,13 @@ export default function WorktimeDetailQuickSearch({
     isErrorAdminUserSearch,
   } = useGetAdminUserSearchQuery({ keyword: debouncedSearchText });
 
-  // 사용자를 고르기 전에는 userId가 비어 있어 조회가 돌지 않는다.
+  // 사용자를 고르기 전에는 보낼 userId가 없어 조회가 돌지 않는다.
   const {
     adminWorkScheduleQuickSearchData,
     isFetchingAdminWorkScheduleQuickSearch,
     isErrorAdminWorkScheduleQuickSearch,
   } = useGetAdminWorkScheduleQuickSearchQuery({
-    userId: selectedUser?.userId ?? "",
+    userId: selectedUser?.userId ?? 0,
     startDate,
     endDate,
   });
