@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test --experimental-strip-types --import ./scripts/ts-test-register.mjs \"src/lib/**/*.test.ts\" \"src/features/**/*.test.ts\"",
+    "test": "NEXT_PUBLIC_API_BASE_URL=http://localhost node --test --experimental-strip-types --import ./scripts/ts-test-register.mjs \"src/apis/**/*.test.ts\" \"src/lib/**/*.test.ts\" \"src/features/**/*.test.ts\"",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

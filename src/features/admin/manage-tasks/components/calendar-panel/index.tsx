@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { memo, useState } from "react";
 
 import calendarDropdownIcon from "@/assets/icons/admin-manage-tasks/ic_calendar_dropdown.svg";
 import {
@@ -20,7 +20,33 @@ import CalendarMonthMoveButton from "../calendar-month-move-button";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
 
-export default function CalendarPanel({
+const clampMonthDate = ({
+  date,
+  maxDate,
+  maxMonthValue,
+  minDate,
+  minMonthValue,
+}: {
+  date: Date;
+  maxDate: Date;
+  maxMonthValue: number;
+  minDate: Date;
+  minMonthValue: number;
+}) => {
+  const monthValue = getMonthValue(date);
+
+  if (monthValue < minMonthValue) {
+    return minDate;
+  }
+
+  if (monthValue > maxMonthValue) {
+    return maxDate;
+  }
+
+  return date;
+};
+
+function CalendarPanel({
   onSelectDate,
   selectedDate,
   systemCreatedYear,
@@ -32,90 +58,73 @@ export default function CalendarPanel({
   const currentMonthDate = new Date();
   const currentYear = currentMonthDate.getFullYear();
   const minViewYear = Math.min(systemCreatedYear ?? currentYear, currentYear);
-  const maxViewDate = new Date(currentYear, currentMonthDate.getMonth(), 1);
+  const maxViewDate = new Date(currentYear, currentMonthDate.getMonth() + 1, 1);
   const minViewDate = new Date(minViewYear, 0, 1);
   const minMonthValue = getMonthValue(minViewDate);
   const maxMonthValue = getMonthValue(maxViewDate);
   const [viewDate, setViewDate] = useState(() => {
     const selectedMonthStart = getDateMonthStart(selectedDate);
-    const selectedMonthValue = getMonthValue(selectedMonthStart);
 
-    if (selectedMonthValue < minMonthValue) {
-      return minViewDate;
-    }
-
-    if (selectedMonthValue > maxMonthValue) {
-      return maxViewDate;
-    }
-
-    return selectedMonthStart;
+    return clampMonthDate({
+      date: selectedMonthStart,
+      maxDate: maxViewDate,
+      maxMonthValue,
+      minDate: minViewDate,
+      minMonthValue,
+    });
   });
   const [openDropdown, setOpenDropdown] = useState<"month" | "year" | null>(
     null,
   );
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth() + 1;
+  const clampedViewDate = clampMonthDate({
+    date: viewDate,
+    maxDate: maxViewDate,
+    maxMonthValue,
+    minDate: minViewDate,
+    minMonthValue,
+  });
+  const year = clampedViewDate.getFullYear();
+  const month = clampedViewDate.getMonth() + 1;
   const monthTitle = `${year}년 ${month}월`;
   const days = getPanelCalendarDays(year, month);
   const todayDate = formatDateValue(new Date());
   const availableYears = getAvailableYears(minViewDate, maxViewDate);
   const availableMonths = getAvailableMonths(year, minViewDate, maxViewDate);
-  const canMovePrevious = getMonthValue(viewDate) > minMonthValue;
-  const canMoveNext = getMonthValue(viewDate) < maxMonthValue;
-
-  useEffect(() => {
-    setViewDate((currentViewDate) => {
-      const currentMonthValue = getMonthValue(currentViewDate);
-
-      if (currentMonthValue < minMonthValue) {
-        return minViewDate;
-      }
-
-      if (currentMonthValue > maxMonthValue) {
-        return maxViewDate;
-      }
-
-      return currentViewDate;
-    });
-  }, [maxMonthValue, minMonthValue, minViewYear]);
+  const clampedMonthValue = getMonthValue(clampedViewDate);
+  const canMovePrevious = clampedMonthValue > minMonthValue;
+  const canMoveNext = clampedMonthValue < maxMonthValue;
 
   const moveMonth = (offset: number) => {
-    setViewDate((current) => {
+    setViewDate(() => {
       const nextDate = new Date(
-        current.getFullYear(),
-        current.getMonth() + offset,
+        clampedViewDate.getFullYear(),
+        clampedViewDate.getMonth() + offset,
         1,
       );
-      const nextMonthValue = getMonthValue(nextDate);
 
-      if (nextMonthValue < minMonthValue) {
-        return minViewDate;
-      }
-
-      if (nextMonthValue > maxMonthValue) {
-        return maxViewDate;
-      }
-
-      return nextDate;
+      return clampMonthDate({
+        date: nextDate,
+        maxDate: maxViewDate,
+        maxMonthValue,
+        minDate: minViewDate,
+        minMonthValue,
+      });
     });
   };
 
   const selectDate = (dateValue: string) => {
     onSelectDate(dateValue);
     const nextViewDate = getDateMonthStart(dateValue);
-    const nextMonthValue = getMonthValue(nextViewDate);
 
-    if (nextMonthValue < minMonthValue) {
-      setViewDate(minViewDate);
-      return;
-    }
-
-    if (nextMonthValue > maxMonthValue) {
-      setViewDate(maxViewDate);
-      return;
-    }
-
-    setViewDate(nextViewDate);
+    setViewDate(
+      clampMonthDate({
+        date: nextViewDate,
+        maxDate: maxViewDate,
+        maxMonthValue,
+        minDate: minViewDate,
+        minMonthValue,
+      }),
+    );
   };
 
   const selectYear = (nextYear: number) => {
@@ -269,3 +278,5 @@ export default function CalendarPanel({
     </section>
   );
 }
+
+export default memo(CalendarPanel);

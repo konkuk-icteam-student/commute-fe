@@ -36,6 +36,26 @@ const successAdapter = async (config: InternalAxiosRequestConfig) => ({
   statusText: "OK",
 });
 
+const dataSuccessAdapter = async (config: InternalAxiosRequestConfig) => ({
+  config,
+  data: {
+    isSuccess: true as const,
+    message: "ok",
+    data: { value: "response" },
+  },
+  headers: {},
+  status: 200,
+  statusText: "OK",
+});
+
+const noContentAdapter = async (config: InternalAxiosRequestConfig) => ({
+  config,
+  data: "",
+  headers: {},
+  status: 204,
+  statusText: "No Content",
+});
+
 const createHttpErrorAdapter =
   (status: number, message = "해당 연월의 스케줄 설정을 찾을 수 없습니다.") =>
   async (config: InternalAxiosRequestConfig) => {
@@ -180,6 +200,34 @@ describe("apiClient authentication guard", () => {
 
     assert.deepEqual(response.details, { value: "response" });
     assert.equal(storage.getItem("refreshToken"), "refresh-token");
+  });
+
+  it("normalizes a data success response into details", async () => {
+    const response = await apiClient.get<{ value: string }>("/public", {
+      adapter: dataSuccessAdapter,
+      skipAuth: true,
+    });
+
+    assert.deepEqual(response.details, { value: "response" });
+  });
+
+  it("allows a DELETE request with HTTP 204", async () => {
+    const response = await apiClient.delete<void>("/public", {
+      adapter: noContentAdapter,
+      skipAuth: true,
+    });
+
+    assert.equal(response.details, undefined);
+  });
+
+  it("rejects a non-DELETE request with HTTP 204", async () => {
+    await assert.rejects(
+      apiClient.get<{ value: string }>("/public", {
+        adapter: noContentAdapter,
+        skipAuth: true,
+      }),
+      /Invalid API response/,
+    );
   });
 
   it("normalizes a skipAuth HTTP 401 without clearing stored auth", async () => {

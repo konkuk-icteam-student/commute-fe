@@ -6,7 +6,6 @@ export {
   deleteAdminWorkScheduleApi,
   getAdminUserWorkSchedulesApi,
   getAdminWorkScheduleQuickSearchApi,
-  getAdminWorkSchedulesApi,
 } from "./admin-work-schedules.api";
 
 export {
@@ -14,7 +13,6 @@ export {
   useDeleteAdminWorkScheduleMutation,
   useGetAdminUserWorkSchedulesQuery,
   useGetAdminWorkScheduleQuickSearchQuery,
-  useGetAdminWorkSchedulesQuery,
 } from "./admin-work-schedules.queries";
 
 export type {
@@ -23,9 +21,6 @@ export type {
   AdminWorkScheduleDay,
   AdminWorkScheduleQuickSearchDay,
   AdminWorkScheduleQuickSearchSlot,
-  AdminWorkScheduleSlot,
-  AdminWorkScheduleSlotStatus,
-  AdminWorkScheduleUser,
   CreateAdminWorkScheduleRequest,
   CreateAdminWorkScheduleResponse,
   DeleteAdminWorkScheduleRequest,
@@ -34,6 +29,4 @@ export type {
   GetAdminUserWorkSchedulesResponse,
   GetAdminWorkScheduleQuickSearchRequest,
   GetAdminWorkScheduleQuickSearchResponse,
-  GetAdminWorkSchedulesRequest,
-  GetAdminWorkSchedulesResponse,
 } from "./admin-work-schedules.types";

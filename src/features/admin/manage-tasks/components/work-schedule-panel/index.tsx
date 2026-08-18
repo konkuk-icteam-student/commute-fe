@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { memo } from "react";
 
 import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
 import chevronRightIcon from "@/assets/icons/admin-common/ic_chevron_right_gray.svg";
@@ -21,7 +22,7 @@ const workerToneClass: Record<BadgeVariant, string> = {
   "student-purple": "bg-[#E6DDF5] text-[#8266C3]",
 };
 
-export default function WorkSchedulePanel({
+function WorkSchedulePanel({
   groups,
   isError = false,
   isLoading = false,
@@ -78,3 +79,5 @@ export default function WorkSchedulePanel({
     </section>
   );
 }
+
+export default memo(WorkSchedulePanel);

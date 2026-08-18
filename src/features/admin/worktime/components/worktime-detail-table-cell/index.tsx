@@ -4,8 +4,8 @@ import type { AdminSearchedUser } from "@/apis/admin/users";
 import {
   useCreateAdminWorkScheduleMutation,
   useDeleteAdminWorkScheduleMutation,
-  type AdminWorkScheduleUser,
 } from "@/apis/admin/work-schedules";
+import type { AdminWorkScheduleUser } from "@/apis/work-schedules";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui";
 
