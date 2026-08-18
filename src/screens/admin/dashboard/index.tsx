@@ -21,6 +21,7 @@ import {
   toDashboardTimeRowsFromAdminWorkSchedules,
   toDashboardWorkRequests,
 } from "@/features/admin/dashboard";
+import { useDebouncedValue } from "@/hooks";
 
 const MEMBER_ATTENDANCE_PAGE_SIZE = 6;
 const WORK_CHANGE_REQUEST_PAGE_SIZE = 2;
@@ -48,7 +49,8 @@ export default function AdminDashboardScreen() {
   const [selectedYear, selectedMonth] = selectedDate
     .split("-")
     .map((value) => Number(value));
-  const trimmedMemberQuery = memberQuery.trim();
+  const debouncedMemberQuery = useDebouncedValue(memberQuery);
+  const trimmedMemberQuery = debouncedMemberQuery.trim();
 
   const {
     adminHomeAttendanceSummaryData,
@@ -99,6 +101,8 @@ export default function AdminDashboardScreen() {
   const dashboardTimeRows = toDashboardTimeRowsFromAdminWorkSchedules(
     adminWorkSchedulesData,
   );
+  const isSearchingMemberAttendance =
+    isPendingAdminHomeAttendanceStatus || debouncedMemberQuery !== memberQuery;
 
   return (
     <div className="flex-1 p-8.5">
@@ -132,7 +136,7 @@ export default function AdminDashboardScreen() {
             />
             <MemberAttendancePanel
               members={dashboardMemberRows}
-              isLoading={isPendingAdminHomeAttendanceStatus}
+              isLoading={isSearchingMemberAttendance}
               isError={isErrorAdminHomeAttendanceStatus}
               page={adminHomeAttendanceStatusData?.page ?? memberPage}
               query={memberQuery}

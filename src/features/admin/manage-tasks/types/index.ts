@@ -31,8 +31,3 @@ export type ManageTaskMemo = {
   id: number;
   isMine: boolean;
 };
-
-export type ManageTaskDailyData = {
-  memos: ManageTaskMemo[];
-  tasks: ManageTaskItem[];
-};

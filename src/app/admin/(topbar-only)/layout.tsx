@@ -1,5 +1,4 @@
 import { AdminLayout } from "@/components/layout";
-import { ADMIN_HEADER_USER } from "@/constants/admin";
 
 export default function WithoutSidebarAdminLayout({
   children,
@@ -7,11 +6,7 @@ export default function WithoutSidebarAdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AdminLayout
-      adminUser={ADMIN_HEADER_USER}
-      showBackButton
-      variant="topbar"
-    >
+    <AdminLayout showBackButton variant="topbar">
       {children}
     </AdminLayout>
   );
