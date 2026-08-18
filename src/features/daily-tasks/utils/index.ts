@@ -1,4 +1,4 @@
-import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/work-schedules";
 import type { BadgeVariant } from "@/components/ui";
 
 import type { DailyTaskPeriod, WorkTimeSlot, WorkTimeWorker } from "../types";
@@ -58,7 +58,7 @@ export const toDailyTaskWorkTimeSlots = (
     )
     .map((slot) => ({
       time: slot.start,
-      workers: slot.users.map((user) => ({
+      workers: (slot.users ?? []).map((user) => ({
         id: user.scheduleId,
         name: user.userName,
         tone: getWorkerTone(user.userId),

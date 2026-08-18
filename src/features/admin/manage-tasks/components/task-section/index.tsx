@@ -8,6 +8,9 @@ export default function TaskSection({
   editingTaskId,
   editingTitle,
   hasBottomBorder,
+  isDeletingTask,
+  isSavingEdit,
+  isTogglingTask,
   onCancelDelete,
   onCancelEdit,
   onDelete,
@@ -23,6 +26,9 @@ export default function TaskSection({
   editingTaskId: number | null;
   editingTitle: string;
   hasBottomBorder: boolean;
+  isDeletingTask: boolean;
+  isSavingEdit: boolean;
+  isTogglingTask: boolean;
   onCancelDelete: () => void;
   onCancelEdit: () => void;
   onDelete: (taskId: number) => void;
@@ -39,12 +45,17 @@ export default function TaskSection({
       <h3 className="border-b-[0.3px] border-[#DDE3EF] p-2 px-1.5 text-sm leading-3.5 font-bold text-[#000000]">
         {period}
       </h3>
-      <ul className={cn(hasBottomBorder && "border-b-[0.3px] border-[#DDE3EF]")}>
+      <ul
+        className={cn(hasBottomBorder && "border-b-[0.3px] border-[#DDE3EF]")}
+      >
         {tasks.map((task) => (
           <TaskRow
             deletingTaskId={deletingTaskId}
             editingTaskId={editingTaskId}
             editingTitle={editingTitle}
+            isDeletingTask={isDeletingTask}
+            isSavingEdit={isSavingEdit}
+            isTogglingTask={isTogglingTask}
             key={task.id}
             onCancelDelete={onCancelDelete}
             onCancelEdit={onCancelEdit}

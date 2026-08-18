@@ -1,23 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
+import { useGetTodosQuery } from "@/apis/todos";
 import {
   CalendarPanel,
-  getManageTaskDailyData,
   HandoverMemoPanel,
   manageTaskDataByDate,
   TaskManagementPanel,
   toManageTaskScheduleGroups,
   WorkSchedulePanel,
 } from "@/features/admin/manage-tasks";
-import type {
-  ManageTaskItem,
-  ManageTaskMemo,
-} from "@/features/admin/manage-tasks";
+import type { ManageTaskMemo } from "@/features/admin/manage-tasks";
 import { formatDateValue, parseDateValue } from "@/utils/calendar";
+import { toManageTaskItem } from "@/utils/todos";
 
 const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -29,13 +27,6 @@ const formatSelectedDateTitle = (dateValue: string) => {
     weekdayText: weekdayLabels[date.getDay()],
   };
 };
-
-const initialTasksByDate = Object.fromEntries(
-  Object.entries(manageTaskDataByDate).map(([date, dailyData]) => [
-    date,
-    [...dailyData.tasks],
-  ]),
-) as Record<string, ManageTaskItem[]>;
 
 const initialMemosByDate = Object.fromEntries(
   Object.entries(manageTaskDataByDate).map(([date, dailyData]) => [
@@ -49,9 +40,7 @@ export default function AdminManageTasksScreen() {
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateValue(new Date()),
   );
-  const [tasksByDate, setTasksByDate] = useState(initialTasksByDate);
   const [memosByDate, setMemosByDate] = useState(initialMemosByDate);
-  const dailyData = getManageTaskDailyData(selectedDate);
   const {
     adminWorkSchedulesData,
     isFetchingAdminWorkSchedules,
@@ -60,22 +49,33 @@ export default function AdminManageTasksScreen() {
     startDate: selectedDate,
     endDate: selectedDate,
   });
-  const tasks = tasksByDate[selectedDate] ?? dailyData.tasks;
+  const { todosData, isFetchingTodos, isErrorTodos, todosError } =
+    useGetTodosQuery({
+      date: selectedDate,
+    });
+  const tasks = useMemo(
+    () => [
+      ...(todosData?.morningTodos ?? []).map(toManageTaskItem),
+      ...(todosData?.afternoonTodos ?? []).map(toManageTaskItem),
+    ],
+    [todosData],
+  );
+  const dailyData = manageTaskDataByDate[selectedDate] ?? { memos: [] };
   const memos = memosByDate[selectedDate] ?? dailyData.memos;
-  const scheduleGroups = toManageTaskScheduleGroups(adminWorkSchedulesData);
+  const scheduleGroups = useMemo(
+    () => toManageTaskScheduleGroups(adminWorkSchedulesData),
+    [adminWorkSchedulesData],
+  );
   const { dateText, weekdayText } = formatSelectedDateTitle(selectedDate);
-  const updateSelectedTasks = (nextTasks: ManageTaskItem[]) => {
-    setTasksByDate((currentTasksByDate) => ({
-      ...currentTasksByDate,
-      [selectedDate]: nextTasks,
-    }));
-  };
-  const updateSelectedMemos = (nextMemos: ManageTaskMemo[]) => {
-    setMemosByDate((currentMemosByDate) => ({
-      ...currentMemosByDate,
-      [selectedDate]: nextMemos,
-    }));
-  };
+  const updateSelectedMemos = useCallback(
+    (nextMemos: ManageTaskMemo[]) => {
+      setMemosByDate((currentMemosByDate) => ({
+        ...currentMemosByDate,
+        [selectedDate]: nextMemos,
+      }));
+    },
+    [selectedDate],
+  );
 
   return (
     <div className="min-w-340.75 flex-1 bg-[#F4F5F7] px-10 py-11.5">
@@ -105,7 +105,10 @@ export default function AdminManageTasksScreen() {
 
           <TaskManagementPanel
             tasks={tasks}
-            onTasksChange={updateSelectedTasks}
+            selectedDate={selectedDate}
+            isError={isErrorTodos}
+            isLoading={isFetchingTodos}
+            errorMessage={todosError?.message}
           />
         </div>
       </div>

@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
+import {
+  useGetTodosQuery,
+  useUpdateTodoCompletionMutation,
+} from "@/apis/todos";
+import { Toast } from "@/components/ui";
 import {
   formatDailyTaskDate,
   HandoverMemoPanel,
@@ -16,6 +21,7 @@ import {
   WorkTimeList,
 } from "@/features/daily-tasks";
 import { formatDateValue } from "@/utils/calendar";
+import { toDailyTaskItem } from "@/utils/todos";
 
 const formatMemoCreatedAt = (date: Date) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -31,10 +37,6 @@ export default function DailyTasksScreen() {
   const todayDate = formatDateValue(today);
   const [selectedPeriod, setSelectedPeriod] =
     useState<DailyTaskPeriod>("morning");
-  const [tasksByPeriod, setTasksByPeriod] = useState(() => ({
-    morning: mockDailyTasksByPeriod.morning.tasks,
-    afternoon: mockDailyTasksByPeriod.afternoon.tasks,
-  }));
   const [handoverMemosByPeriod, setHandoverMemosByPeriod] = useState(() => ({
     morning: mockDailyTasksByPeriod.morning.handoverMemos,
     afternoon: mockDailyTasksByPeriod.afternoon.handoverMemos,
@@ -56,6 +58,19 @@ export default function DailyTasksScreen() {
     startDate: todayDate,
     endDate: todayDate,
   });
+  const { todosData, isFetchingTodos, isErrorTodos, todosError } =
+    useGetTodosQuery({
+      date: todayDate,
+    });
+  const { updateTodoCompletion, isPendingUpdateTodoCompletion } =
+    useUpdateTodoCompletionMutation();
+  const tasksByPeriod = useMemo(
+    () => ({
+      morning: (todosData?.morningTodos ?? []).map(toDailyTaskItem),
+      afternoon: (todosData?.afternoonTodos ?? []).map(toDailyTaskItem),
+    }),
+    [todosData],
+  );
   const tasks = tasksByPeriod[selectedPeriod];
   const handoverMemos = handoverMemosByPeriod[selectedPeriod];
   const memo = memoByPeriod[selectedPeriod];
@@ -67,6 +82,7 @@ export default function DailyTasksScreen() {
     () => tasks.filter((task) => task.completed).length,
     [tasks],
   );
+  const [toastMessage, setToastMessage] = useState("");
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((currentSections) => ({
@@ -76,12 +92,23 @@ export default function DailyTasksScreen() {
   };
 
   const toggleTask = (taskId: number) => {
-    setTasksByPeriod((currentTasksByPeriod) => ({
-      ...currentTasksByPeriod,
-      [selectedPeriod]: currentTasksByPeriod[selectedPeriod].map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task,
-      ),
-    }));
+    const currentTask = tasks.find((task) => task.id === taskId);
+
+    if (!currentTask || isPendingUpdateTodoCompletion) {
+      return;
+    }
+
+    updateTodoCompletion(
+      {
+        todoId: taskId,
+        isCompleted: !currentTask.completed,
+      },
+      {
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
+    );
   };
 
   const changeMemo = (nextMemo: string) => {
@@ -151,7 +178,25 @@ export default function DailyTasksScreen() {
           title="업무 사항"
           onToggle={() => toggleSection("tasks")}
         >
-          <TaskChecklist tasks={tasks} onToggleTask={toggleTask} />
+          {isFetchingTodos ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              업무 사항을 불러오는 중입니다.
+            </p>
+          ) : isErrorTodos ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              {todosError?.message ?? "업무 사항을 불러오지 못했습니다."}
+            </p>
+          ) : tasks.length > 0 ? (
+            <TaskChecklist
+              isTogglingTask={isPendingUpdateTodoCompletion}
+              tasks={tasks}
+              onToggleTask={toggleTask}
+            />
+          ) : (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              등록된 업무 사항이 없습니다.
+            </p>
+          )}
         </SectionCard>
 
         <SectionCard
@@ -193,6 +238,12 @@ export default function DailyTasksScreen() {
           />
         </SectionCard>
       </div>
+
+      <Toast
+        open={toastMessage.length > 0}
+        message={toastMessage}
+        onDismiss={() => setToastMessage("")}
+      />
     </main>
   );
 }

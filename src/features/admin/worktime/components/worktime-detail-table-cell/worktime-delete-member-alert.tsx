@@ -1,4 +1,4 @@
-import type { AdminWorkScheduleUser } from "@/apis/admin/work-schedules";
+import type { AdminWorkScheduleUser } from "@/apis/work-schedules";
 import { Alert } from "@/components/ui";
 
 interface WorktimeDeleteMemberAlertProps {

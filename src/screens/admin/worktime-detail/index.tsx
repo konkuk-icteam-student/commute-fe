@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import { ScheduleErrorModal, useScheduleErrorModal } from "@/features/schedule";
 import {
   toWorktimeDetailSlotsByDay,

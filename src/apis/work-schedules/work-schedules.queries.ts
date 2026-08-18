@@ -12,6 +12,8 @@ import type {
   GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesRequest,
   GetMonthlyWorkSchedulesResponse,
+  GetWorkSchedulesWithUsersRequest,
+  GetWorkSchedulesWithUsersResponse,
   GetPeriodWorkSchedulesRequest,
   GetPeriodWorkSchedulesResponse,
   GetWorkSchedulesSummaryRequest,
@@ -23,12 +25,17 @@ import {
   editWorkSchedulesApi,
   getMonthlyLimitApi,
   getMonthlySchedulesApi,
+  getWorkSchedulesWithUsersApi,
   getPeriodSchedulesApi,
   getWorkSchedulesSummaryApi,
 } from "./work-schedules.api";
 import { type ApiError } from "../api-client";
 
 const WORK_SCHEDULES_CACHE_TIME = {
+  WITH_USERS: {
+    STALE: 1000 * 30,
+    GC: 1000 * 60 * 5,
+  },
   MONTHLY: {
     STALE: 1000 * 60 * 10,
     GC: 1000 * 60 * 15,
@@ -46,6 +53,56 @@ const WORK_SCHEDULES_CACHE_TIME = {
     GC: 1000 * 60 * 15,
   },
 } as const;
+
+export const useGetWorkSchedulesWithUsersQuery = (
+  params: GetWorkSchedulesWithUsersRequest,
+) => {
+  const {
+    data: workSchedulesWithUsersData,
+    isPending: isPendingWorkSchedulesWithUsers,
+    isFetching: isFetchingWorkSchedulesWithUsers,
+    isError: isErrorWorkSchedulesWithUsers,
+    error: workSchedulesWithUsersError,
+    refetch: refetchWorkSchedulesWithUsers,
+  } = useQuery<GetWorkSchedulesWithUsersResponse, ApiError>({
+    queryKey: WORK_SCHEDULES_QUERY_KEY.WITH_USERS(params),
+    queryFn: () => getWorkSchedulesWithUsersApi(params),
+    retry: 1,
+    staleTime: WORK_SCHEDULES_CACHE_TIME.WITH_USERS.STALE,
+    gcTime: WORK_SCHEDULES_CACHE_TIME.WITH_USERS.GC,
+  });
+
+  return {
+    workSchedulesWithUsersData,
+    isPendingWorkSchedulesWithUsers,
+    isFetchingWorkSchedulesWithUsers,
+    isErrorWorkSchedulesWithUsers,
+    workSchedulesWithUsersError,
+    refetchWorkSchedulesWithUsers,
+  };
+};
+
+export const useGetAdminWorkSchedulesQuery = (
+  params: GetWorkSchedulesWithUsersRequest,
+) => {
+  const {
+    workSchedulesWithUsersData,
+    isPendingWorkSchedulesWithUsers,
+    isFetchingWorkSchedulesWithUsers,
+    isErrorWorkSchedulesWithUsers,
+    workSchedulesWithUsersError,
+    refetchWorkSchedulesWithUsers,
+  } = useGetWorkSchedulesWithUsersQuery(params);
+
+  return {
+    adminWorkSchedulesData: workSchedulesWithUsersData,
+    isPendingAdminWorkSchedules: isPendingWorkSchedulesWithUsers,
+    isFetchingAdminWorkSchedules: isFetchingWorkSchedulesWithUsers,
+    isErrorAdminWorkSchedules: isErrorWorkSchedulesWithUsers,
+    adminWorkSchedulesError: workSchedulesWithUsersError,
+    refetchAdminWorkSchedules: refetchWorkSchedulesWithUsers,
+  };
+};
 
 export const useGetMonthlySchedulesQuery = ({
   year,
