@@ -44,6 +44,10 @@ export default function MembersInfo() {
 
   // 응답이 오기 전에는 페이지 이동을 막아 두려고 최소 1페이지로 둔다.
   const totalPage = Math.max(adminWorkersData?.totalPages ?? 1, 1);
+  // 표의 '번호'는 목록 순번이다. 응답이 알려 준 페이지 기준으로 이어서 센다.
+  const listStartNumber =
+    (adminWorkersData?.page ?? currentPage - 1) *
+    (adminWorkersData?.size ?? PAGE_SIZE);
   // 입력이 멎기 전에는 아직 조회 전이라 이전 결과가 남아 있다. 없음이 아니라 로딩으로 본다.
   const isLoading =
     isFetchingAdminWorkers || debouncedSearchText !== searchText;
@@ -52,12 +56,13 @@ export default function MembersInfo() {
     setSearchText(e.target.value);
 
   const handlePrevPage = () => {
-    if (currentPage === 1) return;
+    if (currentPage <= 1) return;
     setCurrentPage((prev) => prev - 1);
   };
 
+  // 조회 결과가 줄어 totalPage가 currentPage보다 작아질 수 있어 부등호로 막는다.
   const handleNextPage = () => {
-    if (currentPage === totalPage) return;
+    if (currentPage >= totalPage) return;
     setCurrentPage((prev) => prev + 1);
   };
 
@@ -79,6 +84,7 @@ export default function MembersInfo() {
       />
       <MembersInfoTable
         workers={adminWorkersData?.workers ?? []}
+        startNumber={listStartNumber}
         isLoading={isLoading}
         isError={isErrorAdminWorkers}
         errorMessage={adminWorkersError?.message}

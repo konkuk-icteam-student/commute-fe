@@ -11,6 +11,8 @@ import {
 
 interface MembersInfoTableProps {
   workers: AdminWorker[];
+  // 현재 페이지의 첫 행 앞까지 센 인원 수. 여기에 이어서 목록 순번을 매긴다.
+  startNumber: number;
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
@@ -21,6 +23,7 @@ const COLUMN_COUNT = 11;
 
 export default function MembersInfoTable({
   workers,
+  startNumber,
   isLoading,
   isError,
   errorMessage,
@@ -67,8 +70,9 @@ export default function MembersInfoTable({
               >
                 {isError ? (
                   // 조회에 실패하면 빈 표가 인원이 없는 것처럼 보이므로 사유를 적는다.
+                  // 서버 메시지가 빈 문자열이면 안내가 사라지므로 기본 문구로 대체한다.
                   <span className="text-[#FD7171]">
-                    {errorMessage ?? "근무인원을 불러오지 못했습니다."}
+                    {errorMessage || "근무인원을 불러오지 못했습니다."}
                   </span>
                 ) : isLoading ? (
                   "근무인원을 불러오는 중입니다."
@@ -78,13 +82,13 @@ export default function MembersInfoTable({
               </td>
             </tr>
           ) : (
-            workers.map((worker) => (
+            workers.map((worker, index) => (
               <tr
                 key={worker.userId}
                 className="transition-colors hover:bg-gray-50"
               >
                 <td className="h-12 px-4 text-center font-medium whitespace-nowrap">
-                  {worker.userId}
+                  {startNumber + index + 1}
                 </td>
                 <td className="h-12 px-4 font-medium whitespace-nowrap">
                   {worker.name}
