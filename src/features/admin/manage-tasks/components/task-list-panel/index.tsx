@@ -3,6 +3,11 @@
 import Image from "next/image";
 import { useCallback, useState } from "react";
 
+import {
+  useDeleteAdminTodoMutation,
+  useUpdateAdminTodoMutation,
+} from "@/apis/admin/todos";
+import { useUpdateTodoCompletionMutation } from "@/apis/todos";
 import checkCircleIcon from "@/assets/icons/admin-common/ic_check_circle.svg";
 import { Toast } from "@/components/ui";
 
@@ -10,20 +15,26 @@ import type { ManageTaskItem } from "../../types";
 import TaskRepeatNotice from "../task-repeat-notice";
 import TaskSection from "../task-section";
 
-const formatCompletedAt = (date: Date) => {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${hours}:${minutes} 완료`;
-};
-
 export default function TaskListPanel({
-  onTasksChange,
+  errorMessage,
+  isError,
+  isLoading,
   tasks,
 }: {
-  onTasksChange: (tasks: ManageTaskItem[]) => void;
+  errorMessage?: string;
+  isError: boolean;
+  isLoading: boolean;
   tasks: ManageTaskItem[];
 }) {
+  const { updateAdminTodo, isPendingUpdateAdminTodo } =
+    useUpdateAdminTodoMutation();
+  const { deleteAdminTodo, isPendingDeleteAdminTodo } =
+    useDeleteAdminTodoMutation();
+  const {
+    updateTodoCompletion,
+    isPendingUpdateTodoCompletion,
+    pendingTodoCompletionId,
+  } = useUpdateTodoCompletionMutation();
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
@@ -34,27 +45,22 @@ export default function TaskListPanel({
   }));
 
   const toggleTask = (taskId: number) => {
-    onTasksChange(
-      tasks.map((task) => {
-        if (task.id !== taskId) {
-          return task;
-        }
+    const currentTask = tasks.find((task) => task.id === taskId);
 
-        if (task.completed) {
-          return {
-            ...task,
-            completed: false,
-            completedAt: undefined,
-          };
-        }
+    if (!currentTask || isPendingUpdateTodoCompletion) {
+      return;
+    }
 
-        return {
-          ...task,
-          assignee: "관리자",
-          completed: true,
-          completedAt: formatCompletedAt(new Date()),
-        };
-      }),
+    updateTodoCompletion(
+      {
+        todoId: taskId,
+        isCompleted: !currentTask.completed,
+      },
+      {
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
     );
   };
 
@@ -76,13 +82,21 @@ export default function TaskListPanel({
       return;
     }
 
-    onTasksChange(
-      tasks.map((task) =>
-        task.id === editingTaskId ? { ...task, title: trimmedTitle } : task,
-      ),
+    updateAdminTodo(
+      {
+        todoId: editingTaskId,
+        description: trimmedTitle,
+      },
+      {
+        onSuccess: () => {
+          cancelEditTask();
+          setToastMessage("업무가 수정되었습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
     );
-    cancelEditTask();
-    setToastMessage("업무가 수정되었습니다.");
   };
 
   const openDeleteTask = (taskId: number) => {
@@ -100,9 +114,18 @@ export default function TaskListPanel({
   }, []);
 
   const deleteTask = (taskId: number) => {
-    onTasksChange(tasks.filter((task) => task.id !== taskId));
-    setDeletingTaskId(null);
-    setToastMessage("업무가 삭제 되었습니다.");
+    deleteAdminTodo(
+      { todoId: taskId },
+      {
+        onSuccess: () => {
+          setDeletingTaskId(null);
+          setToastMessage("업무가 삭제 되었습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
+    );
   };
 
   return (
@@ -112,27 +135,40 @@ export default function TaskListPanel({
         업무사항
       </div>
 
-      <div className="space-y-4">
-        {groupedTasks.map((group, groupIndex) => (
-          <TaskSection
-            deletingTaskId={deletingTaskId}
-            editingTaskId={editingTaskId}
-            editingTitle={editingTitle}
-            hasBottomBorder={groupIndex < groupedTasks.length - 1}
-            key={group.period}
-            onCancelDelete={cancelDeleteTask}
-            onCancelEdit={cancelEditTask}
-            onDelete={deleteTask}
-            onEditTitleChange={setEditingTitle}
-            onOpenDelete={openDeleteTask}
-            onOpenEdit={openEditTask}
-            onSaveEdit={saveEditTask}
-            onToggle={toggleTask}
-            period={group.period}
-            tasks={group.tasks}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="py-8 text-center text-[13px] font-medium text-[#8892A6]">
+          업무사항을 불러오는 중입니다.
+        </p>
+      ) : isError ? (
+        <p className="py-8 text-center text-[13px] font-medium text-[#FD7171]">
+          {errorMessage ?? "업무사항을 불러오지 못했습니다."}
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {groupedTasks.map((group, groupIndex) => (
+            <TaskSection
+              deletingTaskId={deletingTaskId}
+              editingTaskId={editingTaskId}
+              editingTitle={editingTitle}
+              hasBottomBorder={groupIndex < groupedTasks.length - 1}
+              isDeletingTask={isPendingDeleteAdminTodo}
+              isSavingEdit={isPendingUpdateAdminTodo}
+              key={group.period}
+              onCancelDelete={cancelDeleteTask}
+              onCancelEdit={cancelEditTask}
+              onDelete={deleteTask}
+              onEditTitleChange={setEditingTitle}
+              onOpenDelete={openDeleteTask}
+              onOpenEdit={openEditTask}
+              onSaveEdit={saveEditTask}
+              onToggle={toggleTask}
+              period={group.period}
+              tasks={group.tasks}
+              togglingTaskId={pendingTodoCompletionId}
+            />
+          ))}
+        </div>
+      )}
 
       <TaskRepeatNotice />
 

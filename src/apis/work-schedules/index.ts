@@ -2,6 +2,7 @@ export type {
   ScheduleDayType,
   ScheduleSlotType,
   ScheduleStatusType,
+  WorkScheduleSlotUserType,
   WorkScheduleSlotTimeType,
   WorkScheduleSlotRangeType,
   WorkSchedulesSummaryEntryType,

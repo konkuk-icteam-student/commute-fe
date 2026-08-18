@@ -9,14 +9,16 @@ import { cn } from "@/lib/utils";
 export type TaskPeriod = "오전" | "오후";
 
 export default function TaskAddPanel({
+  isAdding = false,
   onAddTask,
 }: {
+  isAdding?: boolean;
   onAddTask: (task: { period: TaskPeriod; title: string }) => void;
 }) {
   const [taskTitle, setTaskTitle] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState<TaskPeriod>("오후");
   const trimmedTaskTitle = taskTitle.trim();
-  const canAddTask = trimmedTaskTitle.length > 0;
+  const canAddTask = trimmedTaskTitle.length > 0 && !isAdding;
 
   const addTask = () => {
     if (!canAddTask) {
@@ -97,7 +99,9 @@ export default function TaskAddPanel({
           onClick={addTask}
         >
           <Image src={plusIcon} alt="" width={16} height={16} />
-          <span className="mt-0.5">업무 추가</span>
+          <span className="mt-0.5">
+            {isAdding ? "추가 중" : "업무 추가"}
+          </span>
         </button>
         <p className="mt-1.5 text-center text-[10px] text-[#8892A6]">
           추가한 업무는 선택한 시간대의 업무 사항에 등록됩니다

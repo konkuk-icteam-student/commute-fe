@@ -19,13 +19,23 @@ export type ApiSuccessResponse<T> = {
   details: T;
 };
 
-export type ApiErrorResponse = {
-  isSuccess: false;
+type ApiDataSuccessResponse<T> = {
+  isSuccess: true;
   message: string;
-  details: null;
+  data: T;
 };
 
-export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiErrorResponse = {
+  isSuccess: false;
+  code?: string;
+  message: string;
+  details?: null;
+};
+
+export type ApiResponse<T> =
+  | ApiSuccessResponse<T>
+  | ApiDataSuccessResponse<T>
+  | ApiErrorResponse;
 
 export type ApiClientResponse<T> = ApiSuccessResponse<T>;
 
@@ -51,12 +61,17 @@ export const isApiErrorResponse = (
   isRecord(value) &&
   value.isSuccess === false &&
   typeof value.message === "string" &&
-  value.details === null;
+  (!("details" in value) || value.details === null);
 
 const isApiSuccessResponse = <T>(
   value: ApiResponse<T>,
 ): value is ApiSuccessResponse<T> =>
   value.isSuccess === true && "details" in value;
+
+const isApiDataSuccessResponse = <T>(
+  value: ApiResponse<T>,
+): value is ApiDataSuccessResponse<T> =>
+  value.isSuccess === true && "data" in value;
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -94,11 +109,27 @@ const request = async <T>(
     const response = await axiosInstance.request<ApiResponse<T>>(config);
     const responseData = response.data;
 
+    if (response.status === 204) {
+      return {
+        isSuccess: true,
+        message: "",
+        details: undefined as T,
+      };
+    }
+
     if (isApiErrorResponse(responseData)) {
       throw new ApiError(responseData, response.status);
     }
 
     if (!isApiSuccessResponse(responseData)) {
+      if (isApiDataSuccessResponse(responseData)) {
+        return {
+          isSuccess: true,
+          message: responseData.message,
+          details: responseData.data,
+        };
+      }
+
       throw new Error("Invalid API response.");
     }
 

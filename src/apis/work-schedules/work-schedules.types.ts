@@ -21,6 +21,13 @@ export interface ScheduleSlotType {
   end: string;
   status: ScheduleStatusType;
   currentCount: number;
+  users?: WorkScheduleSlotUserType[];
+}
+
+export interface WorkScheduleSlotUserType {
+  userId: string;
+  userName: string;
+  scheduleId: number;
 }
 
 export interface ScheduleDayType {

@@ -12,6 +12,9 @@ export default function TaskRow({
   deletingTaskId,
   editingTaskId,
   editingTitle,
+  isDeletingTask,
+  isSavingEdit,
+  togglingTaskId,
   onCancelDelete,
   onCancelEdit,
   onDelete,
@@ -25,6 +28,9 @@ export default function TaskRow({
   deletingTaskId: number | null;
   editingTaskId: number | null;
   editingTitle: string;
+  isDeletingTask: boolean;
+  isSavingEdit: boolean;
+  togglingTaskId?: number;
   onCancelDelete: () => void;
   onCancelEdit: () => void;
   onDelete: (taskId: number) => void;
@@ -52,6 +58,7 @@ export default function TaskRow({
       {isEditing ? (
         <TaskEditContent
           editingTitle={editingTitle}
+          isSaving={isSavingEdit}
           onCancel={onCancelEdit}
           onChange={onEditTitleChange}
           onSave={onSaveEdit}
@@ -60,12 +67,14 @@ export default function TaskRow({
         <>
           <CheckButton
             checked={task.completed}
+            disabled={togglingTaskId === task.id}
             label={`${task.title} 완료 여부`}
             onClick={() => onToggle(task.id)}
           />
           <TaskContent task={task} />
           {isDeleting ? (
             <TaskDeleteActions
+              isDeleting={isDeletingTask}
               onCancel={onCancelDelete}
               onDelete={() => onDelete(task.id)}
             />
@@ -93,11 +102,13 @@ export default function TaskRow({
 
 function TaskEditContent({
   editingTitle,
+  isSaving,
   onCancel,
   onChange,
   onSave,
 }: {
   editingTitle: string;
+  isSaving: boolean;
   onCancel: () => void;
   onChange: (title: string) => void;
   onSave: () => void;
@@ -113,11 +124,11 @@ function TaskEditContent({
             return;
           }
 
-          if (event.key === "Enter") {
+          if (event.key === "Enter" && !isSaving) {
             onSave();
           }
 
-          if (event.key === "Escape") {
+          if (event.key === "Escape" && !isSaving) {
             onCancel();
           }
         }}
@@ -125,14 +136,16 @@ function TaskEditContent({
       <div className="flex justify-end gap-2">
         <button
           type="button"
-          className="h-6.25 w-10 rounded-md bg-[#2563EB] text-[11px] font-semibold text-white"
+          className="h-6.25 w-10 rounded-md bg-[#2563EB] text-[11px] font-semibold text-white disabled:bg-[#B4BBC8]"
+          disabled={isSaving}
           onClick={onSave}
         >
-          저장
+          {isSaving ? "저장중" : "저장"}
         </button>
         <button
           type="button"
           className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236]"
+          disabled={isSaving}
           onClick={onCancel}
         >
           취소
@@ -149,7 +162,7 @@ function TaskContent({ task }: { task: ManageTaskItem }) {
         className={cn(
           "truncate text-[15px] font-bold",
           task.completed
-            ? "text-[#2076FF] line-through decoration-[0.5px]"
+            ? "text-[#2076FF] line-through decoration-1"
             : "text-[#1A2236]",
         )}
       >
@@ -165,9 +178,11 @@ function TaskContent({ task }: { task: ManageTaskItem }) {
 }
 
 function TaskDeleteActions({
+  isDeleting,
   onCancel,
   onDelete,
 }: {
+  isDeleting: boolean;
   onCancel: () => void;
   onDelete: () => void;
 }) {
@@ -175,14 +190,16 @@ function TaskDeleteActions({
     <div className="flex justify-end gap-2">
       <button
         type="button"
-        className="h-6.25 w-10 rounded-md bg-[#FD7171] text-[11px] font-semibold text-white"
+        className="h-6.25 w-10 rounded-md bg-[#FD7171] text-[11px] font-semibold text-white disabled:bg-[#B4BBC8]"
+        disabled={isDeleting}
         onClick={onDelete}
       >
-        삭제
+        {isDeleting ? "삭제중" : "삭제"}
       </button>
       <button
         type="button"
         className="h-6.25 w-10 rounded-md border border-[#DDE3EF] bg-white text-[11px] font-semibold text-[#1A2236]"
+        disabled={isDeleting}
         onClick={onCancel}
       >
         취소
