@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
 
 import type { ManageTaskMemo } from "../../types";
 
+type SaveMemoCallbacks = {
+  onSuccess?: () => void;
+};
+
 export default function HandoverMemoPanel({
   errorMessage,
   isError = false,
@@ -24,19 +28,21 @@ export default function HandoverMemoPanel({
   isSaving?: boolean;
   memos: ManageTaskMemo[];
   onDeleteMemo: (memoId: number) => void;
-  onSaveMemo: (memo: string) => void;
+  onSaveMemo: (memo: string, callbacks?: SaveMemoCallbacks) => void;
 }) {
   const [memo, setMemo] = useState("");
   const trimmedMemo = memo.trim();
   const canSaveMemo = trimmedMemo.length > 0;
+  const canSubmitMemo = canSaveMemo && !isSaving;
 
   const saveMemo = () => {
-    if (!canSaveMemo) {
+    if (!canSubmitMemo) {
       return;
     }
 
-    onSaveMemo(trimmedMemo);
-    setMemo("");
+    onSaveMemo(trimmedMemo, {
+      onSuccess: () => setMemo(""),
+    });
   };
 
   const deleteMemo = (memoId: number) => {
@@ -122,11 +128,11 @@ export default function HandoverMemoPanel({
             type="button"
             className={cn(
               "h-7 rounded-md border px-1.75 text-[14px] font-medium",
-              canSaveMemo
+              canSubmitMemo
                 ? "cursor-pointer border-[#DDE3EF] text-[#1A2236]"
                 : "cursor-not-allowed border-[#DDE3EF] text-[#8892A6]",
             )}
-            disabled={!canSaveMemo}
+            disabled={!canSubmitMemo}
             onClick={saveMemo}
           >
             {isSaving ? "저장 중" : "저장"}

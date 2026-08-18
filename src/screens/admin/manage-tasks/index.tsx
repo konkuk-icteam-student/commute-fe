@@ -100,11 +100,12 @@ export default function AdminManageTasksScreen() {
   );
   const { dateText, weekdayText } = formatSelectedDateTitle(selectedDate);
   const saveMemo = useCallback(
-    (content: string) => {
+    (content: string, callbacks?: { onSuccess?: () => void }) => {
       createHandoverMemo(
         { content },
         {
           onSuccess: () => {
+            callbacks?.onSuccess?.();
             setToastMessage("인수인계 메모를 작성했습니다.");
           },
           onError: (error) => {

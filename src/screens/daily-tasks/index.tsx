@@ -263,12 +263,11 @@ export default function DailyTasksScreen() {
           ) : (
             <HandoverMemoPanel
               handoverMemos={handoverMemos}
+              isSaving={isPendingCreateHandoverMemo}
               memo={memo}
               onChangeMemo={changeMemo}
               onDeleteMemo={deleteMemo}
-              onSaveMemo={
-                isPendingCreateHandoverMemo ? () => undefined : saveMemo
-              }
+              onSaveMemo={saveMemo}
             />
           )}
         </SectionCard>

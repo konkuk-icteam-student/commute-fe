@@ -25,7 +25,13 @@ export interface CreateHandoverMemoRequest {
   content: string;
 }
 
-export type CreateHandoverMemoResponse = Required<HandoverMemo>;
+export interface CreateHandoverMemoResponse {
+  memoId: number;
+  content: string;
+  createdBy: HandoverMemoCreatedBy;
+  createdAt: string;
+  expiresAt: string;
+}
 
 export interface DeleteHandoverMemoRequest {
   memoId: number;
