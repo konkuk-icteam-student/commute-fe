@@ -78,3 +78,31 @@ export interface DeleteAdminWorkScheduleResponse {
   currentCount: number;
   maxConcurrentWorkers: number;
 }
+
+// 한 사용자의 승인된 근로 시간표를 기간 내에서 조회한다.
+export interface GetAdminWorkScheduleQuickSearchRequest {
+  userId: string;
+  startDate: string;
+  endDate: string;
+}
+
+// 연속되거나 겹치는 슬롯은 서버가 하나로 병합해 준다.
+// 30분 단위인 시간표 표와 달리 길이가 제각각이다.
+export interface AdminWorkScheduleQuickSearchSlot {
+  start: string;
+  end: string;
+}
+
+// dayOfWeek는 "목"처럼 서버가 만든 표시용 요일이다.
+export interface AdminWorkScheduleQuickSearchDay {
+  date: string;
+  dayOfWeek: string;
+  slots: AdminWorkScheduleQuickSearchSlot[];
+}
+
+// 배치가 없는 날짜는 days에서 빠진다. 조회 기간의 모든 날짜가 오지 않는다.
+export interface GetAdminWorkScheduleQuickSearchResponse {
+  userId: string;
+  userName: string;
+  days: AdminWorkScheduleQuickSearchDay[];
+}

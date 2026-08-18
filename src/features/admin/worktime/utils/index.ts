@@ -1,6 +1,9 @@
 import type { AdminSearchedUser } from "@/apis/admin/users";
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
-import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
+import type {
+  AdminWorkScheduleQuickSearchSlot,
+  GetAdminWorkSchedulesResponse,
+} from "@/apis/admin/work-schedules";
 import {
   EMPTY_SCHEDULE,
   SLOT_TIMES,
@@ -120,4 +123,17 @@ export function toWorktimeEditRequestItems(
     statusCode: request.statusCode,
     rejectReason: request.rejectReason,
   }));
+}
+
+// 빠른 찾기 결과 한 줄. 예: 4.10 (금) 09:30 ~ 11:30
+// 날짜 표기는 시간표 상단과 같은 M.DD 규칙을 따른다.
+export function formatWorktimeQuickSearchSlot({
+  date,
+  dayOfWeek,
+  start,
+  end,
+}: AdminWorkScheduleQuickSearchSlot & { date: string; dayOfWeek: string }) {
+  const [, month, day] = date.split("-");
+
+  return `${Number(month)}.${day} (${dayOfWeek}) ${start} ~ ${end}`;
 }

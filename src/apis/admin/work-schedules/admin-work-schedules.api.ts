@@ -6,6 +6,8 @@ import type {
   CreateAdminWorkScheduleResponse,
   DeleteAdminWorkScheduleRequest,
   DeleteAdminWorkScheduleResponse,
+  GetAdminWorkScheduleQuickSearchRequest,
+  GetAdminWorkScheduleQuickSearchResponse,
   GetAdminWorkSchedulesRequest,
   GetAdminWorkSchedulesResponse,
 } from "./admin-work-schedules.types";
@@ -38,6 +40,17 @@ export const deleteAdminWorkScheduleApi = async ({
 }: DeleteAdminWorkScheduleRequest) => {
   const response = await apiClient.delete<DeleteAdminWorkScheduleResponse>(
     ADMIN_WORK_SCHEDULES_URL.DELETE(scheduleId),
+  );
+
+  return response.details;
+};
+
+export const getAdminWorkScheduleQuickSearchApi = async (
+  params: GetAdminWorkScheduleQuickSearchRequest,
+) => {
+  const response = await apiClient.get<GetAdminWorkScheduleQuickSearchResponse>(
+    ADMIN_WORK_SCHEDULES_URL.QUICK_SEARCH,
+    { params },
   );
 
   return response.details;

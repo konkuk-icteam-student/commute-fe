@@ -58,7 +58,7 @@ export default function WorktimeDetailScreen() {
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
       />
-      <WorktimeDetailQuickSearch />
+      <WorktimeDetailQuickSearch startDate={startDate} endDate={endDate} />
 
       <ScheduleErrorModal message={errorMessage} onClose={closeErrorModal} />
     </div>
