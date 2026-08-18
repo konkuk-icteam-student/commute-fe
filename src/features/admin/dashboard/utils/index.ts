@@ -1,4 +1,5 @@
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
 
 import type {
   DashboardAttendanceDetails,
@@ -181,6 +182,26 @@ export const toDashboardTimeRows = (
       name: user.userName,
     })),
   }));
+
+export const toDashboardTimeRowsFromAdminWorkSchedules = (
+  details?: GetAdminWorkSchedulesResponse,
+): DashboardTimeRow[] =>
+  (details?.days[0]?.slots ?? [])
+    .filter((slot) => slot.status !== "UNAVAILABLE")
+    .map((slot) => ({
+      currentCount: slot.currentCount,
+      periodCode: getTimePeriodCode(slot.start),
+      id: `${details?.days[0]?.date ?? details?.startDate}-${slot.start}-${
+        slot.end
+      }`,
+      isOverLimit: slot.isOverLimit,
+      start: slot.start,
+      end: slot.end,
+      workers: slot.users.map((user) => ({
+        id: user.userId,
+        name: user.userName,
+      })),
+    }));
 
 export const toDashboardMemberAttendanceRows = (
   details: DashboardAttendanceDetails,

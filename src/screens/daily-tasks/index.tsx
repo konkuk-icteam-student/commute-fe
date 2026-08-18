@@ -2,17 +2,20 @@
 
 import { useMemo, useState } from "react";
 
+import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
 import {
+  formatDailyTaskDate,
   HandoverMemoPanel,
   mockDailyTasksByPeriod,
   PeriodTabs,
   SectionCard,
   TaskChecklist,
-  todayTaskDate,
   type DailyTaskPeriod,
   type HandoverMemo,
+  toDailyTaskWorkTimeSlots,
   WorkTimeList,
 } from "@/features/daily-tasks";
+import { formatDateValue } from "@/utils/calendar";
 
 const formatMemoCreatedAt = (date: Date) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -24,6 +27,8 @@ const formatMemoCreatedAt = (date: Date) => {
 };
 
 export default function DailyTasksScreen() {
+  const today = useMemo(() => new Date(), []);
+  const todayDate = formatDateValue(today);
   const [selectedPeriod, setSelectedPeriod] =
     useState<DailyTaskPeriod>("morning");
   const [tasksByPeriod, setTasksByPeriod] = useState(() => ({
@@ -43,10 +48,21 @@ export default function DailyTasksScreen() {
     workTime: false,
     memo: false,
   });
-  const currentDailyTaskData = mockDailyTasksByPeriod[selectedPeriod];
+  const {
+    adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
+    isErrorAdminWorkSchedules,
+  } = useGetAdminWorkSchedulesQuery({
+    startDate: todayDate,
+    endDate: todayDate,
+  });
   const tasks = tasksByPeriod[selectedPeriod];
   const handoverMemos = handoverMemosByPeriod[selectedPeriod];
   const memo = memoByPeriod[selectedPeriod];
+  const workTimeSlots = toDailyTaskWorkTimeSlots(
+    adminWorkSchedulesData,
+    selectedPeriod,
+  );
   const completedTaskCount = useMemo(
     () => tasks.filter((task) => task.completed).length,
     [tasks],
@@ -117,7 +133,7 @@ export default function DailyTasksScreen() {
           오늘의 업무
         </h1>
         <p className="mt-1 text-[11px] leading-4.5 font-bold tracking-[0.24px] text-[#1D4ED8]">
-          {todayTaskDate}
+          {formatDailyTaskDate(today)}
         </p>
       </header>
 
@@ -144,7 +160,21 @@ export default function DailyTasksScreen() {
           title="근로 시간"
           onToggle={() => toggleSection("workTime")}
         >
-          <WorkTimeList workTimeSlots={currentDailyTaskData.workTimeSlots} />
+          {isFetchingAdminWorkSchedules ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              근로 시간을 불러오는 중입니다.
+            </p>
+          ) : isErrorAdminWorkSchedules ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              근로 시간을 불러오지 못했습니다.
+            </p>
+          ) : workTimeSlots.length > 0 ? (
+            <WorkTimeList workTimeSlots={workTimeSlots} />
+          ) : (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              등록된 근로 시간이 없습니다.
+            </p>
+          )}
         </SectionCard>
 
         <SectionCard

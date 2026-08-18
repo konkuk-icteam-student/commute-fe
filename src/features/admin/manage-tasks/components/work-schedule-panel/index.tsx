@@ -23,8 +23,12 @@ const workerToneClass: Record<BadgeVariant, string> = {
 
 export default function WorkSchedulePanel({
   groups,
+  isError = false,
+  isLoading = false,
 }: {
   groups: ManageTaskScheduleGroup[];
+  isError?: boolean;
+  isLoading?: boolean;
 }) {
   return (
     <section className="rounded-lg border border-[#DDE3EF] bg-white p-4">
@@ -42,21 +46,35 @@ export default function WorkSchedulePanel({
         </Link>
       </div>
 
-      <AdminWorkScheduleList
-        groups={groups.map((group) => ({
-          title: group.title,
-          workerShape: "rounded",
-          rows: group.items.map((item) => ({
-            countLabel: `${item.students.length}명`,
-            time: item.time,
-            workers: item.students.map((student) => ({
-              className: workerToneClass[student.tone],
-              name: student.name,
+      {isLoading ? (
+        <p className="py-16 text-center text-[13px] font-bold text-[#8892A6]">
+          근로 스케쥴을 불러오는 중입니다.
+        </p>
+      ) : isError ? (
+        <p className="py-16 text-center text-[13px] font-bold text-[#8892A6]">
+          근로 스케쥴을 불러오지 못했습니다.
+        </p>
+      ) : groups.every((group) => group.items.length === 0) ? (
+        <p className="py-16 text-center text-[13px] font-bold text-[#8892A6]">
+          등록된 근로 스케쥴이 없습니다.
+        </p>
+      ) : (
+        <AdminWorkScheduleList
+          groups={groups.map((group) => ({
+            title: group.title,
+            workerShape: "rounded",
+            rows: group.items.map((item) => ({
+              countLabel: `${item.students.length}명`,
+              time: item.time,
+              workers: item.students.map((student) => ({
+                className: workerToneClass[student.tone],
+                name: student.name,
+              })),
             })),
-          })),
-        }))}
-        variant="dashboard"
-      />
+          }))}
+          variant="dashboard"
+        />
+      )}
     </section>
   );
 }

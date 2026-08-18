@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import calendarDropdownIcon from "@/assets/icons/admin-manage-tasks/ic_calendar_dropdown.svg";
 import {
@@ -19,30 +19,32 @@ import { CalendarDropdown, CalendarDropdownButton } from "../calendar-dropdown";
 import CalendarMonthMoveButton from "../calendar-month-move-button";
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-const systemConfiguredDate = new Date(2022, 0, 1);
 
 export default function CalendarPanel({
   onSelectDate,
   selectedDate,
+  systemCreatedYear,
 }: {
   onSelectDate: (date: string) => void;
   selectedDate: string;
+  systemCreatedYear?: number;
 }) {
   const currentMonthDate = new Date();
-  const maxViewDate = new Date(
-    currentMonthDate.getFullYear(),
-    currentMonthDate.getMonth(),
-    1,
-  );
+  const currentYear = currentMonthDate.getFullYear();
+  const minViewYear = Math.min(systemCreatedYear ?? currentYear, currentYear);
+  const maxViewDate = new Date(currentYear, currentMonthDate.getMonth(), 1);
+  const minViewDate = new Date(minViewYear, 0, 1);
+  const minMonthValue = getMonthValue(minViewDate);
+  const maxMonthValue = getMonthValue(maxViewDate);
   const [viewDate, setViewDate] = useState(() => {
     const selectedMonthStart = getDateMonthStart(selectedDate);
     const selectedMonthValue = getMonthValue(selectedMonthStart);
 
-    if (selectedMonthValue < getMonthValue(systemConfiguredDate)) {
-      return systemConfiguredDate;
+    if (selectedMonthValue < minMonthValue) {
+      return minViewDate;
     }
 
-    if (selectedMonthValue > getMonthValue(maxViewDate)) {
+    if (selectedMonthValue > maxMonthValue) {
       return maxViewDate;
     }
 
@@ -56,15 +58,26 @@ export default function CalendarPanel({
   const monthTitle = `${year}년 ${month}월`;
   const days = getPanelCalendarDays(year, month);
   const todayDate = formatDateValue(new Date());
-  const availableYears = getAvailableYears(systemConfiguredDate, maxViewDate);
-  const availableMonths = getAvailableMonths(
-    year,
-    systemConfiguredDate,
-    maxViewDate,
-  );
-  const canMovePrevious =
-    getMonthValue(viewDate) > getMonthValue(systemConfiguredDate);
-  const canMoveNext = getMonthValue(viewDate) < getMonthValue(maxViewDate);
+  const availableYears = getAvailableYears(minViewDate, maxViewDate);
+  const availableMonths = getAvailableMonths(year, minViewDate, maxViewDate);
+  const canMovePrevious = getMonthValue(viewDate) > minMonthValue;
+  const canMoveNext = getMonthValue(viewDate) < maxMonthValue;
+
+  useEffect(() => {
+    setViewDate((currentViewDate) => {
+      const currentMonthValue = getMonthValue(currentViewDate);
+
+      if (currentMonthValue < minMonthValue) {
+        return minViewDate;
+      }
+
+      if (currentMonthValue > maxMonthValue) {
+        return maxViewDate;
+      }
+
+      return currentViewDate;
+    });
+  }, [maxMonthValue, minMonthValue, minViewYear]);
 
   const moveMonth = (offset: number) => {
     setViewDate((current) => {
@@ -75,11 +88,11 @@ export default function CalendarPanel({
       );
       const nextMonthValue = getMonthValue(nextDate);
 
-      if (nextMonthValue < getMonthValue(systemConfiguredDate)) {
-        return systemConfiguredDate;
+      if (nextMonthValue < minMonthValue) {
+        return minViewDate;
       }
 
-      if (nextMonthValue > getMonthValue(maxViewDate)) {
+      if (nextMonthValue > maxMonthValue) {
         return maxViewDate;
       }
 
@@ -92,12 +105,12 @@ export default function CalendarPanel({
     const nextViewDate = getDateMonthStart(dateValue);
     const nextMonthValue = getMonthValue(nextViewDate);
 
-    if (nextMonthValue < getMonthValue(systemConfiguredDate)) {
-      setViewDate(systemConfiguredDate);
+    if (nextMonthValue < minMonthValue) {
+      setViewDate(minViewDate);
       return;
     }
 
-    if (nextMonthValue > getMonthValue(maxViewDate)) {
+    if (nextMonthValue > maxMonthValue) {
       setViewDate(maxViewDate);
       return;
     }
@@ -108,7 +121,7 @@ export default function CalendarPanel({
   const selectYear = (nextYear: number) => {
     const availableMonthsInNextYear = getAvailableMonths(
       nextYear,
-      systemConfiguredDate,
+      minViewDate,
       maxViewDate,
     );
     const nextMonth = availableMonthsInNextYear.includes(month)
@@ -198,7 +211,7 @@ export default function CalendarPanel({
           </CalendarDropdown>
         ) : null}
         {openDropdown === "month" ? (
-          <CalendarDropdown className="top-12 left-50 w-18.5 p-2">
+          <CalendarDropdown className="top-12 left-50 w-22 p-2">
             {availableMonths.map((availableMonth) => (
               <CalendarDropdownButton
                 isSelected={availableMonth === month}
@@ -233,11 +246,7 @@ export default function CalendarPanel({
             <CalendarDayButton
               day={day}
               isDisabled={
-                !isDateValueInRange(
-                  day.dateValue,
-                  systemConfiguredDate,
-                  maxViewDate,
-                )
+                !isDateValueInRange(day.dateValue, minViewDate, maxViewDate)
               }
               isSelected={day.dateValue === selectedDate}
               isToday={day.dateValue === todayDate}

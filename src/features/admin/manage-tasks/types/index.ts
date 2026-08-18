@@ -34,6 +34,5 @@ export type ManageTaskMemo = {
 
 export type ManageTaskDailyData = {
   memos: ManageTaskMemo[];
-  scheduleGroups: ManageTaskScheduleGroup[];
   tasks: ManageTaskItem[];
 };
