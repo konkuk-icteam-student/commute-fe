@@ -35,6 +35,7 @@ export default function WorktimeSearchUser({
       <div className="flex flex-row items-center gap-6">
         <div className="relative flex h-12 flex-1 flex-row gap-2 rounded-lg border border-[#DDD9D9] bg-white px-4 focus-within:border-[#2874F0]">
           <input
+            aria-label="근로자 이름 검색"
             className="w-full border-none bg-transparent outline-none focus:border-none focus:ring-0 focus:outline-none"
             value={searchText}
             onChange={handleChangeText}
@@ -88,17 +89,20 @@ export default function WorktimeSearchUser({
         </button>
       </div>
       <div className="flex h-12 w-full items-center rounded-lg border border-[#DDE3EF] bg-white px-4">
-        <span className="text-sm text-[#8892A6]">
+        <div className="flex flex-row items-center gap-2 text-sm text-[#8892A6]">
           {userResult !== "" ? (
-            <div className="flex flex-row items-center gap-2 text-sm text-[#8892A6]">
+            <>
               <span className="font-semibold">지금 보고 있는 시간표</span>
               <span>・</span>
               <span className="font-semibold text-[#1A2236]">{userResult}</span>
-            </div>
+            </>
           ) : (
-            "근로자를 검색하거나 오른쪽 수정요청 카드를 선택하면 해당 시간표가          표시됩니다."
+            <span>
+              근로자를 검색하거나 오른쪽 수정요청 카드를 선택하면 해당 시간표가
+              표시됩니다.
+            </span>
           )}
-        </span>
+        </div>
       </div>
     </section>
   );
