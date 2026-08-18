@@ -2,110 +2,7 @@ import type {
   ManageTaskDailyData,
   ManageTaskItem,
   ManageTaskMemo,
-  ManageTaskScheduleGroup,
 } from "../types";
-
-const morningSchedule = [
-  {
-    time: "09:00",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생B", tone: "student-green" },
-    ],
-  },
-  {
-    time: "09:30",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생B", tone: "student-green" },
-      { name: "학생C", tone: "student-red" },
-    ],
-  },
-  {
-    time: "10:00",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생B", tone: "student-green" },
-      { name: "학생C", tone: "student-red" },
-      { name: "학생D", tone: "student-orange" },
-    ],
-  },
-  {
-    time: "10:30",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생B", tone: "student-green" },
-      { name: "학생C", tone: "student-red" },
-      { name: "학생D", tone: "student-orange" },
-    ],
-  },
-  {
-    time: "11:00",
-    students: [
-      { name: "학생D", tone: "student-orange" },
-      { name: "학생E", tone: "student-cyan" },
-      { name: "학생F", tone: "student-pink" },
-      { name: "학생G", tone: "student-purple" },
-    ],
-  },
-] satisfies ManageTaskScheduleGroup["items"];
-
-const afternoonSchedule = [
-  {
-    time: "01:00",
-    students: [
-      { name: "학생B", tone: "student-green" },
-      { name: "학생C", tone: "student-red" },
-    ],
-  },
-  {
-    time: "01:30",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생D", tone: "student-orange" },
-      { name: "학생F", tone: "student-pink" },
-    ],
-  },
-  {
-    time: "02:00",
-    students: [
-      { name: "학생C", tone: "student-red" },
-      { name: "학생E", tone: "student-cyan" },
-      { name: "학생G", tone: "student-purple" },
-    ],
-  },
-  {
-    time: "02:30",
-    students: [
-      { name: "학생A", tone: "student-blue" },
-      { name: "학생B", tone: "student-green" },
-      { name: "학생D", tone: "student-orange" },
-    ],
-  },
-  {
-    time: "03:00",
-    students: [
-      { name: "학생D", tone: "student-orange" },
-      { name: "학생E", tone: "student-cyan" },
-      { name: "학생F", tone: "student-pink" },
-      { name: "학생G", tone: "student-purple" },
-    ],
-  },
-] satisfies ManageTaskScheduleGroup["items"];
-
-const makeScheduleGroups = (
-  morningItems: ManageTaskScheduleGroup["items"] = morningSchedule,
-  afternoonItems: ManageTaskScheduleGroup["items"] = afternoonSchedule,
-): ManageTaskScheduleGroup[] => [
-  {
-    title: "오전",
-    items: morningItems,
-  },
-  {
-    title: "오후",
-    items: afternoonItems,
-  },
-];
 
 const july26Tasks: ManageTaskItem[] = [
   {
@@ -265,30 +162,20 @@ const july28Memos: ManageTaskMemo[] = [
 
 export const emptyManageTaskDailyData: ManageTaskDailyData = {
   memos: [],
-  scheduleGroups: makeScheduleGroups([], []),
   tasks: [],
 };
 
 export const manageTaskDataByDate: Record<string, ManageTaskDailyData> = {
   "2026-07-26": {
     memos: july26Memos,
-    scheduleGroups: makeScheduleGroups(morningSchedule.slice(0, 3), [
-      ...afternoonSchedule.slice(0, 2),
-      afternoonSchedule[4],
-    ]),
     tasks: july26Tasks,
   },
   "2026-07-27": {
     memos: july27Memos,
-    scheduleGroups: makeScheduleGroups(),
     tasks: july27Tasks,
   },
   "2026-07-28": {
     memos: july28Memos,
-    scheduleGroups: makeScheduleGroups(
-      [morningSchedule[1], morningSchedule[3], morningSchedule[4]],
-      afternoonSchedule.slice(1, 4),
-    ),
     tasks: july28Tasks,
   },
 };

@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 
+import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
 import {
   CalendarPanel,
   getManageTaskDailyData,
   HandoverMemoPanel,
   manageTaskDataByDate,
   TaskManagementPanel,
+  toManageTaskScheduleGroups,
   WorkSchedulePanel,
 } from "@/features/admin/manage-tasks";
 import type {
@@ -42,14 +45,24 @@ const initialMemosByDate = Object.fromEntries(
 ) as Record<string, ManageTaskMemo[]>;
 
 export default function AdminManageTasksScreen() {
+  const { adminSystemCreatedYearData } = useGetAdminSystemCreatedYearQuery();
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateValue(new Date()),
   );
   const [tasksByDate, setTasksByDate] = useState(initialTasksByDate);
   const [memosByDate, setMemosByDate] = useState(initialMemosByDate);
   const dailyData = getManageTaskDailyData(selectedDate);
+  const {
+    adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
+    isErrorAdminWorkSchedules,
+  } = useGetAdminWorkSchedulesQuery({
+    startDate: selectedDate,
+    endDate: selectedDate,
+  });
   const tasks = tasksByDate[selectedDate] ?? dailyData.tasks;
   const memos = memosByDate[selectedDate] ?? dailyData.memos;
+  const scheduleGroups = toManageTaskScheduleGroups(adminWorkSchedulesData);
   const { dateText, weekdayText } = formatSelectedDateTitle(selectedDate);
   const updateSelectedTasks = (nextTasks: ManageTaskItem[]) => {
     setTasksByDate((currentTasksByDate) => ({
@@ -75,6 +88,7 @@ export default function AdminManageTasksScreen() {
           <div className="space-y-6">
             <CalendarPanel
               selectedDate={selectedDate}
+              systemCreatedYear={adminSystemCreatedYearData?.createdYear}
               onSelectDate={setSelectedDate}
             />
             <HandoverMemoPanel
@@ -83,7 +97,11 @@ export default function AdminManageTasksScreen() {
             />
           </div>
 
-          <WorkSchedulePanel groups={dailyData.scheduleGroups} />
+          <WorkSchedulePanel
+            groups={scheduleGroups}
+            isError={isErrorAdminWorkSchedules}
+            isLoading={isFetchingAdminWorkSchedules}
+          />
 
           <TaskManagementPanel
             tasks={tasks}

@@ -8,8 +8,8 @@ import {
 } from "@/apis/admin/home";
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
 import { useGetAdminWorkChangeRequestsQuery } from "@/apis/admin/work-change-requests";
+import { useGetAdminWorkSchedulesQuery } from "@/apis/admin/work-schedules";
 import {
-  dashboardTimeRows,
   DateNavigator,
   MemberAttendancePanel,
   SummaryPanel,
@@ -18,6 +18,7 @@ import {
   getDashboardDates,
   toDashboardMemberAttendanceRows,
   toDashboardSummaryItems,
+  toDashboardTimeRowsFromAdminWorkSchedules,
   toDashboardWorkRequests,
 } from "@/features/admin/dashboard";
 
@@ -77,6 +78,14 @@ export default function AdminDashboardScreen() {
     page: 0,
     size: WORK_CHANGE_REQUEST_PAGE_SIZE,
   });
+  const {
+    adminWorkSchedulesData,
+    isFetchingAdminWorkSchedules,
+    isErrorAdminWorkSchedules,
+  } = useGetAdminWorkSchedulesQuery({
+    startDate: selectedDate,
+    endDate: selectedDate,
+  });
 
   const dashboardSummary = adminHomeAttendanceSummaryData
     ? toDashboardSummaryItems(adminHomeAttendanceSummaryData)
@@ -87,6 +96,9 @@ export default function AdminDashboardScreen() {
   const dashboardWorkRequestRows = adminWorkChangeRequestsData
     ? toDashboardWorkRequests(adminWorkChangeRequestsData)
     : [];
+  const dashboardTimeRows = toDashboardTimeRowsFromAdminWorkSchedules(
+    adminWorkSchedulesData,
+  );
 
   return (
     <div className="flex-1 p-8.5">
@@ -107,7 +119,11 @@ export default function AdminDashboardScreen() {
         />
 
         <div className="mt-13.25 grid grid-cols-[minmax(0,613px)_minmax(0,653px)] items-start gap-9.25">
-          <TimeTablePanel rows={dashboardTimeRows} />
+          <TimeTablePanel
+            rows={dashboardTimeRows}
+            isError={isErrorAdminWorkSchedules}
+            isLoading={isFetchingAdminWorkSchedules}
+          />
           <div className="space-y-6">
             <WorkRequestPanel
               requests={dashboardWorkRequestRows}

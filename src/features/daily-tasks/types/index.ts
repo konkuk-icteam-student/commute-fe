@@ -36,7 +36,6 @@ export type DailyTasksByPeriod = Record<
   DailyTaskPeriod,
   {
     tasks: DailyTaskItem[];
-    workTimeSlots: WorkTimeSlot[];
     handoverMemos: HandoverMemo[];
   }
 >;
