@@ -8,6 +8,7 @@ import type { WeekDay } from "@/features/schedule";
 
 import WorktimeScheduleTable from "../worktime-schedule-table";
 import WorktimeScheduleHeader from "../worktime-schedule-header";
+import WorktimeSearchUser from "../worktime-search-user";
 
 interface WorktimeScheduleSectionProps {
   year: number;
@@ -47,25 +48,25 @@ export default function WorktimeScheduleSection({
   handleReset,
 }: WorktimeScheduleSectionProps) {
   return (
-    <div className="flex w-full max-w-160 flex-col gap-6 rounded-xl bg-[#F4F5F6] p-6">
-      <WorktimeScheduleHeader
-        year={year}
-        month={month}
-        week={week}
+    <div className="flex w-full max-w-160 flex-col gap-8 rounded-xl bg-[#F4F5F6] p-6">
+      <WorktimeSearchUser
         searchText={searchText}
         searchedUsers={searchedUsers}
         isSearching={isSearching}
         isSearchError={isSearchError}
-        handlePrevWeek={handlePrevWeek}
-        handleNextWeek={handleNextWeek}
+        userResult={userResult}
         handleChangeText={handleChangeText}
         handleGetMemberSchedule={handleGetMemberSchedule}
         handleReset={handleReset}
       />
       <div className="flex flex-col gap-3">
-        {userResult !== "" && (
-          <h2 className="text-lg font-bold">{userResult}님의 시간표</h2>
-        )}
+        <WorktimeScheduleHeader
+          year={year}
+          month={month}
+          week={week}
+          handlePrevWeek={handlePrevWeek}
+          handleNextWeek={handleNextWeek}
+        />
         <WorktimeScheduleTable
           days={days}
           maxConcurrentWorkers={maxConcurrentWorkers}

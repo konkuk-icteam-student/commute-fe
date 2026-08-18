@@ -8,3 +8,4 @@ export { default as WorktimeDetailHeader } from "./worktime-detail-header";
 export { default as WorktimeDetailTable } from "./worktime-detail-table";
 export { default as WorktimeDetailSection } from "./worktime-detail-section";
 export { default as WorktimeDetailQuickSearch } from "./worktime-detail-quick-search";
+export { default as WorktimeSearchUser } from "./worktime-search-user";
