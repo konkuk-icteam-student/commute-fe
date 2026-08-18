@@ -11,6 +11,7 @@ import type { HandoverMemo } from "../../types";
 
 type HandoverMemoPanelProps = {
   handoverMemos: HandoverMemo[];
+  isSaving?: boolean;
   memo: string;
   onChangeMemo: (memo: string) => void;
   onDeleteMemo: (memoId: number) => void;
@@ -19,6 +20,7 @@ type HandoverMemoPanelProps = {
 
 export default function HandoverMemoPanel({
   handoverMemos,
+  isSaving = false,
   memo,
   onChangeMemo,
   onDeleteMemo,
@@ -27,9 +29,10 @@ export default function HandoverMemoPanel({
   const [deleteMemoId, setDeleteMemoId] = useState<number | null>(null);
   const trimmedMemo = memo.trim();
   const canSaveMemo = trimmedMemo.length > 0;
+  const canSubmitMemo = canSaveMemo && !isSaving;
 
   const handleSaveMemo = () => {
-    if (!canSaveMemo) {
+    if (!canSubmitMemo) {
       return;
     }
 
@@ -128,15 +131,15 @@ export default function HandoverMemoPanel({
           <button
             className={cn(
               "rounded-sm border-[0.5px] px-1.5 py-px text-[10px]",
-              canSaveMemo
+              canSubmitMemo
                 ? "cursor-pointer border-[#DDD9D9] text-[#1A2236]"
                 : "cursor-not-allowed border-[#DDE3EF] text-[#8892A6]",
             )}
-            disabled={!canSaveMemo}
+            disabled={!canSubmitMemo}
             type="button"
             onClick={handleSaveMemo}
           >
-            저장
+            {isSaving ? "저장 중" : "저장"}
           </button>
         </div>
       </div>
