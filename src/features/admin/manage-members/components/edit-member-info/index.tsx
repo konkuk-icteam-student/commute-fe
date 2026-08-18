@@ -1,20 +1,25 @@
 import { useState } from "react";
 
+import { useUpdateAdminWorkerMutation } from "@/apis/admin/workers";
 import { Modal } from "@/components/ui";
 
 import GradeDropdown, { type Grade, normalizeGrade } from "./grade-dropdown";
 import EditMemberInfoAlert from "./edit-member-info-alert";
 
+// 아직 채우지 않은 정보는 서버가 null로 준다.
+// input의 value에 null이 들어가면 제어 컴포넌트가 아니게 되므로 빈 문자열로 바꿔 둔다.
 interface EditMemberInfoProps {
+  userId: number;
   name: string;
-  studentNumber: string;
-  department: string;
-  grade: number;
-  phoneNumber: string;
+  studentNumber: string | null;
+  department: string | null;
+  grade: number | null;
+  phoneNumber: string | null;
   handleCloseEdit: () => void;
 }
 
 export default function EditMemberInfo({
+  userId,
   name,
   studentNumber,
   department,
@@ -22,28 +27,63 @@ export default function EditMemberInfo({
   phoneNumber,
   handleCloseEdit,
 }: EditMemberInfoProps) {
-  const [inputName, setInputName] = useState<string>(name);
-  const [inputStudentNumber, setInputStudentNumber] =
-    useState<string>(studentNumber);
+  const initialName = name ?? "";
+  const initialStudentNumber = studentNumber ?? "";
+  const initialDepartment = department ?? "";
+  const initialPhoneNumber = phoneNumber ?? "";
   const initialGrade = normalizeGrade(grade);
+
+  const [inputName, setInputName] = useState<string>(initialName);
+  const [inputStudentNumber, setInputStudentNumber] =
+    useState<string>(initialStudentNumber);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(
     initialGrade,
   );
-  const [inputDepartment, setInputDepartment] = useState(department);
-  const [inputPhoneNumber, setInputPhoneNumber] = useState(phoneNumber);
+  const [inputDepartment, setInputDepartment] = useState(initialDepartment);
+  const [inputPhoneNumber, setInputPhoneNumber] = useState(initialPhoneNumber);
 
   const [isEditMemeberInfoOpen, setIsEditMemberInfoOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
+  // 실패했을 때는 입력값을 그대로 두고 다시 시도할 수 있어야 하므로 성공한 경우만 닫는다.
+  const [isEditSucceeded, setIsEditSucceeded] = useState(false);
+
+  const { updateAdminWorker, isPendingUpdateAdminWorker } =
+    useUpdateAdminWorkerMutation();
+
+  // 바뀐 항목만 보낸다. 서버가 부분 수정을 받는다.
+  // 학년을 '선택 안 함'으로 되돌리는 것은 이 api로 할 수 없어 변경으로 세지 않는다.
+  const changedFields = {
+    ...(inputName !== initialName ? { name: inputName } : {}),
+    ...(inputStudentNumber !== initialStudentNumber
+      ? { studentId: inputStudentNumber }
+      : {}),
+    ...(selectedGrade !== null && selectedGrade !== initialGrade
+      ? { grade: selectedGrade }
+      : {}),
+    ...(inputDepartment !== initialDepartment
+      ? { department: inputDepartment }
+      : {}),
+    ...(inputPhoneNumber !== initialPhoneNumber
+      ? { phoneNumber: inputPhoneNumber }
+      : {}),
+  };
 
   const handleEdit = () => {
-    console.log(
-      "바꿀 정보 : ",
-      inputName,
-      inputStudentNumber,
-      selectedGrade,
-      inputDepartment,
-      inputPhoneNumber,
+    updateAdminWorker(
+      { userId, ...changedFields },
+      {
+        onSuccess: () => {
+          setIsEditSucceeded(true);
+          setModalText("사용자 정보가 수정되었습니다.");
+          setIsModalOpen(true);
+        },
+        onError: (error) => {
+          setIsEditSucceeded(false);
+          setModalText(error.message);
+          setIsModalOpen(true);
+        },
+      },
     );
   };
 
@@ -55,21 +95,16 @@ export default function EditMemberInfo({
     setIsEditMemberInfoOpen(false);
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
   const handleCloseModal = () => {
     setModalText("");
     setIsModalOpen(false);
-    handleCloseEdit();
+
+    if (isEditSucceeded) {
+      handleCloseEdit();
+    }
   };
 
-  const disabledToEdit =
-    inputName === name &&
-    inputStudentNumber === studentNumber &&
-    selectedGrade === initialGrade &&
-    inputDepartment === department &&
-    inputPhoneNumber === phoneNumber;
+  const disabledToEdit = Object.keys(changedFields).length === 0;
 
   return (
     <>
@@ -141,7 +176,7 @@ export default function EditMemberInfo({
                 type="button"
                 className="h-12 w-28 cursor-pointer rounded-lg border border-[#E8EEF2] bg-[#2076FF] font-bold text-white disabled:cursor-not-allowed disabled:bg-[#C6CBD4]"
                 onClick={handleOpenEditMemberInfo}
-                disabled={disabledToEdit}
+                disabled={disabledToEdit || isPendingUpdateAdminWorker}
               >
                 확인
               </button>
@@ -153,8 +188,6 @@ export default function EditMemberInfo({
         isOpen={isEditMemeberInfoOpen}
         handleEdit={handleEdit}
         handleClose={handleCloseEditMemeberInfo}
-        handleOpenModal={handleOpenModal}
-        handleModalText={setModalText}
       />
       <Modal
         open={isModalOpen}

@@ -4,23 +4,17 @@ interface EditMemberInfoAlertProps {
   isOpen: boolean;
   handleEdit: () => void;
   handleClose: () => void;
-  handleOpenModal: () => void;
-  handleModalText: (text: string) => void;
 }
 
 export default function EditMemberInfoAlert({
   isOpen,
   handleEdit,
   handleClose,
-  handleOpenModal,
-  handleModalText,
 }: EditMemberInfoAlertProps) {
+  // 결과 안내는 요청을 보낸 쪽이 성공·실패를 보고 띄운다.
   const handleConfirm = () => {
     handleClose();
     handleEdit();
-    // TODO: 서버 api 연동 후 요청 성공 시와 실패 시 text 설정
-    handleOpenModal();
-    handleModalText("사용자 정보가 수정되었습니다.");
   };
 
   return (
