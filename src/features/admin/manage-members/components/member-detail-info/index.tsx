@@ -6,8 +6,6 @@ import { Modal } from "@/components/ui";
 
 import { DUMMY_MEMBER_DETAIL_INFO } from "../../constants";
 import EditMemberInfo from "../edit-member-info";
-import PasswordResetAlert from "./password-reset-alert";
-import DeleteAccountAlert from "./delete-account-alert";
 
 interface MemberDetailInfoProps {
   isOpen: boolean;
@@ -25,14 +23,14 @@ export default function MemberDetailInfo({
   handleCloseDetailInfo,
 }: MemberDetailInfoProps) {
   const [isEdit, setIsEdit] = useState(false);
-  const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
-  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
+  // const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
+  // const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
 
   // TODO: 서버에서 받아온 값으로 진행
   const {
-    userId,
+    // userId,
     name,
     studentNumber,
     department,
@@ -54,25 +52,25 @@ export default function MemberDetailInfo({
     setIsEdit(false);
   };
 
-  const handleOpenPasswordReset = () => {
-    setIsPasswordResetOpen(true);
-  };
+  // const handleOpenPasswordReset = () => {
+  //   setIsPasswordResetOpen(true);
+  // };
 
-  const handleClosePasswordReset = () => {
-    setIsPasswordResetOpen(false);
-  };
+  // const handleClosePasswordReset = () => {
+  //   setIsPasswordResetOpen(false);
+  // };
 
-  const handleOpenDeleteAccount = () => {
-    setIsDeleteAccountOpen(true);
-  };
+  // const handleOpenDeleteAccount = () => {
+  //   setIsDeleteAccountOpen(true);
+  // };
 
-  const handleCloseDeleteAccount = () => {
-    setIsDeleteAccountOpen(false);
-  };
+  // const handleCloseDeleteAccount = () => {
+  //   setIsDeleteAccountOpen(false);
+  // };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
+  // const handleOpenModal = () => {
+  //   setIsModalOpen(true);
+  // };
   const handleCloseModal = () => {
     handleCloseDetailInfo();
     setModalText("");
@@ -211,7 +209,8 @@ export default function MemberDetailInfo({
                     (최근 접속일 : {lastAccessDate})
                   </span>
                 </div>
-                <div className="mt-1 flex flex-row gap-3">
+                {/* TODO: 추후 해당 기능 추가. 현재는 불가능하도록 */}
+                {/* <div className="mt-1 flex flex-row gap-3">
                   <button
                     type="button"
                     className="h-10 w-full cursor-pointer rounded-xl border border-[#C6CBD4] text-center text-sm font-semibold text-[#1A2236]"
@@ -226,25 +225,25 @@ export default function MemberDetailInfo({
                   >
                     계정 삭제
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
         )}
-        <PasswordResetAlert
+        {/* <PasswordResetAlert
           isOpen={isPasswordResetOpen}
           userId={userId}
           handleClose={handleClosePasswordReset}
           handleOpenModal={handleOpenModal}
           handleModalText={setModalText}
-        />
-        <DeleteAccountAlert
+        /> */}
+        {/* <DeleteAccountAlert
           isOpen={isDeleteAccountOpen}
           userId={userId}
           handleClose={handleCloseDeleteAccount}
           handleOpenModal={handleOpenModal}
           handleModalText={setModalText}
-        />
+        /> */}
         <Modal
           open={isModalOpen}
           title="알림"
