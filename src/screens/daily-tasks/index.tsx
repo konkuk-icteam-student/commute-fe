@@ -11,7 +11,7 @@ import { Toast } from "@/components/ui";
 import {
   formatDailyTaskDate,
   HandoverMemoPanel,
-  mockDailyTasksByPeriod,
+  mockHandoverMemosByPeriod,
   PeriodTabs,
   SectionCard,
   TaskChecklist,
@@ -38,8 +38,8 @@ export default function DailyTasksScreen() {
   const [selectedPeriod, setSelectedPeriod] =
     useState<DailyTaskPeriod>("morning");
   const [handoverMemosByPeriod, setHandoverMemosByPeriod] = useState(() => ({
-    morning: mockDailyTasksByPeriod.morning.handoverMemos,
-    afternoon: mockDailyTasksByPeriod.afternoon.handoverMemos,
+    morning: mockHandoverMemosByPeriod.morning,
+    afternoon: mockHandoverMemosByPeriod.afternoon,
   }));
   const [memoByPeriod, setMemoByPeriod] = useState({
     morning: "",

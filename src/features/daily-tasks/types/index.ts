@@ -31,11 +31,3 @@ export type HandoverMemo = {
   content: string;
   isMine: boolean;
 };
-
-export type DailyTasksByPeriod = Record<
-  DailyTaskPeriod,
-  {
-    tasks: DailyTaskItem[];
-    handoverMemos: HandoverMemo[];
-  }
->;

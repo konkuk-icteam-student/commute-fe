@@ -1,54 +1,4 @@
-import type {
-  DailyTaskItem,
-  DailyTasksByPeriod,
-  HandoverMemo,
-} from "../types";
-
-const mockMorningDailyTasks: DailyTaskItem[] = [
-  {
-    id: 1,
-    title: "신문지 가져오기",
-    completed: true,
-  },
-  {
-    id: 2,
-    title: "커피머신 청소",
-    completed: false,
-  },
-  {
-    id: 3,
-    title: "싱크대 청소",
-    completed: false,
-  },
-  {
-    id: 4,
-    title: "회의실 청소",
-    completed: false,
-  },
-];
-
-const mockAfternoonDailyTasks: DailyTaskItem[] = [
-  {
-    id: 1,
-    title: "택배 정리",
-    completed: true,
-  },
-  {
-    id: 2,
-    title: "프린터 용지 채우기",
-    completed: true,
-  },
-  {
-    id: 3,
-    title: "창가 테이블 정리",
-    completed: false,
-  },
-  {
-    id: 4,
-    title: "마감 전 바닥 확인",
-    completed: false,
-  },
-];
+import type { DailyTaskPeriod, HandoverMemo } from "../types";
 
 const mockMorningHandoverMemos: HandoverMemo[] = [
   {
@@ -77,13 +27,10 @@ const mockAfternoonHandoverMemos: HandoverMemo[] = [
   },
 ];
 
-export const mockDailyTasksByPeriod: DailyTasksByPeriod = {
-  morning: {
-    tasks: mockMorningDailyTasks,
-    handoverMemos: mockMorningHandoverMemos,
-  },
-  afternoon: {
-    tasks: mockAfternoonDailyTasks,
-    handoverMemos: mockAfternoonHandoverMemos,
-  },
+export const mockHandoverMemosByPeriod: Record<
+  DailyTaskPeriod,
+  HandoverMemo[]
+> = {
+  morning: mockMorningHandoverMemos,
+  afternoon: mockAfternoonHandoverMemos,
 };
