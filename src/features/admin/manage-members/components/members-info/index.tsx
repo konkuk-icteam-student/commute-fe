@@ -1,14 +1,16 @@
 import { ChangeEvent, useState } from "react";
 import Image from "next/image";
 
+import { useGetAdminWorkersQuery } from "@/apis/admin/workers";
+import { useDebouncedValue } from "@/hooks";
+import { formatDateString } from "@/lib/date-formatter";
 import icChevronPagination from "@/assets/icons/admin-common/ic_chevron_pagination.svg";
 
 import MembersInfoHeader from "../members-info-header";
 import MembersInfoTable from "../members-info-table";
 import MemberDetailInfo from "../member-detail-info";
 
-// TODO: 서버에서 받아와야 함
-const TOTAL_PAGE = 3;
+const PAGE_SIZE = 10;
 
 export default function MembersInfo() {
   const [searchText, setSearchText] = useState("");
@@ -16,17 +18,51 @@ export default function MembersInfo() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailMemberId, setDetailMemberId] = useState<number | null>(null);
 
-  // TODO: 디바운싱을 주고, 입력 시마다 검색되도록 구현
+  // 주·월 통계의 기준일. 지금 화면은 오늘이 속한 주와 달만 보여 준다.
+  const date = formatDateString(new Date());
+  const debouncedSearchText = useDebouncedValue(searchText);
+
+  // 검색어가 바뀌면 결과가 통째로 달라지므로 첫 페이지로 되돌린다.
+  const [lastSearchedText, setLastSearchedText] = useState(debouncedSearchText);
+
+  if (lastSearchedText !== debouncedSearchText) {
+    setLastSearchedText(debouncedSearchText);
+    setCurrentPage(1);
+  }
+
+  const {
+    adminWorkersData,
+    isFetchingAdminWorkers,
+    isErrorAdminWorkers,
+    adminWorkersError,
+  } = useGetAdminWorkersQuery({
+    date,
+    keyword: debouncedSearchText.trim(),
+    page: currentPage - 1,
+    size: PAGE_SIZE,
+  });
+
+  // 응답이 오기 전에는 페이지 이동을 막아 두려고 최소 1페이지로 둔다.
+  const totalPage = Math.max(adminWorkersData?.totalPages ?? 1, 1);
+  // 표의 '번호'는 목록 순번이다. 응답이 알려 준 페이지 기준으로 이어서 센다.
+  const listStartNumber =
+    (adminWorkersData?.page ?? currentPage - 1) *
+    (adminWorkersData?.size ?? PAGE_SIZE);
+  // 입력이 멎기 전에는 아직 조회 전이라 이전 결과가 남아 있다. 없음이 아니라 로딩으로 본다.
+  const isLoading =
+    isFetchingAdminWorkers || debouncedSearchText !== searchText;
+
   const handleChangeSearchText = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchText(e.target.value);
 
   const handlePrevPage = () => {
-    if (currentPage === 1) return;
+    if (currentPage <= 1) return;
     setCurrentPage((prev) => prev - 1);
   };
 
+  // 조회 결과가 줄어 totalPage가 currentPage보다 작아질 수 있어 부등호로 막는다.
   const handleNextPage = () => {
-    if (currentPage === TOTAL_PAGE) return;
+    if (currentPage >= totalPage) return;
     setCurrentPage((prev) => prev + 1);
   };
 
@@ -46,7 +82,14 @@ export default function MembersInfo() {
         searchText={searchText}
         handleChangeSearchText={handleChangeSearchText}
       />
-      <MembersInfoTable handleDetailOpen={handleDetailOpen} />
+      <MembersInfoTable
+        workers={adminWorkersData?.workers ?? []}
+        startNumber={listStartNumber}
+        isLoading={isLoading}
+        isError={isErrorAdminWorkers}
+        errorMessage={adminWorkersError?.message}
+        handleDetailOpen={handleDetailOpen}
+      />
       <div className="flex flex-row items-center gap-2 self-end">
         <button
           type="button"
@@ -56,7 +99,7 @@ export default function MembersInfo() {
           <Image src={icChevronPagination} alt="이전" />
         </button>
         <span className="text-xl font-bold">
-          {currentPage}/{TOTAL_PAGE}
+          {currentPage}/{totalPage}
         </span>
         <button
           type="button"
@@ -69,6 +112,7 @@ export default function MembersInfo() {
       <MemberDetailInfo
         isOpen={isDetailOpen}
         id={detailMemberId}
+        date={date}
         handleCloseDetailInfo={handleDetailClose}
       />
     </div>

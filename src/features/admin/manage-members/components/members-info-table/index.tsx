@@ -1,19 +1,32 @@
 import Image from "next/image";
 
+import type { AdminWorker } from "@/apis/admin/workers";
 import icChevronRight from "@/assets/icons/admin-common/ic_chevron-right-black.svg";
 
-// TODO: 추후 부모에게 prop으로 받아오기
-import { DUMMY_MEMBER_LIST } from "../../constants";
-
-// TODO: 서버에서 가져오기
-const WEEKLY_TOTAL_HOURS = 13;
-const MONTHLY_TOTAL_HOURS = 27;
+import {
+  EMPTY_MEMBER_TEXT,
+  formatGrade,
+  formatMinutesToHours,
+} from "../../utils";
 
 interface MembersInfoTableProps {
+  workers: AdminWorker[];
+  // 현재 페이지의 첫 행 앞까지 센 인원 수. 여기에 이어서 목록 순번을 매긴다.
+  startNumber: number;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
   handleDetailOpen: (id: number) => void;
 }
 
+const COLUMN_COUNT = 11;
+
 export default function MembersInfoTable({
+  workers,
+  startNumber,
+  isLoading,
+  isError,
+  errorMessage,
   handleDetailOpen,
 }: MembersInfoTableProps) {
   return (
@@ -49,56 +62,81 @@ export default function MembersInfoTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-[#DDE3EF] border-b border-[#DDE3EF] text-sm text-[#464C53]">
-          {DUMMY_MEMBER_LIST.map((student) => (
-            <tr
-              key={student.userId}
-              className="transition-colors hover:bg-gray-50"
-            >
-              <td className="h-12 px-4 text-center font-medium whitespace-nowrap">
-                {student.userId}
-              </td>
-              <td className="h-12 px-4 font-medium whitespace-nowrap">
-                {student.name}
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                {student.studentNumber}
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                {student.department}
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                {student.grade}학년
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">{student.phone}</td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                {student.weeklyWorkedHours}시간 / {WEEKLY_TOTAL_HOURS}시간
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                {student.monthlyWorkedHours}시간 / {MONTHLY_TOTAL_HOURS}시간
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                총 {student.editRequestCount}건 (
-                {student.monthlyEditRequestCount}건)
-              </td>
-              <td className="h-12 px-4 whitespace-nowrap">
-                총 {student.attendanceIssueCount}건 (
-                {student.monthlyAttendanceIssueCount}건)
-              </td>
-              <td className="h-12 px-4">
-                <button
-                  type="button"
-                  className="cursor-pointer hover:bg-[#EEF4FF]"
-                  onClick={() => handleDetailOpen(student.userId)}
-                >
-                  <Image
-                    className="h-7 w-7 rounded-lg border border-[#DDE3EF] p-1"
-                    src={icChevronRight}
-                    alt="상세보기"
-                  />
-                </button>
+          {isError || isLoading || workers.length === 0 ? (
+            <tr>
+              <td
+                className="py-8 text-center text-base text-[#6B7280]"
+                colSpan={COLUMN_COUNT}
+              >
+                {isError ? (
+                  // 조회에 실패하면 빈 표가 인원이 없는 것처럼 보이므로 사유를 적는다.
+                  // 서버 메시지가 빈 문자열이면 안내가 사라지므로 기본 문구로 대체한다.
+                  <span className="text-[#FD7171]">
+                    {errorMessage || "근무인원을 불러오지 못했습니다."}
+                  </span>
+                ) : isLoading ? (
+                  "근무인원을 불러오는 중입니다."
+                ) : (
+                  "조회된 근무인원이 없습니다."
+                )}
               </td>
             </tr>
-          ))}
+          ) : (
+            workers.map((worker, index) => (
+              <tr
+                key={worker.userId}
+                className="transition-colors hover:bg-gray-50"
+              >
+                <td className="h-12 px-4 text-center font-medium whitespace-nowrap">
+                  {startNumber + index + 1}
+                </td>
+                <td className="h-12 px-4 font-medium whitespace-nowrap">
+                  {worker.name}
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {worker.studentId ?? EMPTY_MEMBER_TEXT}
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {worker.department ?? EMPTY_MEMBER_TEXT}
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {formatGrade(worker.grade)}
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {worker.phoneNumber ?? EMPTY_MEMBER_TEXT}
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {formatMinutesToHours(worker.weeklyWorkedMinutes)}시간 /{" "}
+                  {formatMinutesToHours(worker.weeklyLimitMinutes)}시간
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  {formatMinutesToHours(worker.monthlyWorkedMinutes)}시간 /{" "}
+                  {formatMinutesToHours(worker.monthlyLimitMinutes)}시간
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  총 {worker.totalChangeRequestCount}건 (승인{" "}
+                  {worker.approvedChangeRequestCount}건)
+                </td>
+                <td className="h-12 px-4 whitespace-nowrap">
+                  총 {worker.totalAttendanceIssueCount}건 (지각{" "}
+                  {worker.lateCount}건)
+                </td>
+                <td className="h-12 px-4">
+                  <button
+                    type="button"
+                    className="cursor-pointer hover:bg-[#EEF4FF]"
+                    onClick={() => handleDetailOpen(worker.userId)}
+                  >
+                    <Image
+                      className="h-7 w-7 rounded-lg border border-[#DDE3EF] p-1"
+                      src={icChevronRight}
+                      alt="상세보기"
+                    />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
