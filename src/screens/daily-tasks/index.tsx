@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  useCreateHandoverMemoMutation,
+  useDeleteHandoverMemoMutation,
+  useGetHandoverMemosQuery,
+} from "@/apis/handover-memos";
 import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import {
   useGetTodosQuery,
@@ -11,7 +16,6 @@ import { Toast } from "@/components/ui";
 import {
   formatDailyTaskDate,
   HandoverMemoPanel,
-  mockHandoverMemosByPeriod,
   PeriodTabs,
   SectionCard,
   TaskChecklist,
@@ -32,19 +36,22 @@ const formatMemoCreatedAt = (date: Date) => {
   return `${month}.${day} ${hours}:${minutes}`;
 };
 
+const toHandoverMemo = (
+  handoverMemo: import("@/apis/handover-memos").HandoverMemo,
+): HandoverMemo => ({
+  id: handoverMemo.memoId,
+  author: handoverMemo.createdBy.name,
+  createdAt: formatMemoCreatedAt(new Date(handoverMemo.createdAt)),
+  content: handoverMemo.content,
+  isMine: true,
+});
+
 export default function DailyTasksScreen() {
   const today = useMemo(() => new Date(), []);
   const todayDate = formatDateValue(today);
   const [selectedPeriod, setSelectedPeriod] =
     useState<DailyTaskPeriod>("morning");
-  const [handoverMemosByPeriod, setHandoverMemosByPeriod] = useState(() => ({
-    morning: mockHandoverMemosByPeriod.morning,
-    afternoon: mockHandoverMemosByPeriod.afternoon,
-  }));
-  const [memoByPeriod, setMemoByPeriod] = useState({
-    morning: "",
-    afternoon: "",
-  });
+  const [memo, setMemo] = useState("");
   const [openSections, setOpenSections] = useState({
     tasks: true,
     workTime: false,
@@ -62,8 +69,20 @@ export default function DailyTasksScreen() {
     useGetTodosQuery({
       date: todayDate,
     });
+  const {
+    handoverMemosData,
+    isFetchingHandoverMemos,
+    isErrorHandoverMemos,
+    handoverMemosError,
+  } = useGetHandoverMemosQuery({
+    date: todayDate,
+  });
   const { updateTodoCompletion, isPendingUpdateTodoCompletion } =
     useUpdateTodoCompletionMutation();
+  const { createHandoverMemo, isPendingCreateHandoverMemo } =
+    useCreateHandoverMemoMutation();
+  const { deleteHandoverMemo, isPendingDeleteHandoverMemo } =
+    useDeleteHandoverMemoMutation();
   const tasksByPeriod = useMemo(
     () => ({
       morning: (todosData?.morningTodos ?? []).map(toDailyTaskItem),
@@ -72,8 +91,10 @@ export default function DailyTasksScreen() {
     [todosData],
   );
   const tasks = tasksByPeriod[selectedPeriod];
-  const handoverMemos = handoverMemosByPeriod[selectedPeriod];
-  const memo = memoByPeriod[selectedPeriod];
+  const handoverMemos = useMemo(
+    () => (handoverMemosData?.memos ?? []).map(toHandoverMemo),
+    [handoverMemosData],
+  );
   const workTimeSlots = toDailyTaskWorkTimeSlots(
     adminWorkSchedulesData,
     selectedPeriod,
@@ -112,19 +133,25 @@ export default function DailyTasksScreen() {
   };
 
   const changeMemo = (nextMemo: string) => {
-    setMemoByPeriod((currentMemoByPeriod) => ({
-      ...currentMemoByPeriod,
-      [selectedPeriod]: nextMemo,
-    }));
+    setMemo(nextMemo);
   };
 
   const deleteMemo = (memoId: number) => {
-    setHandoverMemosByPeriod((currentMemosByPeriod) => ({
-      ...currentMemosByPeriod,
-      [selectedPeriod]: currentMemosByPeriod[selectedPeriod].filter(
-        (handoverMemo) => handoverMemo.id !== memoId || !handoverMemo.isMine,
-      ),
-    }));
+    if (isPendingDeleteHandoverMemo) {
+      return;
+    }
+
+    deleteHandoverMemo(
+      { memoId },
+      {
+        onSuccess: () => {
+          setToastMessage("인수인계 메모를 삭제했습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
+    );
   };
 
   const saveMemo = (nextMemo: string) => {
@@ -134,23 +161,18 @@ export default function DailyTasksScreen() {
       return;
     }
 
-    const newMemo: HandoverMemo = {
-      id: Date.now(),
-      author: "현재 사용자",
-      createdAt: formatMemoCreatedAt(new Date()),
-      content: trimmedMemo,
-      isMine: true,
-    };
-
-    setHandoverMemosByPeriod((currentMemosByPeriod) => ({
-      ...currentMemosByPeriod,
-      [selectedPeriod]: [...currentMemosByPeriod[selectedPeriod], newMemo],
-    }));
-
-    setMemoByPeriod((currentMemoByPeriod) => ({
-      ...currentMemoByPeriod,
-      [selectedPeriod]: "",
-    }));
+    createHandoverMemo(
+      { content: trimmedMemo },
+      {
+        onSuccess: () => {
+          setMemo("");
+          setToastMessage("인수인계 메모를 작성했습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error.message);
+        },
+      },
+    );
   };
 
   return (
@@ -179,11 +201,11 @@ export default function DailyTasksScreen() {
           onToggle={() => toggleSection("tasks")}
         >
           {isFetchingTodos ? (
-            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+            <p className="px-4 pt-2 pb-4 text-[12px] font-bold text-[#8892A6]">
               업무 사항을 불러오는 중입니다.
             </p>
           ) : isErrorTodos ? (
-            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+            <p className="px-4 pt-2 pb-4 text-[12px] font-bold text-[#8892A6]">
               {todosError?.message ?? "업무 사항을 불러오지 못했습니다."}
             </p>
           ) : tasks.length > 0 ? (
@@ -193,7 +215,7 @@ export default function DailyTasksScreen() {
               onToggleTask={toggleTask}
             />
           ) : (
-            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+            <p className="px-4 pt-2 pb-4 text-[12px] font-bold text-[#8892A6]">
               등록된 업무 사항이 없습니다.
             </p>
           )}
@@ -229,13 +251,26 @@ export default function DailyTasksScreen() {
           title="인수인계 메모"
           onToggle={() => toggleSection("memo")}
         >
-          <HandoverMemoPanel
-            handoverMemos={handoverMemos}
-            memo={memo}
-            onChangeMemo={changeMemo}
-            onDeleteMemo={deleteMemo}
-            onSaveMemo={saveMemo}
-          />
+          {isFetchingHandoverMemos ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              인수인계 메모를 불러오는 중입니다.
+            </p>
+          ) : isErrorHandoverMemos ? (
+            <p className="px-4 pb-4 text-[12px] font-bold text-[#8892A6]">
+              {handoverMemosError?.message ??
+                "인수인계 메모를 불러오지 못했습니다."}
+            </p>
+          ) : (
+            <HandoverMemoPanel
+              handoverMemos={handoverMemos}
+              memo={memo}
+              onChangeMemo={changeMemo}
+              onDeleteMemo={deleteMemo}
+              onSaveMemo={
+                isPendingCreateHandoverMemo ? () => undefined : saveMemo
+              }
+            />
+          )}
         </SectionCard>
       </div>
 

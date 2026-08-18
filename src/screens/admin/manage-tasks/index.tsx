@@ -3,12 +3,17 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { useGetAdminSystemCreatedYearQuery } from "@/apis/admin/system";
+import {
+  useCreateHandoverMemoMutation,
+  useDeleteHandoverMemoMutation,
+  useGetHandoverMemosQuery,
+} from "@/apis/handover-memos";
 import { useGetAdminWorkSchedulesQuery } from "@/apis/work-schedules";
 import { useGetTodosQuery } from "@/apis/todos";
+import { Toast } from "@/components/ui";
 import {
   CalendarPanel,
   HandoverMemoPanel,
-  manageTaskDataByDate,
   TaskManagementPanel,
   toManageTaskScheduleGroups,
   WorkSchedulePanel,
@@ -28,19 +33,31 @@ const formatSelectedDateTitle = (dateValue: string) => {
   };
 };
 
-const initialMemosByDate = Object.fromEntries(
-  Object.entries(manageTaskDataByDate).map(([date, dailyData]) => [
-    date,
-    [...dailyData.memos],
-  ]),
-) as Record<string, ManageTaskMemo[]>;
+const formatMemoCreatedAt = (date: Date) => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${month}.${day} ${hours}:${minutes}`;
+};
+
+const toManageTaskMemo = (
+  handoverMemo: import("@/apis/handover-memos").HandoverMemo,
+): ManageTaskMemo => ({
+  id: handoverMemo.memoId,
+  author: handoverMemo.createdBy.name,
+  createdAt: formatMemoCreatedAt(new Date(handoverMemo.createdAt)),
+  content: handoverMemo.content,
+  isMine: false,
+});
 
 export default function AdminManageTasksScreen() {
   const { adminSystemCreatedYearData } = useGetAdminSystemCreatedYearQuery();
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateValue(new Date()),
   );
-  const [memosByDate, setMemosByDate] = useState(initialMemosByDate);
+  const [toastMessage, setToastMessage] = useState("");
   const {
     adminWorkSchedulesData,
     isFetchingAdminWorkSchedules,
@@ -53,6 +70,18 @@ export default function AdminManageTasksScreen() {
     useGetTodosQuery({
       date: selectedDate,
     });
+  const {
+    handoverMemosData,
+    isFetchingHandoverMemos,
+    isErrorHandoverMemos,
+    handoverMemosError,
+  } = useGetHandoverMemosQuery({
+    date: selectedDate,
+  });
+  const { createHandoverMemo, isPendingCreateHandoverMemo } =
+    useCreateHandoverMemoMutation();
+  const { deleteHandoverMemo, isPendingDeleteHandoverMemo } =
+    useDeleteHandoverMemoMutation();
   const tasks = useMemo(
     () => [
       ...(todosData?.morningTodos ?? []).map(toManageTaskItem),
@@ -60,21 +89,52 @@ export default function AdminManageTasksScreen() {
     ],
     [todosData],
   );
-  const dailyData = manageTaskDataByDate[selectedDate] ?? { memos: [] };
-  const memos = memosByDate[selectedDate] ?? dailyData.memos;
+  const serverMemos = useMemo(
+    () => (handoverMemosData?.memos ?? []).map(toManageTaskMemo),
+    [handoverMemosData],
+  );
+  const memos = serverMemos;
   const scheduleGroups = useMemo(
     () => toManageTaskScheduleGroups(adminWorkSchedulesData),
     [adminWorkSchedulesData],
   );
   const { dateText, weekdayText } = formatSelectedDateTitle(selectedDate);
-  const updateSelectedMemos = useCallback(
-    (nextMemos: ManageTaskMemo[]) => {
-      setMemosByDate((currentMemosByDate) => ({
-        ...currentMemosByDate,
-        [selectedDate]: nextMemos,
-      }));
+  const saveMemo = useCallback(
+    (content: string) => {
+      createHandoverMemo(
+        { content },
+        {
+          onSuccess: () => {
+            setToastMessage("인수인계 메모를 작성했습니다.");
+          },
+          onError: (error) => {
+            setToastMessage(error.message);
+          },
+        },
+      );
     },
-    [selectedDate],
+    [createHandoverMemo],
+  );
+
+  const deleteMemo = useCallback(
+    (memoId: number) => {
+      if (isPendingDeleteHandoverMemo) {
+        return;
+      }
+
+      deleteHandoverMemo(
+        { memoId },
+        {
+          onSuccess: () => {
+            setToastMessage("인수인계 메모를 삭제했습니다.");
+          },
+          onError: (error) => {
+            setToastMessage(error.message);
+          },
+        },
+      );
+    },
+    [deleteHandoverMemo, isPendingDeleteHandoverMemo],
   );
 
   return (
@@ -92,8 +152,13 @@ export default function AdminManageTasksScreen() {
               onSelectDate={setSelectedDate}
             />
             <HandoverMemoPanel
+              errorMessage={handoverMemosError?.message}
+              isError={isErrorHandoverMemos}
+              isLoading={isFetchingHandoverMemos}
+              isSaving={isPendingCreateHandoverMemo}
               memos={memos}
-              onMemosChange={updateSelectedMemos}
+              onDeleteMemo={deleteMemo}
+              onSaveMemo={saveMemo}
             />
           </div>
 
@@ -112,6 +177,11 @@ export default function AdminManageTasksScreen() {
           />
         </div>
       </div>
+      <Toast
+        open={toastMessage.length > 0}
+        message={toastMessage}
+        onDismiss={() => setToastMessage("")}
+      />
     </div>
   );
 }

@@ -27,7 +27,8 @@ type ApiDataSuccessResponse<T> = {
 };
 
 export type ApiErrorResponse = {
-  isSuccess: false;
+  isSuccess?: false;
+  status?: number;
   code?: string;
   message: string;
   details?: null;
@@ -57,7 +58,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 export const isApiErrorResponse = (value: unknown): value is ApiErrorResponse =>
   isRecord(value) &&
-  value.isSuccess === false &&
+  (value.isSuccess === false ||
+    typeof value.status === "number" ||
+    typeof value.code === "string") &&
   typeof value.message === "string" &&
   (!("details" in value) || value.details === null);
 
