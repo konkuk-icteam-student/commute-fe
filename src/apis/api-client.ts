@@ -9,6 +9,7 @@ import { getAccessToken } from "./token-storage";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
+    allowNoContent?: boolean;
     skipAuth?: boolean;
   }
 }
@@ -19,44 +20,56 @@ export type ApiSuccessResponse<T> = {
   details: T;
 };
 
-export type ApiErrorResponse = {
-  isSuccess: false;
+type ApiDataSuccessResponse<T> = {
+  isSuccess: true;
   message: string;
-  details: null;
+  data: T;
 };
 
-export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiErrorResponse = {
+  isSuccess: false;
+  code?: string;
+  message: string;
+  details?: null;
+};
+
+export type ApiResponse<T> =
+  | ApiSuccessResponse<T>
+  | ApiDataSuccessResponse<T>
+  | ApiErrorResponse;
 
 export type ApiClientResponse<T> = ApiSuccessResponse<T>;
 
 export class ApiError extends Error {
   readonly isSuccess = false;
   readonly details = null;
+  readonly status?: number;
 
-  constructor(
-    response: ApiErrorResponse,
-    readonly status?: number,
-  ) {
+  constructor(response: ApiErrorResponse, status?: number) {
     super(response.message);
     this.name = "ApiError";
+    this.status = status;
   }
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-export const isApiErrorResponse = (
-  value: unknown,
-): value is ApiErrorResponse =>
+export const isApiErrorResponse = (value: unknown): value is ApiErrorResponse =>
   isRecord(value) &&
   value.isSuccess === false &&
   typeof value.message === "string" &&
-  value.details === null;
+  (!("details" in value) || value.details === null);
 
 const isApiSuccessResponse = <T>(
   value: ApiResponse<T>,
 ): value is ApiSuccessResponse<T> =>
   value.isSuccess === true && "details" in value;
+
+const isApiDataSuccessResponse = <T>(
+  value: ApiResponse<T>,
+): value is ApiDataSuccessResponse<T> =>
+  value.isSuccess === true && "data" in value;
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -94,11 +107,27 @@ const request = async <T>(
     const response = await axiosInstance.request<ApiResponse<T>>(config);
     const responseData = response.data;
 
+    if (response.status === 204 && config.allowNoContent) {
+      return {
+        isSuccess: true,
+        message: "",
+        details: undefined as T,
+      };
+    }
+
     if (isApiErrorResponse(responseData)) {
       throw new ApiError(responseData, response.status);
     }
 
     if (!isApiSuccessResponse(responseData)) {
+      if (isApiDataSuccessResponse(responseData)) {
+        return {
+          isSuccess: true,
+          message: responseData.message,
+          details: responseData.data,
+        };
+      }
+
       throw new Error("Invalid API response.");
     }
 
@@ -135,5 +164,5 @@ export const apiClient = {
     request<T>({ ...config, method: "PATCH", url, data }),
 
   delete: <T>(url: string, config?: AxiosRequestConfig) =>
-    request<T>({ ...config, method: "DELETE", url }),
+    request<T>({ ...config, allowNoContent: true, method: "DELETE", url }),
 };

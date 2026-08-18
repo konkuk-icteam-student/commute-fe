@@ -9,11 +9,25 @@ import type {
   GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesResponse,
   GetMonthlyWorkSchedulesRequest,
+  GetWorkSchedulesWithUsersRequest,
+  GetWorkSchedulesWithUsersResponse,
   GetPeriodWorkSchedulesRequest,
   GetPeriodWorkSchedulesResponse,
   GetWorkSchedulesSummaryRequest,
   GetWorkSchedulesSummaryResponse,
 } from "./work-schedules.types";
+
+export const getWorkSchedulesWithUsersApi = async ({
+  userName,
+  ...params
+}: GetWorkSchedulesWithUsersRequest) => {
+  const response = await apiClient.get<GetWorkSchedulesWithUsersResponse>(
+    WORK_SCHEDULES_URL.ADMIN_DEFAULT,
+    { params: { ...params, ...(userName ? { userName } : {}) } },
+  );
+
+  return response.details;
+};
 
 // 근무 시간표 월별 조회
 export const getMonthlySchedulesApi = async ({

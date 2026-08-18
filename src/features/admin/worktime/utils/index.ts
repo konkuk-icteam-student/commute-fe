@@ -1,9 +1,7 @@
 import type { AdminSearchedUser } from "@/apis/admin/users";
 import type { GetAdminWorkChangeRequestsResponse } from "@/apis/admin/work-change-requests";
-import type {
-  AdminWorkScheduleQuickSearchSlot,
-  GetAdminWorkSchedulesResponse,
-} from "@/apis/admin/work-schedules";
+import type { AdminWorkScheduleQuickSearchSlot } from "@/apis/admin/work-schedules";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/work-schedules";
 import {
   EMPTY_SCHEDULE,
   SLOT_TIMES,

@@ -1,4 +1,4 @@
-import type { GetAdminWorkSchedulesResponse } from "@/apis/admin/work-schedules";
+import type { GetAdminWorkSchedulesResponse } from "@/apis/work-schedules";
 import type { BadgeVariant } from "@/components/ui";
 
 import type { ManageTaskScheduleGroup, ManageTaskStudent } from "../types";
