@@ -41,7 +41,7 @@ export default function WorktimeEditRequestItem({
   const {
     updateAdminWorkChangeRequest,
     isPendingUpdateAdminWorkChangeRequest,
-  } = useUpdateAdminWorkChangeRequestMutation(userId);
+  } = useUpdateAdminWorkChangeRequestMutation();
   const isPendingRequest = statusCode === "CS01";
 
   const handleReject = (e: MouseEvent<HTMLButtonElement>) => {

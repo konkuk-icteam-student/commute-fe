@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ADMIN_WORK_SCHEDULES_QUERY_KEY } from "@/apis/admin/work-schedules";
+import { ADMIN_WORK_SCHEDULES_QUERY_KEY } from "@/apis/admin/work-schedules/admin-work-schedules.key";
 import { type ApiError } from "@/apis/api-client";
 
 import {
@@ -114,25 +114,22 @@ const useInvalidateAdminWorkChangeRequests = () => {
   };
 };
 
-// 요청을 승인하거나 반려하면 그 사용자의 시간표가 바뀐다.
-// 어느 기간을 보고 있는지 알 수 없으므로 그 사용자의 조회만 통째로 무효화한다.
-const useInvalidateAdminUserWorkSchedules = () => {
+// 요청을 승인하거나 반려하면 그 사용자의 시간표와 슬롯 인원 수가 함께 바뀐다.
+// 어느 사용자의 어느 기간이 떠 있는지 알 수 없으므로 시간표 조회를 한꺼번에 무효화한다.
+const useInvalidateAdminWorkSchedules = () => {
   const queryClient = useQueryClient();
 
-  return (userId: number) => {
+  return () => {
     queryClient.invalidateQueries({
-      queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.USER_ALL(userId),
+      queryKey: ADMIN_WORK_SCHEDULES_QUERY_KEY.ALL,
     });
   };
 };
 
-// userId를 넘기면 그 사용자의 시간표 조회까지 다시 받아 온다.
-// 대시보드처럼 여러 사람의 요청을 한 훅으로 처리하는 곳은 넘기지 않는다.
-export const useUpdateAdminWorkChangeRequestMutation = (userId?: number) => {
+export const useUpdateAdminWorkChangeRequestMutation = () => {
   const invalidateAdminWorkChangeRequests =
     useInvalidateAdminWorkChangeRequests();
-  const invalidateAdminUserWorkSchedules =
-    useInvalidateAdminUserWorkSchedules();
+  const invalidateAdminWorkSchedules = useInvalidateAdminWorkSchedules();
 
   const {
     mutate: updateAdminWorkChangeRequest,
@@ -145,10 +142,7 @@ export const useUpdateAdminWorkChangeRequestMutation = (userId?: number) => {
     mutationFn: updateAdminWorkChangeRequestApi,
     onSuccess: () => {
       invalidateAdminWorkChangeRequests();
-
-      if (userId !== undefined) {
-        invalidateAdminUserWorkSchedules(userId);
-      }
+      invalidateAdminWorkSchedules();
     },
     onError: () => {
       // TODO: 사용하는 화면에서 토스트 메시지 사용
@@ -164,6 +158,7 @@ export const useUpdateAdminWorkChangeRequestMutation = (userId?: number) => {
 export const useBulkApproveAdminWorkChangeRequestsMutation = () => {
   const invalidateAdminWorkChangeRequests =
     useInvalidateAdminWorkChangeRequests();
+  const invalidateAdminWorkSchedules = useInvalidateAdminWorkSchedules();
 
   const {
     mutate: bulkApproveAdminWorkChangeRequests,
@@ -174,7 +169,10 @@ export const useBulkApproveAdminWorkChangeRequestsMutation = () => {
     BulkApproveAdminWorkChangeRequestsRequest
   >({
     mutationFn: bulkApproveAdminWorkChangeRequestsApi,
-    onSuccess: invalidateAdminWorkChangeRequests,
+    onSuccess: () => {
+      invalidateAdminWorkChangeRequests();
+      invalidateAdminWorkSchedules();
+    },
     onError: () => {
       // TODO: 사용하는 화면에서 토스트 메시지 사용
     },
