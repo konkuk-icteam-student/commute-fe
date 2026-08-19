@@ -3,25 +3,23 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { useGetAdminMeQuery } from "@/apis/admin/me";
 import chevronLeftIcon from "@/assets/icons/admin-common/ic_chevron_right_bold.svg";
 import profileIcon from "@/assets/icons/admin-nav/ic_profile.svg";
 
 export default function AdminHeader({
-  adminUser,
   showBackButton,
   title,
 }: {
-  adminUser?: {
-    name: string;
-    team?: string;
-  };
   showBackButton: boolean;
   title: string;
 }) {
   const router = useRouter();
-  const adminLabel = adminUser?.team
-    ? `${adminUser.name} (${adminUser.team})`
-    : (adminUser?.name ?? "관리자");
+  const { adminMeData } = useGetAdminMeQuery();
+  // 아직 못 받았거나 조회에 실패해도 헤더는 그려야 하므로 이름 자리를 비우지 않는다.
+  const adminLabel = adminMeData
+    ? `${adminMeData.adminName} (${adminMeData.teamName})`
+    : "관리자";
 
   return (
     <header className="sticky top-0 z-20 flex h-25 shrink-0 items-center justify-between border-b [border-bottom-width:0.5px] border-l [border-left-width:0.5px] border-[#D1D1D1] bg-white pr-14.5 pl-10">

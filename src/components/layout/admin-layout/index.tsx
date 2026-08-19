@@ -12,16 +12,11 @@ import AdminHeader from "./admin-header";
 import AdminSidebar from "./admin-sidebar";
 
 export default function AdminLayout({
-  adminUser,
   children,
   showBackButton = false,
   title,
   variant = "with-sidebar",
 }: Readonly<{
-  adminUser?: {
-    name: string;
-    team?: string;
-  };
   children: React.ReactNode;
   showBackButton?: boolean;
   title?: string;
@@ -52,7 +47,6 @@ export default function AdminLayout({
           )}
         >
           <AdminHeader
-            adminUser={adminUser}
             showBackButton={shouldShowBackButton}
             title={currentTitle}
           />
