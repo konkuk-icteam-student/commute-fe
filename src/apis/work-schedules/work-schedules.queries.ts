@@ -8,6 +8,8 @@ import type {
   ApplyWorkSchedulesResponse,
   EditWorkSchedulesRequest,
   EditWorkSchedulesResponse,
+  GetApplyPeriodRequest,
+  GetApplyPeriodResponse,
   GetMonthlyLimitRequest,
   GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesRequest,
@@ -23,6 +25,7 @@ import { WORK_SCHEDULES_QUERY_KEY } from "./work-schedules.key";
 import {
   applyWorkSchedulesApi,
   editWorkSchedulesApi,
+  getApplyPeriodApi,
   getMonthlyLimitApi,
   getMonthlySchedulesApi,
   getWorkSchedulesWithUsersApi,
@@ -51,6 +54,11 @@ const WORK_SCHEDULES_CACHE_TIME = {
   MONTHLY_LIMIT: {
     STALE: 1000 * 60 * 10,
     GC: 1000 * 60 * 15,
+  },
+  // 신청 기간은 관리자가 바꾸면 화면 잠금 여부가 달라지므로 짧게 잡는다.
+  APPLY_PERIOD: {
+    STALE: 1000 * 60,
+    GC: 1000 * 60 * 5,
   },
 } as const;
 
@@ -224,6 +232,39 @@ export const useGetMonthlyLimitQuery = ({
     isPendingMonthlyLimit,
     isErrorMonthlyLimit,
     monthlyLimitError,
+  };
+};
+
+// 해당 연월에 근로 신청·수정 요청을 할 수 있는지와 그 신청 기간.
+// 설정이 없는 달이면 신청은 막히고 수정 요청만 열린 상태로 온다.
+export const useGetApplyPeriodQuery = ({
+  year,
+  month,
+  enabled = true,
+}: GetApplyPeriodRequest & { enabled?: boolean }) => {
+  const {
+    data: applyPeriodData,
+    isPending: isPendingApplyPeriod,
+    isFetching: isFetchingApplyPeriod,
+    isError: isErrorApplyPeriod,
+    error: applyPeriodError,
+    refetch: refetchApplyPeriod,
+  } = useQuery<GetApplyPeriodResponse, ApiError>({
+    queryKey: WORK_SCHEDULES_QUERY_KEY.APPLY_PERIOD(year, month),
+    queryFn: () => getApplyPeriodApi({ year, month }),
+    enabled,
+    retry: 1,
+    staleTime: WORK_SCHEDULES_CACHE_TIME.APPLY_PERIOD.STALE,
+    gcTime: WORK_SCHEDULES_CACHE_TIME.APPLY_PERIOD.GC,
+  });
+
+  return {
+    applyPeriodData,
+    isPendingApplyPeriod,
+    isFetchingApplyPeriod,
+    isErrorApplyPeriod,
+    applyPeriodError,
+    refetchApplyPeriod,
   };
 };
 

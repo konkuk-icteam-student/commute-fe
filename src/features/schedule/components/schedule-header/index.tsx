@@ -8,12 +8,17 @@ interface ScheduleHeaderProps {
   mode?: "view" | "edit" | "apply";
   year: number;
   month: number;
+  // 신청 기간 조회로 정해진다. 아직 못 받았으면 열지 않는 쪽이 안전하다.
+  isApplyAvailable?: boolean;
+  isEditAvailable?: boolean;
 }
 
 export default function ScheduleHeader({
   mode = "view",
   year,
   month,
+  isApplyAvailable = false,
+  isEditAvailable = false,
 }: ScheduleHeaderProps) {
   const router = useRouter();
 
@@ -36,11 +41,14 @@ export default function ScheduleHeader({
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-xl font-bold text-[#1A2236]">근로 시간표</h1>
         <div className="flex flex-row items-center gap-2">
-          <Button size="sm" onClick={handleToEdit}>
+          <Button size="sm" onClick={handleToEdit} disabled={!isEditAvailable}>
             수정 요청
           </Button>
-          {/* TODO: 근로 신청은 신청 기간이 아니면 disabled */}
-          <Button size="sm" onClick={handleToApply} disabled={false}>
+          <Button
+            size="sm"
+            onClick={handleToApply}
+            disabled={!isApplyAvailable}
+          >
             근로 신청
           </Button>
         </div>

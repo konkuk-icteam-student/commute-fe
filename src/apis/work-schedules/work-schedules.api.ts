@@ -5,6 +5,8 @@ import type {
   ApplyWorkSchedulesResponse,
   EditWorkSchedulesRequest,
   EditWorkSchedulesResponse,
+  GetApplyPeriodRequest,
+  GetApplyPeriodResponse,
   GetMonthlyLimitRequest,
   GetMonthlyLimitResponse,
   GetMonthlyWorkSchedulesResponse,
@@ -76,6 +78,19 @@ export const getMonthlyLimitApi = async ({
 }: GetMonthlyLimitRequest) => {
   const response = await apiClient.get<GetMonthlyLimitResponse>(
     WORK_SCHEDULES_URL.MONTHLY_LIMIT(year, month),
+  );
+
+  return response.details;
+};
+
+// 근로 신청 기간과 신청·수정 가능 여부 조회
+export const getApplyPeriodApi = async ({
+  year,
+  month,
+}: GetApplyPeriodRequest) => {
+  const response = await apiClient.get<GetApplyPeriodResponse>(
+    WORK_SCHEDULES_URL.APPLY_PERIOD,
+    { params: { year, month } },
   );
 
   return response.details;

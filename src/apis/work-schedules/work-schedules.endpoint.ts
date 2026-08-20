@@ -9,6 +9,7 @@ export const WORK_SCHEDULES_URL = {
     `${BASE_URL}/${encodeURIComponent(year)}/${encodeURIComponent(month)}`,
   MONTHLY_LIMIT: (year: number, month: number) =>
     `${BASE_URL}/monthly-limit/${encodeURIComponent(year)}/${encodeURIComponent(month)}`,
+  APPLY_PERIOD: `${BASE_URL}/apply-period`,
   APPLY: `${BASE_URL}/apply`,
   EDIT: `${BASE_URL}/edit`,
 } as const;

@@ -18,6 +18,7 @@ import {
   WorkingHoursCard,
 } from "@/features/schedule";
 import {
+  useGetApplyPeriodQuery,
   useGetPeriodSchedulesQuery,
   useGetWorkSchedulesSummaryQuery,
 } from "@/apis/work-schedules";
@@ -69,6 +70,11 @@ export default function ScheduleViewScreen() {
   const { myPageData, isFetchingMyPage, myPageError, refetchMyPage } =
     useGetMyPageQuery();
 
+  // 상단 두 버튼의 활성 여부. 보고 있는 달을 그대로 보내면 서버가
+  // isApplyAvailable은 다음 달 신청 기준으로, isEditAvailable은 이 달 기준으로 판별해 준다.
+  const { applyPeriodData, applyPeriodError, refetchApplyPeriod } =
+    useGetApplyPeriodQuery({ year, month });
+
   // 아직 처리되지 않은 요청만 미리 보여 준다. 이 칸의 빈 상태 문구도 '처리 중인 내역'을 가리킨다.
   const {
     workChangeRequestHistoryData,
@@ -93,6 +99,7 @@ export default function ScheduleViewScreen() {
     void refetchWorkSchedulesSummary();
     void refetchMyPage();
     void refetchWorkChangeRequestHistory();
+    void refetchApplyPeriod();
   };
 
   // 조회에 실패하면 표가 회색으로만 남아 장애인지 알 수 없으므로 모달로 알린다.
@@ -101,6 +108,7 @@ export default function ScheduleViewScreen() {
     workSchedulesSummaryError,
     myPageError,
     workChangeRequestHistoryError,
+    applyPeriodError,
   ]);
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
@@ -128,7 +136,12 @@ export default function ScheduleViewScreen() {
 
   return (
     <div className="flex w-full flex-col gap-4 px-3 py-4">
-      <ScheduleHeader year={year} month={month} />
+      <ScheduleHeader
+        year={year}
+        month={month}
+        isApplyAvailable={applyPeriodData?.isApplyAvailable ?? false}
+        isEditAvailable={applyPeriodData?.isEditAvailable ?? false}
+      />
       <div className="flex flex-col gap-2">
         <ScheduleWeekNav
           week={week}
