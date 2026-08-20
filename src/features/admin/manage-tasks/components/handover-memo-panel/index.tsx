@@ -82,14 +82,16 @@ export default function HandoverMemoPanel({
                     {handoverMemo.createdAt}
                   </span>
                 </p>
-                <button
-                  type="button"
-                  aria-label="메모 삭제"
-                  className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
-                  onClick={() => deleteMemo(handoverMemo.id)}
-                >
-                  <Image src={closeIcon} alt="" width={19} height={19} />
-                </button>
+                {handoverMemo.isMine && (
+                  <button
+                    type="button"
+                    aria-label="메모 삭제"
+                    className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
+                    onClick={() => deleteMemo(handoverMemo.id)}
+                  >
+                    <Image src={closeIcon} alt="" width={19} height={19} />
+                  </button>
+                )}
               </div>
               <p className="mt-1.5 text-[12px] break-all text-[#1A2236]">
                 {handoverMemo.content}

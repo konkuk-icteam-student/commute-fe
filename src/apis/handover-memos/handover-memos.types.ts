@@ -10,6 +10,7 @@ export interface HandoverMemoCreatedBy {
 export interface HandoverMemo {
   memoId: number;
   content: string;
+  isMine: boolean;
   createdBy: HandoverMemoCreatedBy;
   createdAt: string;
   expiresAt?: string;

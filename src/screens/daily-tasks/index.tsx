@@ -43,7 +43,7 @@ const toHandoverMemo = (
   author: handoverMemo.createdBy.name,
   createdAt: formatMemoCreatedAt(new Date(handoverMemo.createdAt)),
   content: handoverMemo.content,
-  isMine: true,
+  isMine: handoverMemo.isMine,
 });
 
 export default function DailyTasksScreen() {
