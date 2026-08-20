@@ -40,9 +40,7 @@ export default function NotificationListItem({
   const isApproved = notification.typeCode === "NT01";
   const contentLines = notification.content
     .split(/\r?\n/)
-    .filter(
-      (content) => content && !content.trimStart().startsWith("반려사유"),
-    );
+    .filter((content) => content.trim().length > 0);
   const hasContent = contentLines.length > 0;
   const timeIcon =
     notification.typeCode in timeIconClassNames
