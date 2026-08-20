@@ -32,4 +32,10 @@ export const WORK_SCHEDULES_QUERY_KEY = {
     year,
     month,
   ],
+  APPLY_PERIOD: (year: number, month: number) => [
+    "work-schedules",
+    "apply-period",
+    year,
+    month,
+  ],
 };

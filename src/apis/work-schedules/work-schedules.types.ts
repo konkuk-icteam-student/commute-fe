@@ -119,6 +119,22 @@ export interface GetMonthlyLimitRequest {
   month: number;
 }
 
+export interface GetApplyPeriodRequest {
+  year: number;
+  month: number;
+}
+
+// 보내는 연월은 조회 기준 달 하나뿐이고, 두 플래그의 대상 달은 서버가 나눠서 판별한다.
+// isApplyAvailable은 다음 달 근로 신청, isEditAvailable은 그 달 수정 요청을 뜻한다.
+// 관리자가 그 달 설정을 만들지 않았으면 신청 기간 미설정으로 보고
+// isApplyAvailable=false, isEditAvailable=true로 온다. 이때 날짜는 비어 있을 수 있다.
+export interface GetApplyPeriodResponse {
+  applyStartDate: string | null;
+  applyEndDate: string | null;
+  isApplyAvailable: boolean;
+  isEditAvailable: boolean;
+}
+
 export interface GetMonthlyLimitResponse {
   scheduleYear: number;
   scheduleMonth: number;
