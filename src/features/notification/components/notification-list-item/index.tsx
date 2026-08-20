@@ -64,7 +64,7 @@ export default function NotificationListItem({
             </span>
           </div>
 
-          <ul className="mt-3 ml-[5px] flex flex-col gap-1">
+          <ul className="mt-3 ml-1.25 flex flex-col gap-1">
             {contentLines.map((content, index) => (
               <li
                 className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
@@ -86,7 +86,7 @@ export default function NotificationListItem({
           </ul>
 
           <time
-            className="mt-2 ml-[5px] block text-[8px] leading-2.5 font-medium text-[#8892A6]"
+            className="mt-2 ml-1.25 block text-[8px] leading-2.5 font-medium text-[#8892A6]"
             dateTime={getNotificationDateTime(notification.createdAt)}
           >
             신청 {formatNotificationCreatedAt(notification.createdAt)}
@@ -112,7 +112,7 @@ export default function NotificationListItem({
 
         {hasContent ? (
           <p
-            className="mt-3 ml-[5px] flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
+            className="mt-3 ml-1.25 flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
           >
             {shouldShowAddTimeIcon(notification) && timeIcon ? (
               <Image
@@ -130,7 +130,7 @@ export default function NotificationListItem({
 
         <time
           className={cn(
-            "ml-[5px] block text-[8px] leading-2.5 font-medium text-[#8892A6]",
+            "ml-1.25 block text-[8px] leading-2.5 font-medium text-[#8892A6]",
             hasContent ? "mt-3" : "mt-4",
           )}
           dateTime={getNotificationDateTime(notification.createdAt)}
