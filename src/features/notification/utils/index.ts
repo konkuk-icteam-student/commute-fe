@@ -1,13 +1,4 @@
-import type { NotificationItem, NotificationTypeCode } from "@/apis/notifications";
-
-const notificationIcons: Record<NotificationTypeCode, string> = {
-  NT01: "✏️",
-  NT02: "❌",
-  NT03: "🗓️",
-};
-
-export const getNotificationIcon = (typeCode: NotificationTypeCode) =>
-  notificationIcons[typeCode];
+import type { NotificationItem } from "@/apis/notifications";
 
 export const shouldShowAddTimeIcon = (notification: NotificationItem) =>
   notification.typeCode === "NT01" || notification.typeCode === "NT02";
