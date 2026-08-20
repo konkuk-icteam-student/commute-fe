@@ -4,5 +4,3 @@ export {
   MembersInfoTable,
   MemberDetailInfo,
 } from "./components";
-
-export { DUMMY_MEMBER_LIST } from "./constants";

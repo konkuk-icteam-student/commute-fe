@@ -10,7 +10,7 @@ export default function NotificationList({
   notifications,
 }: NotificationListProps) {
   return (
-    <ul className="border-t border-[#EFEFEF]">
+    <ul className="flex flex-col gap-4 px-6 pb-8">
       {notifications.map((notification) => (
         <NotificationListItem
           key={notification.notificationId}
