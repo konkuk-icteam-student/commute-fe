@@ -49,7 +49,7 @@ const toManageTaskMemo = (
   author: handoverMemo.createdBy.name,
   createdAt: formatMemoCreatedAt(new Date(handoverMemo.createdAt)),
   content: handoverMemo.content,
-  isMine: false,
+  isMine: handoverMemo.isMine,
 });
 
 export default function AdminManageTasksScreen() {

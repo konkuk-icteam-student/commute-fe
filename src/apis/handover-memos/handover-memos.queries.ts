@@ -79,6 +79,8 @@ export const useCreateHandoverMemoMutation = () => {
   >({
     mutationFn: createHandoverMemoApi,
     onSuccess: (createdMemo) => {
+      const myCreatedMemo = { ...createdMemo, isMine: true };
+
       queryClient.setQueriesData<GetHandoverMemosResponse>(
         { queryKey: HANDOVER_MEMOS_QUERY_KEY.ALL },
         (currentMemosData) => {
@@ -86,19 +88,19 @@ export const useCreateHandoverMemoMutation = () => {
             return currentMemosData;
           }
 
-          if (!isMemoValidOnDate(createdMemo, currentMemosData.date)) {
+          if (!isMemoValidOnDate(myCreatedMemo, currentMemosData.date)) {
             return currentMemosData;
           }
 
           if (
             currentMemosData.memos.some(
-              (handoverMemo) => handoverMemo.memoId === createdMemo.memoId,
+              (handoverMemo) => handoverMemo.memoId === myCreatedMemo.memoId,
             )
           ) {
             return currentMemosData;
           }
 
-          const memos = [...currentMemosData.memos, createdMemo];
+          const memos = [...currentMemosData.memos, myCreatedMemo];
 
           return {
             ...currentMemosData,
