@@ -38,20 +38,18 @@ export type {
 export { applyPolicy, editPolicy, viewPolicy } from "./model/policy";
 export type { PolicyContext, SchedulePolicy } from "./model/policy";
 
-export {
-  SLOTS_PER_DAY,
-  SLOT_STATUS_CLASS_NAME,
-  SLOT_TIMES,
-} from "./constants";
+export { SLOTS_PER_DAY, SLOT_STATUS_CLASS_NAME, SLOT_TIMES } from "./constants";
 
 export {
   chunkScheduleSlots,
   formatScheduleChangeHistorySlot,
   getFirstDateOfNextMonth,
   getMergedApplyPayload,
+  getNextYearMonth,
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,
+  isWithinApplyPeriod,
   mergeContinuousSlotTimes,
 } from "./utils";
 
