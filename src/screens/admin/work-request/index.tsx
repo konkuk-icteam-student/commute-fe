@@ -58,6 +58,11 @@ export default function AdminWorkRequestScreen() {
 
   const [notificationMessage, setNotificationMessage] = useState("");
   const targetMonth = useMemo(() => getNextWorkRequestMonth(), []);
+  const summaryTargetDate = useMemo(
+    () =>
+      `${targetMonth.year}-${String(targetMonth.month).padStart(2, "0")}-01`,
+    [targetMonth],
+  );
 
   const {
     workApplicationSettingsData,
@@ -172,8 +177,10 @@ export default function AdminWorkRequestScreen() {
         <SummaryPanel
           isActive={isActive}
           isEditing={isEditing}
+          monthlyMinMinutes={formValues.monthlyMinMinutes}
           onRemoveUnavailableDate={removeUnavailableDate}
           onRemoveUnavailableTimeRange={removeUnavailableTimeRange}
+          targetDate={summaryTargetDate}
           unavailableDates={formValues.unavailableDates}
           unavailableTimeRanges={formValues.unavailableTimeRanges}
         />

@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui";
 import {
   formatWorktimeHistoryPeriod,
   getCurrentWorktimeHistoryYearMonth,
+  getNextWorktimeHistoryYearMonth,
   WorktimeHistoryList,
   WorktimeHistorySummaryCard,
 } from "@/features/my-page";
@@ -24,13 +25,13 @@ const getNextMonth = (year: number, month: number) =>
 
 export default function WorktimeHistoryScreen() {
   const router = useRouter();
-  const [currentYearMonth] = useState(getCurrentWorktimeHistoryYearMonth);
+  const [maxYearMonth] = useState(getNextWorktimeHistoryYearMonth);
   const [selectedYearMonth, setSelectedYearMonth] =
     useState(getCurrentWorktimeHistoryYearMonth);
   const [page, setPage] = useState(0);
   const { year, month } = selectedYearMonth;
   const isNextDisabled =
-    year === currentYearMonth.year && month === currentYearMonth.month;
+    year === maxYearMonth.year && month === maxYearMonth.month;
 
   const {
     workChangeRequestHistoryData,

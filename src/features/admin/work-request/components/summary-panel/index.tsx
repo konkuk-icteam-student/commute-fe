@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { WorkRequestTimeRange } from "../../types";
+import { parseWorkRequestMinutes } from "../../utils";
 import SummaryTable from "../summary-table";
 import UnavailableSummaryPanel from "../unavailable-summary-panel";
 
@@ -9,16 +10,22 @@ export default function SummaryPanel({
   isEditing,
   onRemoveUnavailableDate,
   onRemoveUnavailableTimeRange,
+  targetDate,
   unavailableDates,
   unavailableTimeRanges,
+  monthlyMinMinutes,
 }: {
   isActive: boolean;
   isEditing: boolean;
   onRemoveUnavailableDate: (index: number) => void;
   onRemoveUnavailableTimeRange: (index: number) => void;
+  targetDate: string;
   unavailableDates: string[];
   unavailableTimeRanges: WorkRequestTimeRange[];
+  monthlyMinMinutes: string;
 }) {
+  const minimumSubmittedMinutes = parseWorkRequestMinutes(monthlyMinMinutes);
+
   return (
     <section className="relative mt-12.75 min-h-109.5 rounded-xl border border-[#DDE3EF] bg-white pt-8 pr-10 pb-6.75 pl-8">
       <div className="mb-5.5 flex items-center justify-between">
@@ -43,7 +50,10 @@ export default function SummaryPanel({
 
       <div className="grid min-h-75 grid-cols-[minmax(0,1fr)_max-content] gap-11">
         {isActive ? (
-          <SummaryTable />
+          <SummaryTable
+            date={targetDate}
+            minimumSubmittedMinutes={minimumSubmittedMinutes ?? 0}
+          />
         ) : (
           <>
             <div className="min-w-0" />

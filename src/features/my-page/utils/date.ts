@@ -70,3 +70,11 @@ export const getCurrentWorktimeHistoryYearMonth = (date = new Date()) => {
 
   return { year, month };
 };
+
+export const getNextWorktimeHistoryYearMonth = (date = new Date()) => {
+  const { year, month } = getCurrentWorktimeHistoryYearMonth(date);
+
+  return month === 12
+    ? { year: year + 1, month: 1 }
+    : { year, month: month + 1 };
+};

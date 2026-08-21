@@ -60,6 +60,8 @@ export interface GetAdminWorkerDetailResponse {
   monthlyLimitMinutes: number;
   totalChangeRequestCount: number;
   approvedChangeRequestCount: number;
+  submittedMinutes: number;
+  lastRequestedAt: string | null;
 }
 
 // 수정할 필드만 보낸다. 이메일·비밀번호·근로 시작일은 이 api로 바꿀 수 없다.
