@@ -44,7 +44,7 @@ export default function Modal({
     >
       <section
         className={cn(
-          "flex max-h-103 w-3/5 min-w-76.5 flex-col overflow-hidden rounded-[10px] bg-white opacity-100 shadow-[0_4px_20px_0_#00000040]",
+          "flex max-h-103 w-76.5 flex-col overflow-hidden rounded-[10px] bg-white opacity-100 shadow-[0_4px_20px_0_#00000040]",
           panelClassName,
         )}
       >
