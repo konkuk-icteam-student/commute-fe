@@ -29,6 +29,7 @@ export interface GetTodosResponse {
 }
 
 export interface UpdateTodoCompletionRequest {
+  date: string;
   todoId: number;
   isCompleted: boolean;
 }

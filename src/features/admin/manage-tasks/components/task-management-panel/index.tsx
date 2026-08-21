@@ -65,6 +65,7 @@ export default function TaskManagementPanel({
         errorMessage={errorMessage}
         isError={isError}
         isLoading={isLoading}
+        selectedDate={selectedDate}
         tasks={tasks}
       />
       <TaskAddPanel

@@ -19,11 +19,13 @@ export default function TaskListPanel({
   errorMessage,
   isError,
   isLoading,
+  selectedDate,
   tasks,
 }: {
   errorMessage?: string;
   isError: boolean;
   isLoading: boolean;
+  selectedDate: string;
   tasks: ManageTaskItem[];
 }) {
   const { updateAdminTodo, isPendingUpdateAdminTodo } =
@@ -50,6 +52,7 @@ export default function TaskListPanel({
 
     updateTodoCompletion(
       {
+        date: selectedDate,
         todoId: taskId,
         isCompleted: !currentTask.completed,
       },

@@ -121,6 +121,7 @@ export default function DailyTasksScreen() {
 
     updateTodoCompletion(
       {
+        date: todayDate,
         todoId: taskId,
         isCompleted: !currentTask.completed,
       },

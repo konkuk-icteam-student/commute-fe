@@ -17,13 +17,14 @@ export const getTodosApi = async ({ date }: GetTodosRequest) => {
 };
 
 export const updateTodoCompletionApi = async ({
+  date,
   todoId,
   isCompleted,
 }: UpdateTodoCompletionRequest) => {
   const response = await apiClient.patch<
     UpdateTodoCompletionResponse,
-    Pick<UpdateTodoCompletionRequest, "isCompleted">
-  >(TODOS_URL.COMPLETION(todoId), { isCompleted });
+    Pick<UpdateTodoCompletionRequest, "date" | "isCompleted">
+  >(TODOS_URL.COMPLETION(todoId), { date, isCompleted });
 
   return response.details;
 };

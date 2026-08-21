@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { WorkRequestTimeRange } from "../../types";
+import { parseWorkRequestMinutes } from "../../utils";
 import SummaryTable from "../summary-table";
 import UnavailableSummaryPanel from "../unavailable-summary-panel";
 
@@ -9,16 +10,22 @@ export default function SummaryPanel({
   isEditing,
   onRemoveUnavailableDate,
   onRemoveUnavailableTimeRange,
+  targetDate,
   unavailableDates,
   unavailableTimeRanges,
+  monthlyMinMinutes,
 }: {
   isActive: boolean;
   isEditing: boolean;
   onRemoveUnavailableDate: (index: number) => void;
   onRemoveUnavailableTimeRange: (index: number) => void;
+  targetDate: string;
   unavailableDates: string[];
   unavailableTimeRanges: WorkRequestTimeRange[];
+  monthlyMinMinutes: string;
 }) {
+  const minimumSubmittedMinutes = parseWorkRequestMinutes(monthlyMinMinutes);
+
   return (
     <section className="relative mt-12.75 min-h-109.5 rounded-xl border border-[#DDE3EF] bg-white pt-8 pr-10 pb-6.75 pl-8">
       <div className="mb-5.5 flex items-center justify-between">
@@ -43,7 +50,14 @@ export default function SummaryPanel({
 
       <div className="grid min-h-75 grid-cols-[minmax(0,1fr)_max-content] gap-11">
         {isActive ? (
-          <SummaryTable />
+          minimumSubmittedMinutes === null ? (
+            <InvalidMinimumState />
+          ) : (
+            <SummaryTable
+              date={targetDate}
+              minimumSubmittedMinutes={minimumSubmittedMinutes}
+            />
+          )
         ) : (
           <>
             <div className="min-w-0" />
@@ -61,6 +75,16 @@ export default function SummaryPanel({
         />
       </div>
     </section>
+  );
+}
+
+function InvalidMinimumState() {
+  return (
+    <div className="flex min-w-0 items-center justify-center text-center">
+      <p className="text-[15px] font-medium text-[#FD7171]">
+        월별 최소 근무시간을 불러오지 못했습니다.
+      </p>
+    </div>
   );
 }
 
