@@ -50,10 +50,14 @@ export default function SummaryPanel({
 
       <div className="grid min-h-75 grid-cols-[minmax(0,1fr)_max-content] gap-11">
         {isActive ? (
-          <SummaryTable
-            date={targetDate}
-            minimumSubmittedMinutes={minimumSubmittedMinutes ?? 0}
-          />
+          minimumSubmittedMinutes === null ? (
+            <InvalidMinimumState />
+          ) : (
+            <SummaryTable
+              date={targetDate}
+              minimumSubmittedMinutes={minimumSubmittedMinutes}
+            />
+          )
         ) : (
           <>
             <div className="min-w-0" />
@@ -71,6 +75,16 @@ export default function SummaryPanel({
         />
       </div>
     </section>
+  );
+}
+
+function InvalidMinimumState() {
+  return (
+    <div className="flex min-w-0 items-center justify-center text-center">
+      <p className="text-[15px] font-medium text-[#FD7171]">
+        월별 최소 근무시간을 불러오지 못했습니다.
+      </p>
+    </div>
   );
 }
 

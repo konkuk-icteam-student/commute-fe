@@ -144,6 +144,20 @@ export function formatWorkRequestTime(value: string) {
   return match ? match[1] : value;
 }
 
+export function formatWorkRequestSummaryRequestedAt(value: string) {
+  const match = value.match(
+    /^(\d{4})[-.](\d{2})[-.](\d{2})[ T](\d{2}):(\d{2})/,
+  );
+
+  if (!match) {
+    return value;
+  }
+
+  const [, year, month, day, hours, minutes] = match;
+
+  return `${year}.${month}.${day} ${hours}:${minutes}`;
+}
+
 // useQuery가 돌려준 값을 그 자리에서 isConfigured로 판별하면 타입이 좁혀지지 않는다.
 // 인자 타입을 명시한 함수 안에서 한 번 걸러 낸다.
 export function pickConfiguredWorkApplicationSettings(

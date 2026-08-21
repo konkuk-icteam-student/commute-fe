@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
 import leftIcon from "@/assets/icons/common/ic_left.svg";
@@ -25,7 +25,9 @@ const getNextMonth = (year: number, month: number) =>
 
 export default function WorktimeHistoryScreen() {
   const router = useRouter();
-  const [maxYearMonth] = useState(getNextWorktimeHistoryYearMonth);
+  const [maxYearMonth, setMaxYearMonth] = useState(
+    getNextWorktimeHistoryYearMonth,
+  );
   const [selectedYearMonth, setSelectedYearMonth] =
     useState(getCurrentWorktimeHistoryYearMonth);
   const [page, setPage] = useState(0);
@@ -45,6 +47,20 @@ export default function WorktimeHistoryScreen() {
     page,
     size: PAGE_SIZE,
   });
+
+  useEffect(() => {
+    const syncMaxYearMonth = () => {
+      setMaxYearMonth(getNextWorktimeHistoryYearMonth());
+    };
+
+    window.addEventListener("focus", syncMaxYearMonth);
+    document.addEventListener("visibilitychange", syncMaxYearMonth);
+
+    return () => {
+      window.removeEventListener("focus", syncMaxYearMonth);
+      document.removeEventListener("visibilitychange", syncMaxYearMonth);
+    };
+  }, []);
 
   const handlePrevMonth = () => {
     setSelectedYearMonth(({ year, month }) => getPrevMonth(year, month));

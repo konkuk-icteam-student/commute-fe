@@ -19,6 +19,7 @@ import {
   formatGrade,
   formatMinutesToHours,
 } from "@/features/admin/manage-members/utils";
+import { formatWorkRequestSummaryRequestedAt } from "../../utils";
 
 const PAGE_SIZE = 5;
 const COLUMN_COUNT = 7;
@@ -267,7 +268,7 @@ function StatusBadge({ status }: { status: "충족" | "미충족" }) {
 function AppliedAt({ value }: { value?: string | null }) {
   return (
     <span className="whitespace-nowrap">
-      {value ? value.replaceAll("-", ".") : EMPTY_MEMBER_TEXT}
+      {value ? formatWorkRequestSummaryRequestedAt(value) : EMPTY_MEMBER_TEXT}
     </span>
   );
 }
