@@ -88,10 +88,11 @@ export default function ScheduleViewScreen() {
   } = useGetApplyPeriodQuery(nextYearMonth);
 
   const todayDate = formatDateString(today);
-  const isEditAvailable = !isWithinApplyPeriod(
-    todayDate,
-    currentMonthApplyPeriodData,
-  );
+  // 응답을 받기 전과 조회에 실패했을 때는 신청 기간인지 알 수 없다.
+  // 열어 두었다가 제출에서 막히는 것보다 잠가 두는 쪽이 낫다.
+  const isEditAvailable =
+    currentMonthApplyPeriodData !== undefined &&
+    !isWithinApplyPeriod(todayDate, currentMonthApplyPeriodData);
   const isApplyAvailable = isWithinApplyPeriod(
     todayDate,
     nextMonthApplyPeriodData,
