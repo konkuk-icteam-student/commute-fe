@@ -174,6 +174,20 @@ describe("apiClient authentication guard", () => {
     assert.equal(storage.getItem("refreshToken"), null);
   });
 
+  it("clears auth for HTTP 401 without trying to refresh when no refresh token is stored", async () => {
+    const message = "인증이 만료되었습니다.";
+    storage.setItem("accessToken", "access-token");
+
+    await assert.rejects(
+      apiClient.get("/private", {
+        adapter: createHttpErrorAdapter(401, message),
+      }),
+      (error: unknown) => isNormalizedApiError(error, 401, message),
+    );
+
+    assert.equal(storage.getItem("accessToken"), null);
+  });
+
   it("normalizes HTTP 403 without clearing valid auth", async () => {
     const message = "해당 작업을 수행할 권한이 없습니다.";
     storage.setItem("accessToken", "access-token");
