@@ -30,8 +30,14 @@ export const getAuthNotice = () => authNotice;
 
 // 이미 떠 있는 안내가 있으면 덮어쓰지 않는다.
 // 한 화면에서 조회 여러 개가 동시에 막혀도 사용자가 읽는 문구는 하나로 유지된다.
+//
+// 다만 로그인으로 내보내는 안내는 예외다. 그 시점에는 저장된 토큰이 이미 지워져 있어서,
+// 권한 안내에 가려 버리면 사용자가 아무것도 할 수 없는 화면에 그대로 남는다.
 export const showAuthNotice = (notice: AuthNotice) => {
-  if (authNotice !== null) {
+  const isMoreUrgent =
+    notice.shouldRedirectToLogin && !authNotice?.shouldRedirectToLogin;
+
+  if (authNotice !== null && !isMoreUrgent) {
     return;
   }
 

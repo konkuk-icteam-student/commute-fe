@@ -103,6 +103,10 @@ const axiosInstance = create({
   timeout: 10000,
 });
 
+// 재발급은 이 안에서 스스로 호출하므로 호출부가 config를 넘길 수 없다.
+// 그 경로까지 검증하려면 인스턴스째로 어댑터를 갈아 끼워야 해서 테스트용으로 내보낸다.
+export const apiAxiosInstance = axiosInstance;
+
 axiosInstance.interceptors.request.use((config) => {
   if (config.skipAuth) {
     return config;
