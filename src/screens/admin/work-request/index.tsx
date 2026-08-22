@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { Alert, Modal, Toast } from "@/components/ui";
 import {
   createWorkRequestSettingsPayload,
-  getNextWorkRequestMonth,
+  getWorkRequestMonth,
   pickConfiguredWorkApplicationSettings,
   SettingsPanel,
   SummaryPanel,
@@ -51,13 +51,24 @@ const failureMessage = "요청 처리에 실패했습니다.";
 const invalidInputMessage = "입력값을 다시 확인해주세요.";
 const loadFailureMessage = "근로신청 설정을 불러오지 못했습니다.";
 
+// 이번 달을 0으로 두고 다다음 달까지만 다룬다. 지난 달 설정은 바꿀 일이 없다.
+const MIN_MONTH_OFFSET = 0;
+const MAX_MONTH_OFFSET = 2;
+const DEFAULT_MONTH_OFFSET = 1;
+
 export default function AdminWorkRequestScreen() {
   const [pendingAction, setPendingAction] = useState<WorkRequestAction | null>(
     null,
   );
 
   const [notificationMessage, setNotificationMessage] = useState("");
-  const targetMonth = useMemo(() => getNextWorkRequestMonth(), []);
+  // 이번 달을 기준으로 다다음 달까지만 연다. 처음 여는 것은 신청을 받을 다음 달이다.
+  const [today] = useState(() => new Date());
+  const [monthOffset, setMonthOffset] = useState(DEFAULT_MONTH_OFFSET);
+  const targetMonth = useMemo(
+    () => getWorkRequestMonth(monthOffset, today),
+    [monthOffset, today],
+  );
   const summaryTargetDate = useMemo(
     () =>
       `${targetMonth.year}-${String(targetMonth.month).padStart(2, "0")}-01`,
@@ -102,6 +113,17 @@ export default function AdminWorkRequestScreen() {
     settings: savedSettings,
     targetMonth,
   });
+
+  // 달을 옮기면 지금 화면의 입력은 다른 달 것이 되므로 수정 중이던 값은 버린다.
+  const moveTargetMonth = (offset: number) => {
+    cancelEditRequest();
+    setMonthOffset((currentOffset) =>
+      Math.min(
+        Math.max(currentOffset + offset, MIN_MONTH_OFFSET),
+        MAX_MONTH_OFFSET,
+      ),
+    );
+  };
 
   const closeAlert = () => {
     setPendingAction(null);
@@ -170,6 +192,10 @@ export default function AdminWorkRequestScreen() {
           onCancelEdit={cancelEditRequest}
           onEdit={editRequest}
           onFieldChange={updateField}
+          isNextMonthDisabled={monthOffset >= MAX_MONTH_OFFSET}
+          isPrevMonthDisabled={monthOffset <= MIN_MONTH_OFFSET}
+          onNextMonth={() => moveTargetMonth(1)}
+          onPrevMonth={() => moveTargetMonth(-1)}
           onStart={() => setPendingAction("start")}
           onUpdate={() => setPendingAction("update")}
           targetMonth={targetMonth}

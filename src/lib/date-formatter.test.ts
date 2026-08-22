@@ -7,6 +7,7 @@ const {
   getMonthWeekOfDate,
   getWeekdaysOfMonthWeek,
   shiftDateByWeeks,
+  shiftYearMonth,
 } = (await import(
   new URL("./date-formatter.ts", import.meta.url).href
 )) as typeof import("./date-formatter");
@@ -195,5 +196,18 @@ describe("getWeekdaysOfMonthWeek", () => {
       result.map(({ date }) => date),
       ["2026-12-28", "2026-12-29", "2026-12-30", "2026-12-31", "2027-01-01"],
     );
+  });
+});
+
+describe("shiftYearMonth", () => {
+  it("moves within the same year", () => {
+    assert.deepEqual(shiftYearMonth(2026, 8, 1), { year: 2026, month: 9 });
+    assert.deepEqual(shiftYearMonth(2026, 8, -1), { year: 2026, month: 7 });
+  });
+
+  it("crosses the year boundary in both directions", () => {
+    assert.deepEqual(shiftYearMonth(2026, 12, 1), { year: 2027, month: 1 });
+    assert.deepEqual(shiftYearMonth(2026, 1, -1), { year: 2025, month: 12 });
+    assert.deepEqual(shiftYearMonth(2026, 11, 3), { year: 2027, month: 2 });
   });
 });

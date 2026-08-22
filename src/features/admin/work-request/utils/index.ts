@@ -3,6 +3,7 @@ import type {
   GetWorkApplicationSettingsResponse,
   WorkApplicationSettings,
 } from "@/apis/admin/work-application-settings";
+import { shiftYearMonth } from "@/lib/date-formatter";
 
 import type {
   WorkRequestFormValues,
@@ -30,10 +31,13 @@ export const initialWorkRequestFormValues: WorkRequestFormValues = {
   weeklyMinMinutes: "",
 };
 
-export function getNextWorkRequestMonth(date = new Date()) {
-  const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-  const year = nextMonth.getFullYear();
-  const month = nextMonth.getMonth() + 1;
+// 설정할 달. 기준일이 속한 달에서 monthOffset만큼 옮긴 값과 헤더에 쓸 라벨을 함께 준다.
+export function getWorkRequestMonth(monthOffset: number, date = new Date()) {
+  const { year, month } = shiftYearMonth(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    monthOffset,
+  );
 
   return {
     label: `${year}년 ${month}월`,
@@ -263,9 +267,8 @@ export function createWorkRequestSettingsPayload({
     formValues.monthlyMaxMinutes,
   );
   // 검증과 전송이 같은 값을 쓰도록 정규화 결과를 그대로 담아 보낸다.
-  const unavailableTimeRanges = formValues.unavailableTimeRanges.map(
-    parseTimeRangeInput,
-  );
+  const unavailableTimeRanges =
+    formValues.unavailableTimeRanges.map(parseTimeRangeInput);
 
   if (
     !applyStartDate ||

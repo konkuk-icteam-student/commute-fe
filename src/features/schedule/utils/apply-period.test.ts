@@ -1,17 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { getNextYearMonth, isWithinApplyPeriod } from "./index";
-
-describe("getNextYearMonth", () => {
-  it("같은 해 안에서는 월만 하나 올린다", () => {
-    assert.deepEqual(getNextYearMonth(2026, 8), { year: 2026, month: 9 });
-  });
-
-  it("12월이면 다음 해 1월이 된다", () => {
-    assert.deepEqual(getNextYearMonth(2026, 12), { year: 2027, month: 1 });
-  });
-});
+import { isWithinApplyPeriod } from "./index";
 
 describe("isWithinApplyPeriod", () => {
   const period = { applyStartDate: "2026-08-01", applyEndDate: "2026-08-10" };
