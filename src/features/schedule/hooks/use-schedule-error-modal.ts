@@ -3,6 +3,18 @@
 import { useState } from "react";
 
 import { ApiError } from "@/apis/api-client";
+import {
+  AuthRequiredError,
+  isAuthError,
+  isForbiddenError,
+} from "@/apis/auth-guard";
+
+// 401·403은 루트의 안내 모달이 맡는다. 화면에서도 띄우면 모달이 두 개 겹친다.
+export const isHandledAuthError = (error: unknown) =>
+  error instanceof AuthRequiredError ||
+  (error instanceof ApiError &&
+    (isAuthError({ status: error.status }) ||
+      isForbiddenError({ status: error.status })));
 
 // 통신 자체가 끊기거나 응답 형식이 어긋나면 서버 문구가 없다. 그때 대신 보여 줄 문구.
 const DEFAULT_ERROR_MESSAGE =
@@ -24,7 +36,9 @@ export const useScheduleErrorModal = (errors: unknown[]) => {
   const [dismissedError, setDismissedError] = useState<unknown>(null);
   const [requestErrorMessage, setRequestErrorMessage] = useState("");
 
-  const queryError = errors.find(Boolean);
+  const queryError = errors.find(
+    (error) => Boolean(error) && !isHandledAuthError(error),
+  );
   const queryErrorMessage =
     queryError && queryError !== dismissedError
       ? getApiErrorMessage(queryError)
@@ -34,6 +48,10 @@ export const useScheduleErrorModal = (errors: unknown[]) => {
   const errorMessage = requestErrorMessage || queryErrorMessage;
 
   const showError = (error: unknown) => {
+    if (isHandledAuthError(error)) {
+      return;
+    }
+
     setRequestErrorMessage(getApiErrorMessage(error));
   };
 
