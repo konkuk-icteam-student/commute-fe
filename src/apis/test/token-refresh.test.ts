@@ -155,13 +155,46 @@ describe("apiClient token refresh", () => {
     assert.equal(calls.resource, 6);
   });
 
+  it("reissues and succeeds when only the access token is missing", async () => {
+    const { adapter, calls } = createRouterAdapter({
+      refreshDetails: { accessToken: "new-access-token" },
+    });
+    apiAxiosInstance.defaults.adapter = adapter;
+    storage.removeItem("accessToken");
+
+    const response = await apiClient.get<{ value: string }>("/private");
+
+    assert.deepEqual(response.details, { value: "response" });
+    assert.equal(calls.refresh, 1);
+    // 첫 시도는 요청 인터셉터에서 막히므로 서버까지 간 것은 재시도 한 번뿐이다.
+    assert.equal(calls.resource, 1);
+    assert.equal(getAuthNotice(), null);
+  });
+
+  it("skips the reissue and asks to sign in when no refresh token is stored", async () => {
+    const { adapter, calls } = createRouterAdapter({
+      refreshDetails: { accessToken: "new-access-token" },
+    });
+    apiAxiosInstance.defaults.adapter = adapter;
+    storage.removeItem("refreshToken");
+
+    await assert.rejects(apiClient.get("/private"));
+
+    assert.equal(calls.refresh, 0);
+    assert.equal(storage.length, 0);
+    assert.equal(getAuthNotice()?.shouldRedirectToLogin, true);
+  });
+
   it("clears the session and asks to sign in again when the reissue fails", async () => {
     const { adapter, calls } = createRouterAdapter({ refreshDetails: null });
     apiAxiosInstance.defaults.adapter = adapter;
+    storage.setItem("tokenExpiresAt", "1787362890");
+    storage.setItem("userName", "유찬영");
 
     await assert.rejects(apiClient.get("/private"));
 
     assert.equal(calls.refresh, 1);
+    // 다섯 키가 모두 지워져야 한다. 하나라도 남으면 다음 사용자에게 보인다.
     assert.equal(storage.length, 0);
     assert.deepEqual(getAuthNotice(), {
       message: "인증이 필요합니다.\n로그인 화면으로 이동합니다.",
