@@ -142,6 +142,17 @@ function formatDateLabel(date: Date) {
   return `${month}.${day}`;
 }
 
+// 연월을 앞뒤로 옮긴다 (month: 1~12). Date에 맡겨 12월·1월 경계를 따로 다루지 않는다.
+export const shiftYearMonth = (
+  year: number,
+  month: number,
+  monthOffset: number,
+) => {
+  const shifted = new Date(year, month - 1 + monthOffset, 1);
+
+  return { year: shifted.getFullYear(), month: shifted.getMonth() + 1 };
+};
+
 // 데이터 식별용 "YYYY-MM-DD"
 export function formatDateString(date: Date) {
   const year = String(date.getFullYear());

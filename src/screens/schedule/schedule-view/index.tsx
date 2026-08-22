@@ -11,7 +11,6 @@ import {
   ScheduleRefreshButton,
   ScheduleStatusLegend,
   ScheduleWeekNav,
-  getNextYearMonth,
   isWithinApplyPeriod,
   useScheduleErrorModal,
   useScheduleGrid,
@@ -24,7 +23,11 @@ import {
   useGetPeriodSchedulesQuery,
   useGetWorkSchedulesSummaryQuery,
 } from "@/apis/work-schedules";
-import { formatDateString, getMonthWeekDateRange } from "@/lib/date-formatter";
+import {
+  formatDateString,
+  getMonthWeekDateRange,
+  shiftYearMonth,
+} from "@/lib/date-formatter";
 import { Toggle } from "@/components/ui";
 import { useGetMyPageQuery } from "@/apis/my-page";
 import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
@@ -75,7 +78,7 @@ export default function ScheduleViewScreen() {
   // 상단 두 버튼의 활성 여부는 두 달치 신청 기간으로 정한다.
   // 이 달 기간에는 시간표가 확정되는 중이라 수정 요청을 막고,
   // 다음 달 기간에는 그 달 근로를 신청할 수 있다.
-  const nextYearMonth = getNextYearMonth(year, month);
+  const nextYearMonth = shiftYearMonth(year, month, 1);
   const {
     applyPeriodData: currentMonthApplyPeriodData,
     applyPeriodError: currentMonthApplyPeriodError,

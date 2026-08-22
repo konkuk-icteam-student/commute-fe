@@ -45,7 +45,6 @@ export {
   formatScheduleChangeHistorySlot,
   getFirstDateOfNextMonth,
   getMergedApplyPayload,
-  getNextYearMonth,
   getSlotTimesTotalHours,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,

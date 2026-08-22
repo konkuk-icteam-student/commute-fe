@@ -27,10 +27,6 @@ export const getFirstDateOfNextMonth = () => {
   return new Date(today.getFullYear(), today.getMonth() + 1, 1);
 };
 
-// 해당 연월의 다음 달을 반환합니다. 12월이면 다음 해 1월이 됩니다.
-export const getNextYearMonth = (year: number, month: number) =>
-  month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
-
 // 기준일이 근로 신청 기간 안에 있는지 판단합니다. 날짜는 모두 "YYYY-MM-DD"라 문자열끼리 비교합니다.
 // 기간이 설정되지 않은 달은 두 날짜가 비어 오므로 기간 밖으로 봅니다.
 export const isWithinApplyPeriod = (
