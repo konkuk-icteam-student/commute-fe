@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { useLogoutMutation } from "@/apis/auth";
 import { useGetMyPageQuery } from "@/apis/my-page";
@@ -10,7 +9,6 @@ import { Alert, Spinner, Toast } from "@/components/ui";
 import { MenuCard, UserInfoCard, WorkSummaryCard } from "@/features/my-page";
 
 export default function MyPageScreen() {
-  const router = useRouter();
   const [openAlert, setOpenAlert] = useState<"logout" | "withdraw" | null>(
     null,
   );
@@ -59,7 +57,7 @@ export default function MyPageScreen() {
         deleteAuthToken();
         closeAlert();
         setToastMessage("로그아웃되었습니다.");
-        router.replace("/login");
+        window.location.replace("/");
       },
       onError: () => {
         setToastMessage("로그아웃에 실패했습니다. 다시 시도해 주세요.");
