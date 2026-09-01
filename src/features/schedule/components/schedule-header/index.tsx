@@ -8,6 +8,7 @@ interface ScheduleHeaderProps {
   mode?: "view" | "edit" | "apply";
   year: number;
   month: number;
+  applyTargetMonth?: { year: number; month: number };
   // 신청 기간 조회로 정해진다. 아직 못 받았으면 열지 않는 쪽이 안전하다.
   isApplyAvailable?: boolean;
   isEditAvailable?: boolean;
@@ -17,6 +18,7 @@ export default function ScheduleHeader({
   mode = "view",
   year,
   month,
+  applyTargetMonth,
   isApplyAvailable = false,
   isEditAvailable = false,
 }: ScheduleHeaderProps) {
@@ -30,7 +32,11 @@ export default function ScheduleHeader({
     router.push("/schedule-edit");
   };
   const handleToApply = () => {
-    router.push("/schedule-apply");
+    const query = applyTargetMonth
+      ? `?year=${applyTargetMonth.year}&month=${applyTargetMonth.month}`
+      : "";
+
+    router.push(`/schedule-apply${query}`);
   };
 
   return mode === "view" ? (

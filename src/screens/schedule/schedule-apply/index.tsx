@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   applyPolicy,
@@ -9,9 +9,9 @@ import {
   getAppliedSlotTimes,
   getCurrentMonthDates,
   getCurrentMonthSlots,
-  getFirstDateOfNextMonth,
   getSlotTimesTotalHoursOnWeek,
   hasSlotTimesBelowMinSessionHours,
+  isWithinApplyPeriod,
   ScheduleApplySummary,
   ScheduleErrorModal,
   ScheduleGrid,
@@ -26,21 +26,153 @@ import {
 } from "@/features/schedule";
 import {
   useApplyWorkSchedulesMutation,
+  useGetApplyPeriodQuery,
   useGetPeriodSchedulesQuery,
   useGetWorkSchedulesSummaryQuery,
   type ApplyWorkSchedulesResponse,
+  type GetApplyPeriodResponse,
 } from "@/apis/work-schedules";
 import { ApiError } from "@/apis/api-client";
-import { getMonthWeekDateRange } from "@/lib/date-formatter";
+import {
+  formatDateString,
+  getMonthWeekDateRange,
+  shiftYearMonth,
+} from "@/lib/date-formatter";
 import { Alert, Button, Modal } from "@/components/ui";
 
 // 결과 모달에 보여 줄 내용.
 // 전부 실패하면 서버가 구간 목록을 내려주지 않으므로 message만 채워진다.
 type ApplyResult = ApplyWorkSchedulesResponse & { message?: string };
+type ApplyTargetMonth = { year: number; month: number };
+type ApplyPeriodEntry = {
+  target: ApplyTargetMonth;
+  data?: GetApplyPeriodResponse;
+};
+
+const getApplyTargetDate = ({ year, month }: ApplyTargetMonth) =>
+  new Date(year, month - 1, 1);
+
+const isSameMonth = (
+  left: ApplyTargetMonth,
+  right: ApplyTargetMonth,
+) => left.year === right.year && left.month === right.month;
+
+const getInitialApplyTargetMonth = (today: Date): ApplyTargetMonth => {
+  if (typeof window !== "undefined") {
+    const searchParams = new URLSearchParams(window.location.search);
+    const year = Number(searchParams.get("year"));
+    const month = Number(searchParams.get("month"));
+
+    if (
+      Number.isInteger(year) &&
+      Number.isInteger(month) &&
+      month >= 1 &&
+      month <= 12
+    ) {
+      return { year, month };
+    }
+  }
+
+  return shiftYearMonth(today.getFullYear(), today.getMonth() + 1, 1);
+};
 
 export default function ScheduleApplyScreen() {
-  // 근로 신청은 다음 달에 대해서만 가능하다.
-  const [nextMonthDate] = useState(getFirstDateOfNextMonth);
+  // 근로 신청은 현재 달부터 다다음 달까지 열린 신청 기간 중 하나를 대상으로 한다.
+  const [today] = useState(() => new Date());
+  const [selectedTargetMonth, setSelectedTargetMonth] = useState(() =>
+    getInitialApplyTargetMonth(today),
+  );
+  const candidateMonths = useMemo(
+    () =>
+      [0, 1, 2].map((monthOffset) =>
+        shiftYearMonth(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          monthOffset,
+        ),
+      ),
+    [today],
+  );
+  const todayDate = formatDateString(today);
+  const {
+    applyPeriodData: currentMonthApplyPeriodData,
+    applyPeriodError: currentMonthApplyPeriodError,
+    refetchApplyPeriod: refetchCurrentMonthApplyPeriod,
+  } = useGetApplyPeriodQuery(candidateMonths[0]);
+  const {
+    applyPeriodData: nextMonthApplyPeriodData,
+    applyPeriodError: nextMonthApplyPeriodError,
+    refetchApplyPeriod: refetchNextMonthApplyPeriod,
+  } = useGetApplyPeriodQuery(candidateMonths[1]);
+  const {
+    applyPeriodData: followingMonthApplyPeriodData,
+    applyPeriodError: followingMonthApplyPeriodError,
+    refetchApplyPeriod: refetchFollowingMonthApplyPeriod,
+  } = useGetApplyPeriodQuery(candidateMonths[2]);
+
+  const applyPeriodEntries: ApplyPeriodEntry[] = [
+    { target: candidateMonths[0], data: currentMonthApplyPeriodData },
+    { target: candidateMonths[1], data: nextMonthApplyPeriodData },
+    { target: candidateMonths[2], data: followingMonthApplyPeriodData },
+  ];
+  const applyAvailableMonths = applyPeriodEntries
+    .filter(({ data }) => isWithinApplyPeriod(todayDate, data))
+    .map(({ target }) => target);
+  const targetMonth =
+    applyAvailableMonths.find((month) =>
+      isSameMonth(month, selectedTargetMonth),
+    ) ??
+    applyAvailableMonths[0] ??
+    selectedTargetMonth;
+
+  const handleTargetMonthChange = (target: ApplyTargetMonth) => {
+    setSelectedTargetMonth(target);
+
+    if (typeof window !== "undefined") {
+      window.history.replaceState(
+        null,
+        "",
+        `/schedule-apply?year=${target.year}&month=${target.month}`,
+      );
+    }
+  };
+
+  return (
+    <ScheduleApplyContent
+      key={`${targetMonth.year}-${targetMonth.month}`}
+      targetMonth={targetMonth}
+      applyAvailableMonths={applyAvailableMonths}
+      applyPeriodErrors={[
+        currentMonthApplyPeriodError,
+        nextMonthApplyPeriodError,
+        followingMonthApplyPeriodError,
+      ]}
+      onTargetMonthChange={handleTargetMonthChange}
+      refetchApplyPeriods={() => {
+        void refetchCurrentMonthApplyPeriod();
+        void refetchNextMonthApplyPeriod();
+        void refetchFollowingMonthApplyPeriod();
+      }}
+    />
+  );
+}
+
+interface ScheduleApplyContentProps {
+  targetMonth: ApplyTargetMonth;
+  applyAvailableMonths: ApplyTargetMonth[];
+  applyPeriodErrors: unknown[];
+  onTargetMonthChange: (target: ApplyTargetMonth) => void;
+  refetchApplyPeriods: () => void;
+}
+
+function ScheduleApplyContent({
+  targetMonth,
+  applyAvailableMonths,
+  applyPeriodErrors,
+  onTargetMonthChange,
+  refetchApplyPeriods,
+}: ScheduleApplyContentProps) {
+  const targetMonthDate = getApplyTargetDate(targetMonth);
   const {
     year,
     month,
@@ -49,7 +181,7 @@ export default function ScheduleApplyScreen() {
     isNextWeekDisabled,
     goPrevWeek,
     goNextWeek,
-  } = useScheduleWeek(nextMonthDate);
+  } = useScheduleWeek(targetMonthDate);
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [isApplyAlertOpen, setIsApplyAlertOpen] = useState(false);
@@ -81,12 +213,14 @@ export default function ScheduleApplyScreen() {
   const handleRefresh = () => {
     void refetchPeriodSchedules();
     void refetchWorkSchedulesSummary();
+    refetchApplyPeriods();
   };
 
   // 조회 실패는 자동으로, 신청 실패는 showError로 알린다.
   const { errorMessage, showError, closeErrorModal } = useScheduleErrorModal([
     periodSchedulesError,
     workSchedulesSummaryError,
+    ...applyPeriodErrors,
   ]);
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
@@ -191,6 +325,28 @@ export default function ScheduleApplyScreen() {
   return (
     <div className="flex w-full flex-col gap-5 px-3 py-4">
       <ScheduleHeader mode="apply" year={year} month={month} />
+      {applyAvailableMonths.length > 1 ? (
+        <div className="flex gap-2 pl-1">
+          {applyAvailableMonths.map((target) => {
+            const isSelected = isSameMonth(target, targetMonth);
+
+            return (
+              <button
+                key={`${target.year}-${target.month}`}
+                type="button"
+                className={`h-8 rounded-md px-3 text-sm font-medium ${
+                  isSelected
+                    ? "bg-[#2076FF] text-white"
+                    : "border border-[#DDE3EF] bg-white text-[#1E2124]"
+                }`}
+                onClick={() => onTargetMonthChange(target)}
+              >
+                {target.year}년 {target.month}월
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-2">
         <ScheduleWeekNav
           week={week}
