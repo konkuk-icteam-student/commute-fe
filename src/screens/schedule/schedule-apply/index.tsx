@@ -118,6 +118,9 @@ export default function ScheduleApplyScreen() {
   const applyAvailableMonths = applyPeriodEntries
     .filter(({ data }) => isWithinApplyPeriod(todayDate, data))
     .map(({ target }) => target);
+  const isApplyPeriodReady = applyPeriodEntries.every(
+    ({ data }) => data !== undefined,
+  );
   const targetMonth =
     applyAvailableMonths.find((month) =>
       isSameMonth(month, selectedTargetMonth),
@@ -137,6 +140,21 @@ export default function ScheduleApplyScreen() {
     }
   };
 
+  if (isApplyPeriodReady && applyAvailableMonths.length === 0) {
+    return (
+      <div className="flex w-full flex-col gap-5 px-3 py-4">
+        <ScheduleHeader
+          mode="apply"
+          year={selectedTargetMonth.year}
+          month={selectedTargetMonth.month}
+        />
+        <p className="rounded-md bg-[#F4F5F7] px-4 py-5 text-center text-sm font-medium text-[#637083]">
+          현재 신청 가능한 근로신청 기간이 없습니다.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <ScheduleApplyContent
       key={`${targetMonth.year}-${targetMonth.month}`}
@@ -147,6 +165,7 @@ export default function ScheduleApplyScreen() {
         nextMonthApplyPeriodError,
         followingMonthApplyPeriodError,
       ]}
+      isApplyAvailable={applyAvailableMonths.length > 0}
       onTargetMonthChange={handleTargetMonthChange}
       refetchApplyPeriods={() => {
         void refetchCurrentMonthApplyPeriod();
@@ -161,6 +180,7 @@ interface ScheduleApplyContentProps {
   targetMonth: ApplyTargetMonth;
   applyAvailableMonths: ApplyTargetMonth[];
   applyPeriodErrors: unknown[];
+  isApplyAvailable: boolean;
   onTargetMonthChange: (target: ApplyTargetMonth) => void;
   refetchApplyPeriods: () => void;
 }
@@ -169,6 +189,7 @@ function ScheduleApplyContent({
   targetMonth,
   applyAvailableMonths,
   applyPeriodErrors,
+  isApplyAvailable,
   onTargetMonthChange,
   refetchApplyPeriods,
 }: ScheduleApplyContentProps) {
@@ -286,6 +307,7 @@ function ScheduleApplyContent({
   const isSummaryReady = workSchedulesSummaryData !== undefined;
 
   const buttonDisabled =
+    !isApplyAvailable ||
     !isSummaryReady ||
     (deleteRequestHours === 0 && addRequestHours === 0) ||
     weekTotalTimeAfterApply > weekMaxHours ||
