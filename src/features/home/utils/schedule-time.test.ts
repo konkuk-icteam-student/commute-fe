@@ -15,6 +15,10 @@ describe("home schedule time utils", () => {
 
   it("parses ISO datetime check-in values", () => {
     assert.equal(parseCheckInTimeToMinutes("2026-10-13T09:02:00"), 542);
+    assert.equal(
+      parseCheckInTimeToMinutes("2026-09-02T01:29:13.358873"),
+      89,
+    );
   });
 
   it("keeps check-in time labels in AM/PM format", () => {

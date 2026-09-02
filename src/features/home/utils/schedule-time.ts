@@ -1,5 +1,7 @@
 export const parseTimeToMinutes = (time: string) => {
-  const match = time.trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  const match = time
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
 
   if (!match) {
     throw new Error(`Invalid schedule time: "${time}"`);
