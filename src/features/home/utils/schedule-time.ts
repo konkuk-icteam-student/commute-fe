@@ -47,8 +47,10 @@ export const formatTimeLabel = (minutes: number) => {
 };
 
 export const parseCheckInTimeToMinutes = (time: string) => {
+  const timeText = time.includes("T") ? time.split("T")[1] : time;
+
   try {
-    return parseTimeToMinutes(time);
+    return parseTimeToMinutes(timeText);
   } catch {
     return undefined;
   }
