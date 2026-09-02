@@ -19,6 +19,7 @@ import {
   WorkingHoursCard,
 } from "@/features/schedule";
 import {
+  type GetApplyPeriodResponse,
   useGetApplyPeriodQuery,
   useGetPeriodSchedulesQuery,
   useGetWorkSchedulesSummaryQuery,
@@ -34,6 +35,11 @@ import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests
 
 // 미리보기라 최근 것만 보여 준다. 전체는 '처리내역 자세히보기'로 넘어간다.
 const CHANGE_HISTORY_PREVIEW_SIZE = 4;
+type ApplyTargetMonth = { year: number; month: number };
+type ApplyPeriodEntry = {
+  target: ApplyTargetMonth;
+  data?: GetApplyPeriodResponse;
+};
 
 export default function ScheduleViewScreen() {
   // 조회는 이번 달 안에서만 이동할 수 있다.
@@ -75,10 +81,10 @@ export default function ScheduleViewScreen() {
   const { myPageData, isFetchingMyPage, myPageError, refetchMyPage } =
     useGetMyPageQuery();
 
-  // 상단 두 버튼의 활성 여부는 두 달치 신청 기간으로 정한다.
-  // 이 달 기간에는 시간표가 확정되는 중이라 수정 요청을 막고,
-  // 다음 달 기간에는 그 달 근로를 신청할 수 있다.
-  const nextYearMonth = shiftYearMonth(year, month, 1);
+  // 상단 두 버튼의 활성 여부는 현재 달부터 다다음 달까지의 신청 기간으로 정한다.
+  // 신청 기간에 들어온 달이 하나라도 있으면 근로 신청을 열고, 같은 기간 동안 수정 요청은 막는다.
+  const nextMonth = shiftYearMonth(year, month, 1);
+  const followingMonth = shiftYearMonth(year, month, 2);
   const {
     applyPeriodData: currentMonthApplyPeriodData,
     applyPeriodError: currentMonthApplyPeriodError,
@@ -88,18 +94,38 @@ export default function ScheduleViewScreen() {
     applyPeriodData: nextMonthApplyPeriodData,
     applyPeriodError: nextMonthApplyPeriodError,
     refetchApplyPeriod: refetchNextMonthApplyPeriod,
-  } = useGetApplyPeriodQuery(nextYearMonth);
+  } = useGetApplyPeriodQuery(nextMonth);
+  const {
+    applyPeriodData: followingMonthApplyPeriodData,
+    applyPeriodError: followingMonthApplyPeriodError,
+    refetchApplyPeriod: refetchFollowingMonthApplyPeriod,
+  } = useGetApplyPeriodQuery(followingMonth);
 
   const todayDate = formatDateString(today);
+  const applyPeriodEntries: ApplyPeriodEntry[] = [
+    {
+      target: { year, month },
+      data: currentMonthApplyPeriodData,
+    },
+    {
+      target: nextMonth,
+      data: nextMonthApplyPeriodData,
+    },
+    {
+      target: followingMonth,
+      data: followingMonthApplyPeriodData,
+    },
+  ];
+  const applyAvailableMonths = applyPeriodEntries
+    .filter(({ data }) => isWithinApplyPeriod(todayDate, data))
+    .map(({ target }) => target);
+
   // 응답을 받기 전과 조회에 실패했을 때는 신청 기간인지 알 수 없다.
   // 열어 두었다가 제출에서 막히는 것보다 잠가 두는 쪽이 낫다.
+  const isApplyAvailable = applyAvailableMonths.length > 0;
   const isEditAvailable =
     currentMonthApplyPeriodData !== undefined &&
     !isWithinApplyPeriod(todayDate, currentMonthApplyPeriodData);
-  const isApplyAvailable = isWithinApplyPeriod(
-    todayDate,
-    nextMonthApplyPeriodData,
-  );
 
   // 아직 처리되지 않은 요청만 미리 보여 준다. 이 칸의 빈 상태 문구도 '처리 중인 내역'을 가리킨다.
   const {
@@ -127,6 +153,7 @@ export default function ScheduleViewScreen() {
     void refetchWorkChangeRequestHistory();
     void refetchCurrentMonthApplyPeriod();
     void refetchNextMonthApplyPeriod();
+    void refetchFollowingMonthApplyPeriod();
   };
 
   // 조회에 실패하면 표가 회색으로만 남아 장애인지 알 수 없으므로 모달로 알린다.
@@ -137,6 +164,7 @@ export default function ScheduleViewScreen() {
     workChangeRequestHistoryError,
     currentMonthApplyPeriodError,
     nextMonthApplyPeriodError,
+    followingMonthApplyPeriodError,
   ]);
 
   // 응답 전에는 빈 시간표로 그린다. 표 모양이 유지되고 모든 칸이 잠긴 상태로 보인다.
@@ -167,6 +195,7 @@ export default function ScheduleViewScreen() {
       <ScheduleHeader
         year={year}
         month={month}
+        applyTargetMonth={applyAvailableMonths[0]}
         isApplyAvailable={isApplyAvailable}
         isEditAvailable={isEditAvailable}
       />
