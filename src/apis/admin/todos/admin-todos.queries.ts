@@ -78,9 +78,9 @@ export const useCreateAdminTodoMutation = () => {
   const { mutate: createAdminTodo, isPending: isPendingCreateAdminTodo } =
     useMutation<CreateAdminTodoResponse, ApiError, CreateAdminTodoRequest>({
       mutationFn: createAdminTodoApi,
-      onSuccess: (createdTodo) => {
+      onSuccess: (createdTodo, { date }) => {
         queryClient.setQueryData<GetTodosResponse>(
-          TODOS_QUERY_KEY.LIST(createdTodo.date),
+          TODOS_QUERY_KEY.LIST(date),
           (currentTodos) => {
             if (!currentTodos) {
               return currentTodos;
