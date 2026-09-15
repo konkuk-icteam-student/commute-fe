@@ -16,7 +16,7 @@ export default function Input({
   return (
     <label className="block">
       {label ? (
-        <span className="mb-2 block text-sm font-medium text-[#6B7280]">
+        <span className="mb-2 block text-sm font-normal text-[#434343]">
           {label}
         </span>
       ) : null}

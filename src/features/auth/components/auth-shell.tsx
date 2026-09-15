@@ -5,8 +5,8 @@ interface AuthShellProps {
 
 export default function AuthShell({ children, footer }: AuthShellProps) {
   return (
-    <main className="flex min-h-screen flex-col px-6 pt-27.25 pb-5.75">
-      <section className="flex-1">{children}</section>
+    <main className="flex min-h-screen flex-col pb-5.75">
+      <section className="flex min-h-full flex-1 flex-col">{children}</section>
       {footer ? <div className="pt-6">{footer}</div> : null}
     </main>
   );

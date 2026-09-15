@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import {
@@ -7,9 +8,10 @@ import {
   useSendVerificationCodeMutation,
   useVerifyCodeMutation,
 } from "@/apis/auth";
+import leftIcon from "@/assets/icons/common/ic_left.svg";
 import { useGetOrganizationsQuery } from "@/apis/organization";
 import { ROLE_CODE } from "@/apis/token-storage";
-import { Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,11 +35,8 @@ export default function SignupForm({ id }: SignupFormProps) {
     useSendVerificationCodeMutation();
   const { verifyCode, isPendingVerifyCode } = useVerifyCodeMutation();
   const { register, isPendingRegister } = useRegisterMutation();
-  const {
-    organizationsData,
-    isPendingOrganizations,
-    isErrorOrganizations,
-  } = useGetOrganizationsQuery();
+  const { organizationsData, isPendingOrganizations, isErrorOrganizations } =
+    useGetOrganizationsQuery();
   const organizations = organizationsData?.organizations ?? [];
 
   const isEmailFilled = email.trim().length > 0;
@@ -103,7 +102,8 @@ export default function SignupForm({ id }: SignupFormProps) {
         },
         onError: (error) => {
           setErrorMessage(
-            error.message || "인증번호 전송에 실패했습니다. 다시 시도해 주세요.",
+            error.message ||
+              "인증번호 전송에 실패했습니다. 다시 시도해 주세요.",
           );
         },
       },
@@ -124,7 +124,8 @@ export default function SignupForm({ id }: SignupFormProps) {
         onError: (error) => {
           setIsCodeVerified(false);
           setErrorMessage(
-            error.message || "인증번호 확인에 실패했습니다. 다시 시도해 주세요.",
+            error.message ||
+              "인증번호 확인에 실패했습니다. 다시 시도해 주세요.",
           );
         },
       },
@@ -161,17 +162,37 @@ export default function SignupForm({ id }: SignupFormProps) {
   };
 
   return (
-    <>
-      <form id={id} className="flex flex-col" onSubmit={handleSubmit}>
-        <div className="mb-7">
-          <p className="mb-2 text-sm font-semibold text-[#9AA3B2]">
+    <div className="flex flex-1 flex-col">
+      <form
+        id={id}
+        className="flex flex-col px-4 py-4.5"
+        onSubmit={handleSubmit}
+      >
+        <button
+          type="button"
+          aria-label="이전 페이지"
+          onClick={() => router.back()}
+          className="mb-7.5 flex h-7 w-7 cursor-pointer items-center justify-center"
+        >
+          <Image
+            alt=""
+            aria-hidden="true"
+            height={20}
+            src={leftIcon}
+            unoptimized
+            width={20}
+          />
+        </button>
+
+        <div className="mb-8.5 ml-2.25">
+          <p className="mb-3.75 text-[12px] font-bold tracking-[0.015em] text-[#8892A6]">
             출근부 시스템
           </p>
-          <h1 className="text-2xl font-bold text-[#303030]">회원가입</h1>
+          <h1 className="text-2xl font-bold text-[#434343]">회원가입</h1>
         </div>
 
-        <div className="mb-7 flex flex-col gap-2.5">
-          <p className="text-sm font-medium text-[#6B7280]">회원 정보</p>
+        <div className="mb-3.75 flex flex-col gap-2 px-2">
+          <p className="text-sm font-normal text-[#434343]">회원 정보</p>
           <Input
             placeholder="이름"
             value={name}
@@ -185,7 +206,7 @@ export default function SignupForm({ id }: SignupFormProps) {
           <label className="block">
             <span className="relative block">
               <select
-                className="h-12 w-full appearance-none rounded-lg border border-[#D9D9D9] bg-white px-4 pr-10 text-sm font-medium text-[#303030] outline-none transition-colors invalid:text-[#A4A4A4] focus:border-[#8DB4FF] disabled:bg-[#F5F6F8] disabled:text-[#A4A4A4]"
+                className="h-13.25 w-full appearance-none rounded-lg border border-[#BDBDBD] bg-white px-4.5 text-sm font-normal text-[#09121C] transition-colors outline-none invalid:text-[#09121C]/50 focus:border-[#8DB4FF] disabled:bg-white disabled:text-[#09121C]/50"
                 value={organizationId}
                 onChange={(event) => {
                   setOrganizationId(event.target.value);
@@ -210,9 +231,6 @@ export default function SignupForm({ id }: SignupFormProps) {
                   </option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm text-[#8892A6]">
-                v
-              </span>
             </span>
           </label>
           <div>
@@ -230,23 +248,22 @@ export default function SignupForm({ id }: SignupFormProps) {
               autoComplete="email"
             />
             <div className="mt-2 flex justify-end">
-              <button
+              <Button
                 type="button"
                 disabled={!canRequestCode}
                 onClick={handleRequestCode}
-                className="h-9 min-w-[112px] rounded-lg bg-[#2076FF] px-4 text-sm font-semibold text-white transition-colors disabled:bg-[#C4CAD3]"
               >
                 {isPendingSendVerificationCode
                   ? "전송 중"
                   : isCodeSent
                     ? "다시 보내기"
                     : "인증번호 받기"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="mb-7 flex flex-col gap-2.5">
+        <div className="mb-7 flex flex-col gap-2.5 px-2">
           <Input
             label="인증번호"
             inputMode="numeric"
@@ -260,19 +277,18 @@ export default function SignupForm({ id }: SignupFormProps) {
             state={code ? "active" : "default"}
           />
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
               disabled={!canVerifyCode}
               onClick={handleVerifyCode}
-              className="h-9 min-w-[112px] rounded-lg bg-[#2076FF] px-4 text-sm font-semibold text-white transition-colors disabled:bg-[#C4CAD3]"
             >
               {isPendingVerifyCode ? "확인 중" : "인증 확인"}
-            </button>
+            </Button>
           </div>
         </div>
 
         {isCodeVerified ? (
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-3.5 px-2">
             <Input
               label="비밀번호"
               type="password"
@@ -316,10 +332,10 @@ export default function SignupForm({ id }: SignupFormProps) {
         type="submit"
         form={id}
         disabled={!canSubmit}
-        className="h-13 w-full rounded-[46px] bg-[#2076FF] text-base font-semibold text-white transition-colors disabled:bg-[#C4CAD3]"
+        className="mx-6 mt-auto h-14 rounded-[46px] bg-[#2076FF] text-base font-normal text-white transition-colors disabled:bg-[#C6CBD4]"
       >
         {isPendingRegister ? "가입 중" : "가입하기"}
       </button>
-    </>
+    </div>
   );
 }

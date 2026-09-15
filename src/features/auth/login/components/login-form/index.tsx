@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { useLoginMutation } from "@/apis/auth";
 import { ROLE_CODE } from "@/apis/token-storage";
-import { Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="flex flex-col" onSubmit={handleSubmit}>
+    <form className="flex flex-col px-6 pt-27.25" onSubmit={handleSubmit}>
       <div className="mb-7 ml-px">
         <p className="mb-3.75 text-[12px] font-bold tracking-[0.015em] text-[#8892A6]">
           출근부 시스템
@@ -94,13 +94,12 @@ export default function LoginForm() {
         >
           회원가입
         </Link>
-        <button
+        <Button
           type="submit"
           disabled={!canSubmit}
-          className="h-9 w-29 cursor-pointer rounded-lg bg-[#2076FF] text-sm font-normal text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#979797]"
         >
           {isPendingLogin ? "로그인 중" : "로그인"}
-        </button>
+        </Button>
       </div>
     </form>
   );
