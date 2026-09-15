@@ -16,9 +16,7 @@ export const AUTH_ERROR_HTTP_STATUS = 401;
 // 학생이 관리자 화면을, 관리자가 학생 화면을 열었을 때 서버가 내려준다.
 export const FORBIDDEN_HTTP_STATUS = 403;
 
-// 로그인 화면은 이 앱(basePath /commute) 밖의 사이트 루트에 있다.
-// 그래서 next/navigation이 아니라 window.location으로 보낸다.
-export const LOGIN_PATH = "/";
+export const LOGIN_PATH = "/login";
 
 export const isAuthError = ({ status }: AuthErrorCandidate) =>
   status === AUTH_ERROR_HTTP_STATUS;

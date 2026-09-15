@@ -59,6 +59,7 @@ const createRouterAdapter = ({ refreshDetails }: RouteOptions) => {
   const adapter = async (config: InternalAxiosRequestConfig) => {
     if (config.url === AUTH_URL.REFRESH) {
       calls.refresh += 1;
+      assert.equal(config.data, undefined);
 
       if (refreshDetails === null) {
         throw Object.assign(new Error("refresh failed"), {

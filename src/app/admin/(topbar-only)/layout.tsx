@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/layout";
+import { AuthRouteGuard } from "@/features/auth/components";
 
 export default function WithoutSidebarAdminLayout({
   children,
@@ -6,8 +7,10 @@ export default function WithoutSidebarAdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AdminLayout showBackButton variant="topbar">
-      {children}
-    </AdminLayout>
+    <AuthRouteGuard mode="auth-only">
+      <AdminLayout showBackButton variant="topbar">
+        {children}
+      </AdminLayout>
+    </AuthRouteGuard>
   );
 }

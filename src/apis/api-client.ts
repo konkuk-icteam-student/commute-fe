@@ -123,7 +123,7 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// 저장된 refreshToken으로 accessToken을 다시 받아 온다.
+// 저장된 refreshToken이 있으면 accessToken 재발급을 시도한다.
 // 재발급 요청 자체는 accessToken을 쓰지 않으므로 skipAuth로 보낸다.
 const requestNewAccessToken = async () => {
   const refreshToken = getRefreshToken();
@@ -136,7 +136,6 @@ const requestNewAccessToken = async () => {
     const { details } = await request<RefreshTokenResponse>({
       method: "POST",
       url: AUTH_URL.REFRESH,
-      data: { refreshToken },
       skipAuth: true,
     });
 

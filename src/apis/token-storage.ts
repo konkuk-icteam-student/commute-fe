@@ -13,16 +13,16 @@ const AUTH_STORAGE_KEYS = [
   USER_NAME_KEY,
 ] as const;
 
-// RL01은 학생, RL02는 관리자다. 접근 가능한 화면이 서로 갈린다.
+// RL01은 사용자, RL02는 관리자다. 접근 가능한 화면이 서로 갈린다.
 export const ROLE_CODE = {
-  STUDENT: "RL01",
+  USER: "RL01",
   ADMIN: "RL02",
 } as const;
 
 export type RoleCode = (typeof ROLE_CODE)[keyof typeof ROLE_CODE];
 
 const isRoleCode = (value: string | null): value is RoleCode =>
-  value === ROLE_CODE.STUDENT || value === ROLE_CODE.ADMIN;
+  value === ROLE_CODE.USER || value === ROLE_CODE.ADMIN;
 
 export interface AuthSession {
   accessToken: string;

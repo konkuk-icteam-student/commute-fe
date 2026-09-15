@@ -8,3 +8,4 @@ export { default as Alert } from "./alert";
 export { default as Modal } from "./modal";
 export { default as Toast } from "./toast";
 export { default as Spinner } from "./spinner";
+export { default as Input } from "./input";

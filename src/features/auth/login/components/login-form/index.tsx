@@ -1,0 +1,107 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useMemo, useState } from "react";
+import { useLoginMutation } from "@/apis/auth";
+import { ROLE_CODE } from "@/apis/token-storage";
+import { Input } from "@/components/ui";
+
+export default function LoginForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { login, isPendingLogin } = useLoginMutation();
+
+  const canSubmit = useMemo(
+    () =>
+      email.trim().length > 0 && password.trim().length > 0 && !isPendingLogin,
+    [email, isPendingLogin, password],
+  );
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setErrorMessage("");
+    login(
+      { email: email.trim(), password },
+      {
+        onSuccess: (details) => {
+          router.replace(details.roleCode === ROLE_CODE.ADMIN ? "/admin" : "/");
+        },
+        onError: (error) => {
+          setErrorMessage(
+            error.message || "로그인에 실패했습니다. 다시 시도해 주세요.",
+          );
+        },
+      },
+    );
+  };
+
+  return (
+    <form className="flex flex-col" onSubmit={handleSubmit}>
+      <div className="mb-7 ml-px">
+        <p className="mb-3.75 text-[12px] font-bold tracking-[0.015em] text-[#8892A6]">
+          출근부 시스템
+        </p>
+        <h1 className="text-2xl font-bold text-[#434343]">로그인</h1>
+      </div>
+
+      <div className="flex flex-col gap-3.75">
+        <Input
+          type="email"
+          placeholder="이메일"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setErrorMessage("");
+          }}
+          autoComplete="email"
+        />
+
+        <Input
+          type="password"
+          placeholder="비밀번호"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setErrorMessage("");
+          }}
+          autoComplete="current-password"
+        />
+      </div>
+
+      {errorMessage ? (
+        <p className="mt-3 text-sm font-medium text-[#FF5B4D]">
+          {errorMessage}
+        </p>
+      ) : null}
+
+      <div className="mt-3 flex items-center justify-between">
+        <Link
+          href="/signup"
+          className="ml-3.5 text-[14px] font-normal tracking-[0.21px] underline underline-offset-2"
+          style={{
+            color: "rgba(38, 99, 235, 0.8)",
+            textDecorationLine: "underline",
+            textDecorationColor: "rgba(38, 99, 235, 0.8)",
+          }}
+        >
+          회원가입
+        </Link>
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="h-9 w-29 cursor-pointer rounded-lg bg-[#2076FF] text-sm font-normal text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#979797]"
+        >
+          {isPendingLogin ? "로그인 중" : "로그인"}
+        </button>
+      </div>
+    </form>
+  );
+}
