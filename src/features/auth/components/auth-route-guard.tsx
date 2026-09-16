@@ -5,6 +5,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   getRoleCode,
   getTokenExpiresAt,
+  ROLE_CODE,
   type RoleCode,
   subscribeAuthStorageChange,
 } from "@/apis/token-storage";
@@ -21,6 +22,7 @@ interface AuthRouteGuardProps {
 
 const LOGIN_ROUTE = "/login";
 const HOME_ROUTE = "/";
+const ADMIN_HOME_ROUTE = "/admin";
 const PENDING_SNAPSHOT = "pending:";
 
 const getServerSnapshot = () => PENDING_SNAPSHOT;
@@ -46,6 +48,9 @@ const getSessionExpirationDelay = () => {
 
   return Math.max(expiresAtTime - Date.now(), 0);
 };
+
+const getAuthenticatedHomeRoute = (roleCode?: string) =>
+  roleCode === ROLE_CODE.ADMIN ? ADMIN_HOME_ROUTE : HOME_ROUTE;
 
 const subscribe = (onStoreChange: () => void) => {
   let timeoutId: number | null = null;
@@ -107,6 +112,12 @@ export default function AuthRouteGuard({
   const shouldRedirectToLogin = mode === "auth-only" && hasSession === false;
   const shouldRedirectToHome =
     mode === "guest-only" && hasSession === true && pathname !== HOME_ROUTE;
+  const shouldRedirectAdminFromUserRoute =
+    mode === "auth-only" &&
+    hasSession === true &&
+    requiredRole === undefined &&
+    roleCode === ROLE_CODE.ADMIN &&
+    pathname !== ADMIN_HOME_ROUTE;
   const shouldRedirectByRole =
     mode === "auth-only" &&
     hasSession === true &&
@@ -120,15 +131,22 @@ export default function AuthRouteGuard({
     }
 
     if (shouldRedirectToHome) {
-      router.replace(HOME_ROUTE);
+      router.replace(getAuthenticatedHomeRoute(roleCode));
+      return;
+    }
+
+    if (shouldRedirectAdminFromUserRoute) {
+      router.replace(ADMIN_HOME_ROUTE);
       return;
     }
 
     if (shouldRedirectByRole) {
-      router.replace(HOME_ROUTE);
+      router.replace(getAuthenticatedHomeRoute(roleCode));
     }
   }, [
+    roleCode,
     router,
+    shouldRedirectAdminFromUserRoute,
     shouldRedirectByRole,
     shouldRedirectToHome,
     shouldRedirectToLogin,
@@ -138,6 +156,7 @@ export default function AuthRouteGuard({
     hasSession === null ||
     shouldRedirectToLogin ||
     shouldRedirectToHome ||
+    shouldRedirectAdminFromUserRoute ||
     shouldRedirectByRole
   ) {
     return null;

@@ -34,6 +34,14 @@ export interface AuthSession {
   userName: string;
 }
 
+export interface PartialAuthSession {
+  accessToken?: string;
+  refreshToken?: string;
+  roleCode?: string;
+  tokenExpiresAt?: string | number;
+  userName?: string;
+}
+
 const getStorage = (): Storage | null =>
   typeof window === "undefined" ? null : window.localStorage;
 
@@ -141,6 +149,43 @@ export const setAuthSession = ({
   storage.setItem(ROLE_CODE_KEY, roleCode);
   storage.setItem(TOKEN_EXPIRES_AT_KEY, String(tokenExpiresAt));
   storage.setItem(USER_NAME_KEY, userName);
+  notifyAuthStorageChange();
+};
+
+// 로그인·토큰 갱신처럼 여러 인증 값을 한 번에 반영해야 할 때 쓴다.
+export const setPartialAuthSession = ({
+  accessToken,
+  refreshToken,
+  roleCode,
+  tokenExpiresAt,
+  userName,
+}: PartialAuthSession) => {
+  const storage = getStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  if (accessToken) {
+    storage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  }
+
+  if (refreshToken) {
+    storage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  }
+
+  if (roleCode) {
+    storage.setItem(ROLE_CODE_KEY, roleCode);
+  }
+
+  if (tokenExpiresAt !== undefined) {
+    storage.setItem(TOKEN_EXPIRES_AT_KEY, String(tokenExpiresAt));
+  }
+
+  if (userName) {
+    storage.setItem(USER_NAME_KEY, userName);
+  }
+
   notifyAuthStorageChange();
 };
 
