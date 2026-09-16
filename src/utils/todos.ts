@@ -23,7 +23,9 @@ export const getTodoPeriod = (timeSlot: string) => {
 export const toDailyTaskItem = (todo: Todo): DailyTaskItem => ({
   id: todo.todoId,
   title: todo.description,
+  assignee: todo.completedByName ?? undefined,
   completed: todo.status === "COMPLETED",
+  completedAt: formatTodoCompletedAt(todo.completedTime),
 });
 
 export const toManageTaskItem = (todo: Todo): ManageTaskItem => ({
