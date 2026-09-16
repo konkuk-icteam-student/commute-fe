@@ -48,7 +48,7 @@ const getSessionExpirationDelay = () => {
 };
 
 const subscribe = (onStoreChange: () => void) => {
-  let timeoutId: ReturnType<typeof window.setTimeout> | null = null;
+  let timeoutId: number | null = null;
 
   const clearExpirationTimer = () => {
     if (timeoutId === null) {
