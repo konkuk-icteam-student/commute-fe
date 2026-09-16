@@ -31,7 +31,7 @@ import {
   useGetWorkSchedulesSummaryQuery,
 } from "@/apis/work-schedules";
 import { getMonthWeekDateRange } from "@/lib/date-formatter";
-import { Alert, Button, Modal } from "@/components/ui";
+import { Alert, BottomActionButton, Modal } from "@/components/ui";
 
 // 이번 달에 추가로 신청할 수 있는 시간. 삭제를 신청한 만큼 다시 채워 넣을 수 있다.
 const getAbleToAddHours = (
@@ -267,9 +267,9 @@ export default function ScheduleEditScreen() {
         </section>
       </div>
 
-      <Button size="lg" onClick={handleClickButton} disabled={buttonDisabled}>
+      <BottomActionButton onClick={handleClickButton} disabled={buttonDisabled}>
         신청하기
-      </Button>
+      </BottomActionButton>
 
       <Modal
         open={isWarningOpen}

@@ -1,5 +1,6 @@
 export { default as Toggle } from "./toggle";
 export { default as Button } from "./button";
+export { default as BottomActionButton } from "./bottom-action-button";
 export { default as Badge } from "./badge";
 export type { BadgeVariant } from "./badge";
 export { default as CheckButton } from "./check-button";

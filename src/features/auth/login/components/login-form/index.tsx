@@ -6,6 +6,8 @@ import { FormEvent, useMemo, useState } from "react";
 import { useLoginMutation } from "@/apis/auth";
 import { ROLE_CODE } from "@/apis/token-storage";
 import { Button, Input } from "@/components/ui";
+import { AuthTitle } from "@/features/auth/components";
+import { hasText } from "@/features/auth/utils/validation";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -15,8 +17,7 @@ export default function LoginForm() {
   const { login, isPendingLogin } = useLoginMutation();
 
   const canSubmit = useMemo(
-    () =>
-      email.trim().length > 0 && password.trim().length > 0 && !isPendingLogin,
+    () => hasText(email) && hasText(password) && !isPendingLogin,
     [email, isPendingLogin, password],
   );
 
@@ -45,12 +46,7 @@ export default function LoginForm() {
 
   return (
     <form className="flex flex-col px-6 pt-27.25" onSubmit={handleSubmit}>
-      <div className="mb-7 ml-px">
-        <p className="mb-3.75 text-[12px] font-bold tracking-[0.015em] text-[#8892A6]">
-          출근부 시스템
-        </p>
-        <h1 className="text-2xl font-bold text-[#434343]">로그인</h1>
-      </div>
+      <AuthTitle title="로그인" />
 
       <div className="flex flex-col gap-3.75">
         <Input
@@ -94,10 +90,7 @@ export default function LoginForm() {
         >
           회원가입
         </Link>
-        <Button
-          type="submit"
-          disabled={!canSubmit}
-        >
+        <Button type="submit" disabled={!canSubmit}>
           {isPendingLogin ? "로그인 중" : "로그인"}
         </Button>
       </div>

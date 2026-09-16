@@ -38,7 +38,7 @@ import {
   getMonthWeekDateRange,
   shiftYearMonth,
 } from "@/lib/date-formatter";
-import { Alert, Button, Modal } from "@/components/ui";
+import { Alert, BottomActionButton, Modal } from "@/components/ui";
 
 // 결과 모달에 보여 줄 내용.
 // 전부 실패하면 서버가 구간 목록을 내려주지 않으므로 message만 채워진다.
@@ -401,9 +401,9 @@ function ScheduleApplyContent({
         weekTotalTimeAfterApply={weekTotalTimeAfterApply}
         monthTotalTimeAfterApply={monthTotalTimeAfterApply}
       />
-      <Button size="lg" onClick={handleClickButton} disabled={buttonDisabled}>
+      <BottomActionButton onClick={handleClickButton} disabled={buttonDisabled}>
         저장하기
-      </Button>
+      </BottomActionButton>
 
       <Modal
         open={isWarningOpen}
