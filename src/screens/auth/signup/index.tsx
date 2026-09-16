@@ -11,7 +11,7 @@ import {
 import leftIcon from "@/assets/icons/common/ic_left.svg";
 import { useGetOrganizationsQuery } from "@/apis/organization";
 import { ROLE_CODE, type RoleCode } from "@/apis/token-storage";
-import { BottomActionButton } from "@/components/ui";
+import { Alert, BottomActionButton, Toast } from "@/components/ui";
 import { AuthShell } from "@/features/auth";
 import { AuthTitle } from "@/features/auth/components";
 import {
@@ -32,6 +32,8 @@ import { useDebouncedValue } from "@/hooks";
 
 const SIGNUP_FORM_ID = "signup-form";
 
+type SignupAlert = "confirm" | "failure" | null;
+
 export default function SignupScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -50,6 +52,10 @@ export default function SignupScreen() {
   const [emailFeedbackMessage, setEmailFeedbackMessage] = useState("");
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [verificationErrorMessage, setVerificationErrorMessage] = useState("");
+  const [isLeaveAlertOpen, setIsLeaveAlertOpen] = useState(false);
+  const [signupAlert, setSignupAlert] = useState<SignupAlert>(null);
+  const [signupFailureMessage, setSignupFailureMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
   const { sendVerificationCode, isPendingSendVerificationCode } =
     useSendVerificationCodeMutation();
   const { verifyCode, isPendingVerifyCode } = useVerifyCodeMutation();
@@ -68,10 +74,7 @@ export default function SignupScreen() {
     organizationId.length > 0 && Number.isInteger(selectedOrganizationId);
   const canRequestCode = isEmailValid && !isPendingSendVerificationCode;
   const canVerifyCode =
-    isCodeSent &&
-    hasText(code) &&
-    !isCodeVerified &&
-    !isPendingVerifyCode;
+    isCodeSent && hasText(code) && !isCodeVerified && !isPendingVerifyCode;
   const isPasswordMatched =
     password.length > 0 &&
     passwordConfirm.length > 0 &&
@@ -177,7 +180,13 @@ export default function SignupScreen() {
       return;
     }
 
+    setSignupAlert("confirm");
+  };
+
+  const handleConfirmSignup = () => {
     clearMessages();
+    setSignupAlert(null);
+    setSignupFailureMessage("");
     register(
       {
         email: email.trim(),
@@ -188,15 +197,21 @@ export default function SignupScreen() {
       },
       {
         onSuccess: () => {
-          router.replace("/login");
+          setToastMessage("가입이 완료되었습니다.");
         },
         onError: (error) => {
-          setErrorMessage(
-            error.message || "회원가입에 실패했습니다. 다시 시도해 주세요.",
+          setSignupFailureMessage(
+            error.message || "가입에 실패했습니다. 잠시후 다시 시도해주세요.",
           );
+          setSignupAlert("failure");
         },
       },
     );
+  };
+
+  const dismissToast = () => {
+    setToastMessage("");
+    router.replace("/login");
   };
 
   return (
@@ -210,7 +225,7 @@ export default function SignupScreen() {
           <button
             type="button"
             aria-label="이전 페이지"
-            onClick={() => router.back()}
+            onClick={() => setIsLeaveAlertOpen(true)}
             className="mb-7.5 flex h-7 w-7 cursor-pointer items-center justify-center"
           >
             <Image
@@ -304,11 +319,48 @@ export default function SignupScreen() {
         <BottomActionButton
           type="submit"
           form={SIGNUP_FORM_ID}
-          disabled={!canSubmit}
+          disabled={!canSubmit || isPendingRegister}
           fixed
         >
           {isPendingRegister ? "가입 중" : "가입하기"}
         </BottomActionButton>
+
+        <Alert
+          open={isLeaveAlertOpen}
+          title="로그인 화면으로 돌아가기"
+          message={"입력한 내용이 저장되지 않습니다. 나가시겠습니까?"}
+          cancelText="취소"
+          confirmText="나가기"
+          onCancel={() => setIsLeaveAlertOpen(false)}
+          onConfirm={() => router.replace("/login")}
+          confirmButtonClassName="bg-[#FD7171] "
+        />
+        <Alert
+          open={signupAlert === "confirm"}
+          title="가입하시겠습니까?"
+          message="입력한 정보는 수정할 수 있습니다."
+          cancelText="취소"
+          confirmText="가입하기"
+          onCancel={() => setSignupAlert(null)}
+          onConfirm={handleConfirmSignup}
+        />
+        <Alert
+          open={signupAlert === "failure"}
+          title="알림"
+          message={signupFailureMessage}
+          confirmText="확인"
+          onCancel={() => setSignupAlert(null)}
+          onConfirm={() => setSignupAlert(null)}
+          cancelButtonClassName="hidden"
+        />
+        <Toast
+          open={toastMessage.length > 0}
+          message={toastMessage}
+          onDismiss={dismissToast}
+          className="bg-[#444444]/50"
+          panelClassName="w-[342px] rounded-[10px]"
+          contentClassName="px-6 py-13 text-[#1A2236]"
+        />
       </div>
     </AuthShell>
   );
