@@ -6,7 +6,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken?: string;
+  accessToken: string;
   refreshToken?: string;
   roleCode?: string;
   tokenExpiresAt?: string | number;

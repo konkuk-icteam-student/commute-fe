@@ -58,11 +58,13 @@ export class ApiError extends Error {
   readonly isSuccess = false;
   readonly details = null;
   readonly status?: number;
+  readonly code?: string;
 
   constructor(response: ApiErrorResponse, status?: number) {
     super(response.message);
     this.name = "ApiError";
     this.status = status;
+    this.code = response.code;
   }
 }
 

@@ -1,4 +1,4 @@
-import { apiClient } from "../api-client";
+import { ApiError, apiClient } from "../api-client";
 import {
   setAccessToken,
   setRefreshToken,
@@ -26,9 +26,16 @@ export const loginApi = async (data: LoginRequest) => {
   );
   const details = response.details;
 
-  if (details.accessToken) {
-    setAccessToken(details.accessToken);
+  if (!details.accessToken) {
+    throw new ApiError({
+      isSuccess: false,
+      code: "MISSING_ACCESS_TOKEN",
+      message: "Invalid login response.",
+      details: null,
+    });
   }
+
+  setAccessToken(details.accessToken);
 
   if (details.refreshToken) {
     setRefreshToken(details.refreshToken);

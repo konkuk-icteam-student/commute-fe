@@ -9,6 +9,7 @@ export default function Input({
   label,
   state = "default",
   className,
+  "aria-invalid": ariaInvalid,
   ...props
 }: InputProps) {
   const showStatusIcon = state === "error" || state === "success";
@@ -32,15 +33,22 @@ export default function Input({
             state === "success" && "border-[#2663EB]/70",
             className,
           )}
+          aria-invalid={ariaInvalid ?? (state === "error" ? true : undefined)}
           {...props}
         />
         {state === "error" ? (
-          <span className="absolute top-1/2 right-3 -translate-y-1/2 text-xl leading-none text-[#F24822]">
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-xl leading-none text-[#F24822]"
+          >
             ×
           </span>
         ) : null}
         {state === "success" ? (
-          <span className="absolute top-1/2 right-3 -translate-y-1/2 text-lg leading-none text-[#2563EB]">
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-lg leading-none text-[#2563EB]"
+          >
             ✓
           </span>
         ) : null}

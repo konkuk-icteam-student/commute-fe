@@ -5,7 +5,7 @@ import {
   getTokenExpiresAt,
 } from "@/apis/token-storage";
 
-const normalizeExpiresAt = (expiresAt: string) => {
+export const normalizeExpiresAt = (expiresAt: string) => {
   const numericExpiresAt = Number(expiresAt);
 
   if (Number.isFinite(numericExpiresAt)) {
@@ -37,7 +37,8 @@ export const hasUsableStoredSession = () => {
   const expiresAtTime = normalizeExpiresAt(expiresAt);
 
   if (expiresAtTime === null) {
-    return true;
+    deleteAuthToken();
+    return false;
   }
 
   const isExpired = expiresAtTime <= Date.now();

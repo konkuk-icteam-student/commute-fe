@@ -46,7 +46,7 @@ export default function SignupScreen() {
   const [isOrganizationDropdownOpen, setIsOrganizationDropdownOpen] =
     useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [emailFeedbackMessage, setEmailFeedbackMessage] = useState("");
@@ -69,6 +69,8 @@ export default function SignupScreen() {
   const isEmailValid = isValidEmail(email);
   const isDebouncedEmailFilled = hasText(debouncedEmail);
   const isDebouncedEmailValid = isValidEmail(debouncedEmail);
+  const trimmedEmail = email.trim();
+  const isCodeVerified = hasText(trimmedEmail) && verifiedEmail === trimmedEmail;
   const selectedOrganizationId = Number(organizationId);
   const isOrganizationSelected =
     organizationId.length > 0 && Number.isInteger(selectedOrganizationId);
@@ -131,11 +133,11 @@ export default function SignupScreen() {
 
     clearMessages();
     sendVerificationCode(
-      { email: email.trim() },
+      { email: trimmedEmail },
       {
         onSuccess: () => {
           setIsCodeSent(true);
-          setIsCodeVerified(false);
+          setVerifiedEmail("");
           setEmailFeedbackMessage("인증번호를 전송했습니다.");
         },
         onError: (error) => {
@@ -157,14 +159,16 @@ export default function SignupScreen() {
       return;
     }
 
+    const verifyingEmail = trimmedEmail;
+
     verifyCode(
-      { email: email.trim(), code: code.trim() },
+      { email: verifyingEmail, code: code.trim() },
       {
         onSuccess: () => {
-          setIsCodeVerified(true);
+          setVerifiedEmail(verifyingEmail);
         },
         onError: (error) => {
-          setIsCodeVerified(false);
+          setVerifiedEmail("");
           setVerificationErrorMessage(
             getVerificationErrorMessage(error.message),
           );
@@ -189,7 +193,7 @@ export default function SignupScreen() {
     setSignupFailureMessage("");
     register(
       {
-        email: email.trim(),
+        email: trimmedEmail,
         password,
         name: name.trim(),
         roleCode,
@@ -262,7 +266,7 @@ export default function SignupScreen() {
             onEmailChange={(nextEmail) => {
               setEmail(nextEmail);
               setIsCodeSent(false);
-              setIsCodeVerified(false);
+              setVerifiedEmail("");
               clearMessages();
             }}
             emailState={emailState}
@@ -278,7 +282,7 @@ export default function SignupScreen() {
             code={code}
             onCodeChange={(nextCode) => {
               setCode(nextCode);
-              setIsCodeVerified(false);
+              setVerifiedEmail("");
               clearMessages();
             }}
             codeState={codeState}

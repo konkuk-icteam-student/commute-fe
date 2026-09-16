@@ -7,6 +7,7 @@ import { useLoginMutation } from "@/apis/auth";
 import { ROLE_CODE } from "@/apis/token-storage";
 import { Button, Input } from "@/components/ui";
 import { AuthTitle } from "@/features/auth/components";
+import { getLoginErrorMessage } from "@/features/auth/utils/login-error";
 import { hasText } from "@/features/auth/utils/validation";
 
 export default function LoginForm() {
@@ -36,9 +37,7 @@ export default function LoginForm() {
           router.replace(details.roleCode === ROLE_CODE.ADMIN ? "/admin" : "/");
         },
         onError: (error) => {
-          setErrorMessage(
-            error.message || "로그인에 실패했습니다. 다시 시도해 주세요.",
-          );
+          setErrorMessage(getLoginErrorMessage(error));
         },
       },
     );
