@@ -1,17 +1,17 @@
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps {
-  children: React.ReactNode;
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   size?: "lg" | "md" | "sm";
-  disabled?: boolean;
-  onClick: () => void;
 }
 
 export default function Button({
   children,
   size = "md",
-  disabled = false,
-  onClick,
+  className,
+  type = "button",
+  ...props
 }: ButtonProps) {
   const buttonStyles =
     size === "lg"
@@ -20,16 +20,15 @@ export default function Button({
         ? "w-29 h-9 text-sm rounded-lg"
         : "w-16 h-7 text-xs rounded-lg";
 
-  // TODO: 호버 시 커서 변경되도록 설정 필요!!!!
   return (
     <button
       className={cn(
-        "flex cursor-pointer items-center justify-center bg-[#2076FF] text-white disabled:cursor-auto disabled:bg-[#979797]",
+        "flex cursor-pointer items-center justify-center bg-[#2076FF] font-normal text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#C6CBD4]",
         buttonStyles,
+        className,
       )}
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
+      type={type}
+      {...props}
     >
       {children}
     </button>
