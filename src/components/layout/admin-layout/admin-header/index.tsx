@@ -64,6 +64,7 @@ export default function AdminHeader({
 
     logout(undefined, {
       onSuccess: () => {
+        deleteAuthToken();
         setIsLogoutAlertOpen(false);
         setToastMessage("로그아웃되었습니다.");
       },
@@ -80,7 +81,6 @@ export default function AdminHeader({
     setToastMessage("");
 
     if (shouldRedirectToLogin) {
-      deleteAuthToken();
       window.location.replace("/login");
     }
   };
