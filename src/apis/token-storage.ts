@@ -38,7 +38,7 @@ export interface PartialAuthSession {
   accessToken?: string;
   refreshToken?: string;
   roleCode?: string;
-  tokenExpiresAt?: string | number;
+  tokenExpiresAt?: string | number | null;
   userName?: string;
 }
 
@@ -178,7 +178,7 @@ export const setPartialAuthSession = ({
     storage.setItem(ROLE_CODE_KEY, roleCode);
   }
 
-  if (tokenExpiresAt !== undefined) {
+  if (tokenExpiresAt !== undefined && tokenExpiresAt !== null) {
     storage.setItem(TOKEN_EXPIRES_AT_KEY, String(tokenExpiresAt));
   }
 

@@ -8,6 +8,7 @@ import {
   getRoleCode,
   getTokenExpiresAt,
   getUserName,
+  setPartialAuthSession,
 } from "../token-storage";
 
 const originalWindowDescriptor = Object.getOwnPropertyDescriptor(
@@ -114,6 +115,34 @@ describe("token storage environment boundary", () => {
     storage.setItem("roleCode", "RL99");
 
     assert.equal(getRoleCode(), null);
+  });
+
+  it("does not persist a null token expiration", () => {
+    const storage = createMemoryStorage();
+    installBrowserStorage(storage);
+    storage.setItem("tokenExpiresAt", "existing-expiration");
+
+    setPartialAuthSession({ tokenExpiresAt: null });
+
+    assert.equal(storage.getItem("tokenExpiresAt"), "existing-expiration");
+  });
+
+  it("persists a zero token expiration", () => {
+    const storage = createMemoryStorage();
+    installBrowserStorage(storage);
+
+    setPartialAuthSession({ tokenExpiresAt: 0 });
+
+    assert.equal(storage.getItem("tokenExpiresAt"), "0");
+  });
+
+  it("persists a string token expiration", () => {
+    const storage = createMemoryStorage();
+    installBrowserStorage(storage);
+
+    setPartialAuthSession({ tokenExpiresAt: "1787362890" });
+
+    assert.equal(storage.getItem("tokenExpiresAt"), "1787362890");
   });
 
   it("clears the role code and user name together with the tokens", () => {
