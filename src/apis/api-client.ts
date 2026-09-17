@@ -12,10 +12,7 @@ import { showAuthNotice } from "./auth-notice";
 import {
   getAccessToken,
   getRefreshToken,
-  setAccessToken,
-  setRefreshToken,
-  setRoleCode,
-  setTokenExpiresAt,
+  setPartialAuthSession,
 } from "./token-storage";
 
 declare module "axios" {
@@ -145,20 +142,8 @@ const requestNewAccessToken = async () => {
       return false;
     }
 
-    setAccessToken(details.accessToken);
-
     // 서버가 함께 내려준 값만 갱신한다. 오지 않은 값은 기존 것을 그대로 둔다.
-    if (details.refreshToken) {
-      setRefreshToken(details.refreshToken);
-    }
-
-    if (details.roleCode) {
-      setRoleCode(details.roleCode);
-    }
-
-    if (details.tokenExpiresAt !== undefined) {
-      setTokenExpiresAt(details.tokenExpiresAt);
-    }
+    setPartialAuthSession(details);
 
     return true;
   } catch {

@@ -3,7 +3,9 @@ export type DailyTaskPeriod = "morning" | "afternoon";
 export type DailyTaskItem = {
   id: number;
   title: string;
+  assignee?: string;
   completed: boolean;
+  completedAt?: string;
 };
 
 export type WorkTimeWorker = {

@@ -1,10 +1,5 @@
 import { ApiError, apiClient } from "../api-client";
-import {
-  setAccessToken,
-  setRefreshToken,
-  setRoleCode,
-  setTokenExpiresAt,
-} from "../token-storage";
+import { setPartialAuthSession } from "../token-storage";
 import { AUTH_URL } from "./auth.endpoint";
 import type {
   LoginRequest,
@@ -35,19 +30,7 @@ export const loginApi = async (data: LoginRequest) => {
     });
   }
 
-  setAccessToken(details.accessToken);
-
-  if (details.refreshToken) {
-    setRefreshToken(details.refreshToken);
-  }
-
-  if (details.roleCode) {
-    setRoleCode(details.roleCode);
-  }
-
-  if (details.tokenExpiresAt !== undefined) {
-    setTokenExpiresAt(details.tokenExpiresAt);
-  }
+  setPartialAuthSession(details);
 
   return details;
 };
