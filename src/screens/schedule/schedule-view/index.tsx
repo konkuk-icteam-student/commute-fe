@@ -34,7 +34,7 @@ import { useGetMyPageQuery } from "@/apis/my-page";
 import { useGetWorkChangeRequestHistoryQuery } from "@/apis/work-change-requests";
 
 // 미리보기라 최근 것만 보여 준다. 전체는 '처리내역 자세히보기'로 넘어간다.
-const CHANGE_HISTORY_PREVIEW_SIZE = 4;
+const CHANGE_HISTORY_PREVIEW_SIZE = 3;
 type ApplyTargetMonth = { year: number; month: number };
 type ApplyPeriodEntry = {
   target: ApplyTargetMonth;
@@ -127,15 +127,13 @@ export default function ScheduleViewScreen() {
     currentMonthApplyPeriodData !== undefined &&
     !isWithinApplyPeriod(todayDate, currentMonthApplyPeriodData);
 
-  // 아직 처리되지 않은 요청만 미리 보여 준다. 이 칸의 빈 상태 문구도 '처리 중인 내역'을 가리킨다.
+  // 연월과 관계없이 가장 최근 신청 내역을 보여 준다.
   const {
     workChangeRequestHistoryData,
     workChangeRequestHistoryError,
     refetchWorkChangeRequestHistory,
   } = useGetWorkChangeRequestHistoryQuery({
-    year,
-    month,
-    statusCode: "CS01",
+    statusCode: "ALL",
     page: 0,
     size: CHANGE_HISTORY_PREVIEW_SIZE,
   });

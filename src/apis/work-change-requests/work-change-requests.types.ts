@@ -24,7 +24,7 @@ export interface WorkChangeRequestHistorySummary {
 export interface WorkChangeRequestHistorySlot {
   start: string;
   end: string;
-  changeTypeCode?: WorkChangeRequestChangeTypeCode;
+  changeTypeCode: WorkChangeRequestChangeTypeCode;
 }
 
 export interface WorkChangeRequestHistoryItem {
