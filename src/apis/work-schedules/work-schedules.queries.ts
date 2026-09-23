@@ -62,9 +62,10 @@ const WORK_SCHEDULES_CACHE_TIME = {
   },
 } as const;
 
-export const useGetWorkSchedulesWithUsersQuery = (
-  params: GetWorkSchedulesWithUsersRequest,
-) => {
+export const useGetWorkSchedulesWithUsersQuery = ({
+  enabled = true,
+  ...params
+}: GetWorkSchedulesWithUsersRequest & { enabled?: boolean }) => {
   const {
     data: workSchedulesWithUsersData,
     isPending: isPendingWorkSchedulesWithUsers,
@@ -75,6 +76,7 @@ export const useGetWorkSchedulesWithUsersQuery = (
   } = useQuery<GetWorkSchedulesWithUsersResponse, ApiError>({
     queryKey: WORK_SCHEDULES_QUERY_KEY.WITH_USERS(params),
     queryFn: () => getWorkSchedulesWithUsersApi(params),
+    enabled,
     retry: 1,
     staleTime: WORK_SCHEDULES_CACHE_TIME.WITH_USERS.STALE,
     gcTime: WORK_SCHEDULES_CACHE_TIME.WITH_USERS.GC,
@@ -91,7 +93,7 @@ export const useGetWorkSchedulesWithUsersQuery = (
 };
 
 export const useGetAdminWorkSchedulesQuery = (
-  params: GetWorkSchedulesWithUsersRequest,
+  params: GetWorkSchedulesWithUsersRequest & { enabled?: boolean },
 ) => {
   const {
     workSchedulesWithUsersData,

@@ -17,11 +17,13 @@ import {
 interface WorktimeDetailQuickSearchProps {
   startDate: string;
   endDate: string;
+  isScheduleEnabled?: boolean;
 }
 
 export default function WorktimeDetailQuickSearch({
   startDate,
   endDate,
+  isScheduleEnabled = true,
 }: WorktimeDetailQuickSearchProps) {
   const [searchText, setSearchText] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminSearchedUser | null>(
@@ -44,6 +46,7 @@ export default function WorktimeDetailQuickSearch({
     userId: selectedUser?.userId ?? 0,
     startDate,
     endDate,
+    enabled: isScheduleEnabled,
   });
 
   const searchedUsers = adminUserSearchData?.users ?? [];
