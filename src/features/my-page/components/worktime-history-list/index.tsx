@@ -95,6 +95,12 @@ export default function WorktimeHistoryList({
                 ))}
               </ul>
 
+              {history.statusCode === "CS03" && history.rejectReason ? (
+                <p className="mt-[10px] text-[10px] leading-4.5 font-medium text-[#1A2236]">
+                  반려사유 : {history.rejectReason}
+                </p>
+              ) : null}
+
               <p className="mt-2 text-[8px] leading-2.5 font-medium text-[#8892A6]">
                 {formatWorktimeHistoryRequestedAt(history.requestedAt)}
               </p>
