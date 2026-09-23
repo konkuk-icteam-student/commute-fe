@@ -13,7 +13,7 @@ export default function NotificationHeader() {
       >
         <Image alt="" aria-hidden="true" src={icLeft} width={20} height={20} />
       </Link>
-      <h1 className="text-base leading-6 font-bold text-[#1A2236]">알림</h1>
+      <h1 className="text-[16px] leading-6 font-bold text-[#1A2236]">알림</h1>
     </header>
   );
 }

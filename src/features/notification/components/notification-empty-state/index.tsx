@@ -12,7 +12,7 @@ export default function NotificationEmptyState() {
         width={28}
         height={28}
       />
-      <p className="mt-2.25 text-sm leading-6 font-medium text-[#8892A6]">
+      <p className="mt-2.25 text-[14px] leading-6 font-medium text-[#8892A6]">
         최근 30일 내 새로운 알림이 없습니다.
       </p>
     </div>

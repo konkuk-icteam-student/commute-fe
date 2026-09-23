@@ -8,6 +8,9 @@ interface WorktimeDetailHeaderProps {
   month: number;
   week: number;
   isEditMode: boolean;
+  isEditAvailable: boolean;
+  isPrevWeekDisabled: boolean;
+  isNextWeekDisabled: boolean;
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
   handleChangeEditMode: () => void;
@@ -18,6 +21,9 @@ export default function WorktimeDetailHeader({
   month,
   week,
   isEditMode,
+  isEditAvailable,
+  isPrevWeekDisabled,
+  isNextWeekDisabled,
   handlePrevWeek,
   handleNextWeek,
   handleChangeEditMode,
@@ -37,8 +43,9 @@ export default function WorktimeDetailHeader({
 
       <div className="flex w-full flex-1 flex-row items-center justify-center gap-6">
         <button
-          className="flex cursor-pointer items-center justify-center rounded-full"
+          className="flex cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40"
           type="button"
+          disabled={isPrevWeekDisabled}
           onClick={handlePrevWeek}
         >
           <Image
@@ -51,8 +58,9 @@ export default function WorktimeDetailHeader({
           {year}년 {month}월 {week}주차
         </h2>
         <button
-          className="flex cursor-pointer items-center justify-center rounded-full"
+          className="flex cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40"
           type="button"
+          disabled={isNextWeekDisabled}
           onClick={handleNextWeek}
         >
           <Image className="h-9 w-9" src={icRightButton} alt="다음주차" />
@@ -70,7 +78,8 @@ export default function WorktimeDetailHeader({
         ) : (
           <button
             type="button"
-            className="w-40 cursor-pointer rounded-md bg-[#2D81FF] py-1.5 text-lg font-semibold text-white"
+            className="w-40 cursor-pointer rounded-md bg-[#2D81FF] py-1.5 text-lg font-semibold text-white disabled:cursor-default disabled:bg-[#BFC7D4]"
+            disabled={!isEditAvailable}
             onClick={handleChangeEditMode}
           >
             편집하기
