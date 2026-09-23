@@ -29,7 +29,7 @@ export default function WorktimeDetailHeader({
   handleChangeEditMode,
 }: WorktimeDetailHeaderProps) {
   return (
-    <header className="flex flex-row items-center">
+    <header className="flex flex-row items-center gap-2">
       <div className="flex flex-1">
         {isEditMode && (
           <div className="ml-10 flex flex-row items-center gap-2 rounded-xl bg-[#DBEAFE] p-4 text-[#1A2236]">

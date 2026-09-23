@@ -74,7 +74,9 @@ export default function WorktimeDetailScreen() {
   ];
   const editableMonths = settingsEntries
     .filter(
-      ({ data }) => data?.isConfigured && isWithinApplyPeriod(todayDate, data),
+      ({ data }, index) =>
+        index === 0 ||
+        (data?.isConfigured && isWithinApplyPeriod(todayDate, data)),
     )
     .map(({ target }) => target);
   const currentMonthIndex = getMonthIndex(
