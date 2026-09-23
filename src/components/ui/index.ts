@@ -10,3 +10,5 @@ export { default as Modal } from "./modal";
 export { default as Toast } from "./toast";
 export { default as Spinner } from "./spinner";
 export { default as Input } from "./input";
+export { default as StatusHistoryCard } from "./status-history-card";
+export type { StatusHistoryCardTone } from "./status-history-card";

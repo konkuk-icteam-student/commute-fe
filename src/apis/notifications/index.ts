@@ -2,6 +2,8 @@ export type {
   CheckNotificationsResponse,
   GetNewNotificationsResponse,
   GetNotificationsResponse,
+  NotificationChangeTypeCode,
+  NotificationContentItem,
   NotificationItem,
   NotificationTypeCode,
 } from "./notifications.types";
