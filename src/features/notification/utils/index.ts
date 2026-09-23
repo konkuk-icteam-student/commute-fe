@@ -1,7 +1,15 @@
-import type { NotificationItem } from "@/apis/notifications";
+import type { NotificationContentItem } from "@/apis/notifications";
 
-export const shouldShowAddTimeIcon = (notification: NotificationItem) =>
-  notification.typeCode === "NT01" || notification.typeCode === "NT02";
+export const formatNotificationContent = ({
+  date,
+  startTime,
+  endTime,
+  durationMinutes,
+}: NotificationContentItem) => {
+  const [, month, day] = date.split("-").map(Number);
+
+  return `${month}월 ${day}일 ${startTime}-${endTime} (${durationMinutes / 60}h)`;
+};
 
 export const formatNotificationCreatedAt = (createdAt: string) => {
   const [date = "", time = ""] = createdAt.split(/[ T]/);
@@ -12,8 +20,5 @@ export const formatNotificationCreatedAt = (createdAt: string) => {
     return createdAt;
   }
 
-  return `${year}년 ${Number(month)}월 ${Number(day)}일 ${hour}:${minute}`;
+  return `${year}.${month}.${day} ${hour}:${minute}`;
 };
-
-export const getNotificationDateTime = (createdAt: string) =>
-  createdAt.replace(" ", "T");

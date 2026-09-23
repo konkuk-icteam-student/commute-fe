@@ -1,9 +1,8 @@
 import Image from "next/image";
 
-import minusFilledIcon from "@/assets/icons/common/ic_minus_filled.svg";
-import plusFilledIcon from "@/assets/icons/common/ic_plus_filled.svg";
 import rightButtonIcon from "@/assets/icons/common/ic_right_button.svg";
 import rightButtonDisabledIcon from "@/assets/icons/common/ic_right_button_disabled.svg";
+import { StatusHistoryCard, type StatusHistoryCardTone } from "@/components/ui";
 import { formatScheduleChangeHistorySlot } from "@/features/schedule/utils";
 import type { WorktimeHistoryItem } from "@/features/my-page/types";
 import {
@@ -20,16 +19,14 @@ interface WorktimeHistoryListProps {
   onNextPage?: () => void;
 }
 
-const statusClassNames = {
-  CS01: "bg-[#FFF4D7] text-[#B88A42]",
-  CS02: "bg-[#DBEAFE] text-[#2563EB]",
-  CS03: "bg-[#FFE4E4] text-[#C44B5F]",
-} as const;
-
-const changeTypeIcons = {
-  CR01: plusFilledIcon,
-  CR02: minusFilledIcon,
-} as const;
+const statusTone: Record<
+  WorktimeHistoryItem["statusCode"],
+  StatusHistoryCardTone
+> = {
+  CS01: "pending",
+  CS02: "approved",
+  CS03: "rejected",
+};
 
 const getHistorySlots = (history: WorktimeHistoryItem) => [
   ...history.deleteSlots,
@@ -58,53 +55,29 @@ export default function WorktimeHistoryList({
       {hasHistories ? (
         <div className="mt-2 flex flex-col gap-4">
           {histories.map((history) => (
-            <article
-              className="rounded-[20px] border-[0.5px] border-[#DDE3EF] bg-white px-3.75 py-2.75 shadow-[0_2px_8px_0_#F3F2F2]"
+            <StatusHistoryCard
               key={history.requestId}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <span
-                  className={`flex h-4.75 min-w-10.25 items-center justify-center rounded-lg px-2.5 py-1 text-[11px] font-bold ${statusClassNames[history.statusCode]}`}
-                >
-                  {history.statusName}
-                </span>
-                {history.processedAt ? (
-                  <span className="text-[9px] leading-4.5 font-bold text-[#8892A6]">
-                    {formatWorktimeHistoryProcessedAt(history.processedAt)}
-                  </span>
-                ) : null}
-              </div>
-
-              <ul className="mt-3 flex flex-col gap-1">
-                {getHistorySlots(history).map((change, changeIndex) => (
-                  <li
-                    className="flex items-center gap-1.5 text-[10px] leading-4.5 font-medium text-[#1A2236]"
-                    key={`${change.changeTypeCode ?? "CR01"}-${change.start}-${change.end}-${changeIndex}`}
-                  >
-                    <Image
-                      alt=""
-                      aria-hidden="true"
-                      className="shrink-0"
-                      height={5}
-                      src={changeTypeIcons[change.changeTypeCode ?? "CR01"]}
-                      unoptimized
-                      width={5}
-                    />
-                    <span>{formatScheduleChangeHistorySlot(change)}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {history.statusCode === "CS03" && history.rejectReason ? (
-                <p className="mt-[10px] text-[10px] leading-4.5 font-medium text-[#1A2236]">
-                  반려사유 : {history.rejectReason}
-                </p>
-              ) : null}
-
-              <p className="mt-2 text-[8px] leading-2.5 font-medium text-[#8892A6]">
-                {formatWorktimeHistoryRequestedAt(history.requestedAt)}
-              </p>
-            </article>
+              statusLabel={history.statusName}
+              tone={statusTone[history.statusCode]}
+              processedAt={
+                history.processedAt
+                  ? formatWorktimeHistoryProcessedAt(history.processedAt)
+                  : undefined
+              }
+              items={getHistorySlots(history).map((change, changeIndex) => ({
+                key: `${change.changeTypeCode}-${change.start}-${change.end}-${changeIndex}`,
+                text: formatScheduleChangeHistorySlot(change),
+                type:
+                  change.changeTypeCode === "CR01"
+                    ? ("add" as const)
+                    : ("delete" as const),
+              }))}
+              reason={
+                history.statusCode === "CS03" ? history.rejectReason : null
+              }
+              footer={formatWorktimeHistoryRequestedAt(history.requestedAt)}
+              footerDateTime={history.requestedAt}
+            />
           ))}
           {pageCount > 1 ? (
             <div className="flex items-center justify-center gap-3 pt-1">
