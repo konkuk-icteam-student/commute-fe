@@ -38,7 +38,7 @@ export default function WorktimeDetailSection({
   handleChangeEditMonth,
 }: WorktimeDetailSectionProps) {
   return (
-    <div className="flex w-full min-w-240 flex-col gap-8 bg-white p-8 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+    <div className="flex w-full min-w-240 flex-col gap-4 bg-white p-8 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
       <WorktimeDetailHeader
         year={year}
         month={month}
@@ -52,7 +52,7 @@ export default function WorktimeDetailSection({
         handleChangeEditMode={handleChangeEditMode}
       />
       {isEditMode ? (
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-end gap-2">
           {editableMonths.map((target) => {
             const isSelected = target.year === year && target.month === month;
 
