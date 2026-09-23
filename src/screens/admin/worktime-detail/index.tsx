@@ -96,14 +96,18 @@ export default function WorktimeDetailScreen() {
 
   const { year, month, week, maxWeek } = getMonthWeekOfDate(selectedDate);
   const selectedMonthIndex = getMonthIndex(year, month);
-  const isMonthScheduleEnabled = (targetYear: number, targetMonth: number) =>
-    getMonthIndex(targetYear, targetMonth) <= currentMonthIndex ||
+  const isEditableMonth = (targetYear: number, targetMonth: number) =>
     editableMonths.some(
       (target) => target.year === targetYear && target.month === targetMonth,
     );
+  const isMonthScheduleEnabled = (targetYear: number, targetMonth: number) =>
+    isEditableMonth(targetYear, targetMonth) ||
+    (!isEditMode &&
+      getMonthIndex(targetYear, targetMonth) <= currentMonthIndex);
   const isFutureUnavailableMonth =
     selectedMonthIndex > currentMonthIndex &&
     !isMonthScheduleEnabled(year, month);
+  const isCurrentMonthScheduleEnabled = !isFutureUnavailableMonth;
   const isLastViewableWeek =
     selectedMonthIndex >= latestViewableMonthIndex && week >= maxWeek;
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
@@ -128,7 +132,7 @@ export default function WorktimeDetailScreen() {
   } = useGetAdminWorkSchedulesQuery({
     startDate,
     endDate,
-    enabled: !isFutureUnavailableMonth,
+    enabled: isCurrentMonthScheduleEnabled,
   });
   const {
     adminWorkSchedulesData: adjacentMonthWorkSchedulesData,
@@ -140,8 +144,15 @@ export default function WorktimeDetailScreen() {
     enabled: isAdjacentMonthScheduleEnabled,
   });
 
+  const enabledCurrentMonthWorkSchedulesData = isCurrentMonthScheduleEnabled
+    ? currentMonthWorkSchedulesData
+    : undefined;
+  const enabledAdjacentMonthWorkSchedulesData = isAdjacentMonthScheduleEnabled
+    ? adjacentMonthWorkSchedulesData
+    : undefined;
   const baseWorkSchedulesData =
-    currentMonthWorkSchedulesData ?? adjacentMonthWorkSchedulesData;
+    enabledCurrentMonthWorkSchedulesData ??
+    enabledAdjacentMonthWorkSchedulesData;
   const workSchedulesData: GetAdminWorkSchedulesResponse | undefined =
     baseWorkSchedulesData
       ? {
@@ -149,8 +160,8 @@ export default function WorktimeDetailScreen() {
           startDate: weekdays[0]?.date ?? startDate,
           endDate: weekdays[weekdays.length - 1]?.date ?? endDate,
           days: [
-            ...(currentMonthWorkSchedulesData?.days ?? []),
-            ...(adjacentMonthWorkSchedulesData?.days ?? []),
+            ...(enabledCurrentMonthWorkSchedulesData?.days ?? []),
+            ...(enabledAdjacentMonthWorkSchedulesData?.days ?? []),
           ],
         }
       : undefined;
@@ -167,7 +178,7 @@ export default function WorktimeDetailScreen() {
   const slotsByDay = toWorktimeDetailSlotsByDay(weekdays, workSchedulesData);
 
   const handlePrevWeek = () => {
-    if (isEditMode && week <= 1) {
+    if (isEditMode && selectedMonthIndex <= currentMonthIndex && week <= 1) {
       return;
     }
 
@@ -175,10 +186,7 @@ export default function WorktimeDetailScreen() {
   };
 
   const handleNextWeek = () => {
-    if (
-      (isEditMode && week >= maxWeek) ||
-      (!isEditMode && isLastViewableWeek)
-    ) {
+    if (isLastViewableWeek) {
       return;
     }
 
@@ -192,11 +200,9 @@ export default function WorktimeDetailScreen() {
       return;
     }
 
-    const isEditableMonth = editableMonths.some(
-      (target) => target.year === year && target.month === month,
-    );
+    const canEditSelectedMonth = isEditableMonth(year, month);
 
-    if (nextMode && !isEditableMonth) {
+    if (nextMode && !canEditSelectedMonth) {
       const [firstEditableMonth] = editableMonths;
       setSelectedDate(
         getFirstWeekdayOfMonth(
@@ -209,10 +215,6 @@ export default function WorktimeDetailScreen() {
     setIsEditMode(nextMode);
   };
 
-  const handleChangeEditMonth = (targetYear: number, targetMonth: number) => {
-    setSelectedDate(getFirstWeekdayOfMonth(targetYear, targetMonth));
-  };
-
   return (
     <div className="flex flex-row">
       <WorktimeDetailSection
@@ -222,19 +224,20 @@ export default function WorktimeDetailScreen() {
         slotsByDay={slotsByDay}
         maxConcurrentWorkers={workSchedulesData?.maxConcurrentWorkers ?? 0}
         isLoading={
-          (!isFutureUnavailableMonth && isFetchingCurrentMonthWorkSchedules) ||
+          (isCurrentMonthScheduleEnabled &&
+            isFetchingCurrentMonthWorkSchedules) ||
           (isAdjacentMonthScheduleEnabled &&
             isFetchingAdjacentMonthWorkSchedules)
         }
         isEditMode={isEditMode}
         isEditAvailable={isEditAvailable}
-        editableMonths={editableMonths}
-        isPrevWeekDisabled={isEditMode && week <= 1}
-        isNextWeekDisabled={isEditMode ? week >= maxWeek : isLastViewableWeek}
+        isPrevWeekDisabled={
+          isEditMode && selectedMonthIndex <= currentMonthIndex && week <= 1
+        }
+        isNextWeekDisabled={isLastViewableWeek}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         handleChangeEditMode={handleChangeEditMode}
-        handleChangeEditMonth={handleChangeEditMonth}
       />
       <WorktimeDetailQuickSearch
         startDate={startDate}
