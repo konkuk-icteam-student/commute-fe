@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useCheckInHomeMutation, useGetHomeTodayQuery } from "@/apis/home";
+import { useGetMyPageQuery } from "@/apis/my-page";
 import { useGetNewNotificationsQuery } from "@/apis/notifications";
 import {
   AttendanceCard,
@@ -18,11 +19,6 @@ import {
   WorkScheduleCard,
 } from "@/features/home";
 
-const mockHomeData = {
-  userName: "홍길동",
-  teamName: "정보운영팀",
-};
-
 const workStatusMap = {
   WK01: "scheduled",
   WK02: "working",
@@ -34,6 +30,7 @@ export default function HomeScreen() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const { canClockInAtWorkLocation } = useClockInLocation();
   const { newNotificationsData } = useGetNewNotificationsQuery();
+  const { myPageData } = useGetMyPageQuery();
   const {
     homeTodayData,
     isErrorHomeToday,
@@ -104,8 +101,8 @@ export default function HomeScreen() {
         newNotificationCount={newNotificationsData?.newNotificationCount ?? 0}
       />
       <HomeGreeting
-        teamName={mockHomeData.teamName}
-        userName={mockHomeData.userName}
+        teamName={myPageData?.organizationName ?? "-"}
+        userName={myPageData?.userName ?? "-"}
       />
       <DateRefreshButton
         currentDateTime={currentDateTime}
