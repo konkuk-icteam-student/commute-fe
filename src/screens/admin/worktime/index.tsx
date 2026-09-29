@@ -45,6 +45,14 @@ export default function WorktimeScreen() {
 
   const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
+  const weekdays = getWeekdaysOfMonthWeek(year, month, week);
+  const adjacentMonthDates = weekdays.filter(
+    ({ isCurrentMonth }) => !isCurrentMonth,
+  );
+  const adjacentStartDate = adjacentMonthDates[0]?.date ?? startDate;
+  const adjacentEndDate =
+    adjacentMonthDates[adjacentMonthDates.length - 1]?.date ?? endDate;
+  const hasAdjacentMonthDates = adjacentMonthDates.length > 0;
 
   // 조회할 사용자가 정해진 동안에는 사용자별 조회를, 그 외에는 전체 조회를 쓴다.
   const isUserSelected = selectedUser !== null;
@@ -59,6 +67,16 @@ export default function WorktimeScreen() {
     endDate,
     enabled: !isUserSelected,
   });
+  const {
+    adminWorkSchedulesData: adjacentAdminWorkSchedulesData,
+    isFetchingAdminWorkSchedules: isFetchingAdjacentAdminWorkSchedules,
+    adminWorkSchedulesError: adjacentAdminWorkSchedulesError,
+    refetchAdminWorkSchedules: refetchAdjacentAdminWorkSchedules,
+  } = useGetAdminWorkSchedulesQuery({
+    startDate: adjacentStartDate,
+    endDate: adjacentEndDate,
+    enabled: !isUserSelected && hasAdjacentMonthDates,
+  });
 
   const {
     adminUserWorkSchedulesData,
@@ -70,6 +88,17 @@ export default function WorktimeScreen() {
     startDate,
     endDate,
     enabled: isUserSelected,
+  });
+  const {
+    adminUserWorkSchedulesData: adjacentAdminUserWorkSchedulesData,
+    isFetchingAdminUserWorkSchedules: isFetchingAdjacentAdminUserWorkSchedules,
+    adminUserWorkSchedulesError: adjacentAdminUserWorkSchedulesError,
+    refetchAdminUserWorkSchedules: refetchAdjacentAdminUserWorkSchedules,
+  } = useGetAdminUserWorkSchedulesQuery({
+    userId: selectedUser?.userId ?? 0,
+    startDate: adjacentStartDate,
+    endDate: adjacentEndDate,
+    enabled: isUserSelected && hasAdjacentMonthDates,
   });
 
   const debouncedSearchText = useDebouncedValue(searchText);
@@ -86,17 +115,34 @@ export default function WorktimeScreen() {
   // 조회에 실패하면 표가 잠긴 채로 남아 장애인지 알 수 없으므로 모달로 알린다.
   // 지금 돌지 않는 조회의 실패는 남은 값이므로 화면에 쓰는 쪽만 본다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
-    isUserSelected ? adminUserWorkSchedulesError : adminWorkSchedulesError,
+    ...(isUserSelected
+      ? [adminUserWorkSchedulesError, adjacentAdminUserWorkSchedulesError]
+      : [adminWorkSchedulesError, adjacentAdminWorkSchedulesError]),
   ]);
 
+  const mergedAdminWorkSchedulesData = adminWorkSchedulesData
+    ? {
+        ...adminWorkSchedulesData,
+        days: [
+          ...adminWorkSchedulesData.days,
+          ...(adjacentAdminWorkSchedulesData?.days ?? []),
+        ],
+      }
+    : adjacentAdminWorkSchedulesData;
+  const mergedAdminUserWorkSchedulesData = adminUserWorkSchedulesData
+    ? {
+        ...adminUserWorkSchedulesData,
+        days: [
+          ...adminUserWorkSchedulesData.days,
+          ...(adjacentAdminUserWorkSchedulesData?.days ?? []),
+        ],
+      }
+    : adjacentAdminUserWorkSchedulesData;
   const scheduleSource = isUserSelected
-    ? toAdminUserWeekScheduleSource(adminUserWorkSchedulesData)
-    : toAdminWeekScheduleSource(adminWorkSchedulesData);
+    ? toAdminUserWeekScheduleSource(mergedAdminUserWorkSchedulesData)
+    : toAdminWeekScheduleSource(mergedAdminWorkSchedulesData);
 
-  const days = buildWeekSchedule(
-    scheduleSource,
-    getWeekdaysOfMonthWeek(year, month, week),
-  );
+  const days = buildWeekSchedule(scheduleSource, weekdays);
 
   const handlePrevWeek = () => {
     setSelectedDate((currentDate) => shiftDateByWeeks(currentDate, -1));
@@ -119,17 +165,26 @@ export default function WorktimeScreen() {
     setSearchText("");
     setSelectedUser(null);
     void refetchAdminWorkSchedules();
+    if (hasAdjacentMonthDates) {
+      void refetchAdjacentAdminWorkSchedules();
+    }
   };
 
   // 조회에 실패했거나 다른 관리자가 배치를 바꿨을 때 지금 보고 있는 주차를 다시 받아 온다.
   const handleRefresh = () => {
     if (isUserSelected) {
       void refetchAdminUserWorkSchedules();
+      if (hasAdjacentMonthDates) {
+        void refetchAdjacentAdminUserWorkSchedules();
+      }
 
       return;
     }
 
     void refetchAdminWorkSchedules();
+    if (hasAdjacentMonthDates) {
+      void refetchAdjacentAdminWorkSchedules();
+    }
   };
 
   // 카드도 userId를 실어 보내므로 검색으로 고른 것과 같은 조회를 쓴다.
@@ -147,8 +202,10 @@ export default function WorktimeScreen() {
         maxConcurrentWorkers={scheduleSource.maxConcurrentWorkers}
         isLoading={
           isUserSelected
-            ? isFetchingAdminUserWorkSchedules
-            : isFetchingAdminWorkSchedules
+            ? isFetchingAdminUserWorkSchedules ||
+              isFetchingAdjacentAdminUserWorkSchedules
+            : isFetchingAdminWorkSchedules ||
+              isFetchingAdjacentAdminWorkSchedules
         }
         searchText={searchText}
         searchedUsers={adminUserSearchData?.users ?? []}
