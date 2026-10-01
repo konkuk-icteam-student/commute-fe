@@ -155,6 +155,15 @@ const requestNewAccessToken = async () => {
 // 재발급은 한 번만 돌리고 나머지 요청은 그 결과를 기다렸다가 다시 보낸다.
 let refreshTokenPromise: Promise<boolean> | null = null;
 
+// 앱을 연 직후 저장된 토큰만으로는 서버가 인정하는 세션인지 알 수 없다.
+// 보호 API가 한 번 성공한 뒤의 인증 실패만 사용 중 세션 만료로 안내한다.
+let hasValidatedProtectedSession = false;
+
+// 모듈 상태가 테스트 간에 새 세션으로 새지 않게 한다.
+export const resetApiClientSessionValidationForTest = () => {
+  hasValidatedProtectedSession = false;
+};
+
 const refreshAccessToken = () => {
   refreshTokenPromise ??= requestNewAccessToken().finally(() => {
     refreshTokenPromise = null;
@@ -173,6 +182,10 @@ const request = async <T>(
     const responseData = response.data;
 
     if (response.status === 204 && config.allowNoContent) {
+      if (shouldHandleAuthError) {
+        hasValidatedProtectedSession = true;
+      }
+
       return {
         isSuccess: true,
         message: "",
@@ -186,6 +199,10 @@ const request = async <T>(
 
     if (!isApiSuccessResponse(responseData)) {
       if (isApiDataSuccessResponse(responseData)) {
+        if (shouldHandleAuthError) {
+          hasValidatedProtectedSession = true;
+        }
+
         return {
           isSuccess: true,
           message: responseData.message,
@@ -194,6 +211,10 @@ const request = async <T>(
       }
 
       throw new Error("Invalid API response.");
+    }
+
+    if (shouldHandleAuthError) {
+      hasValidatedProtectedSession = true;
     }
 
     return responseData;
@@ -214,12 +235,19 @@ const request = async <T>(
       }
 
       // 재발급할 refreshToken이 없거나 재발급에 실패했다. 더 할 수 있는 게 없다.
-      // 저장된 값은 지금 지우고, 로그인 화면으로 보내는 것은 사용자가 안내를 확인한 뒤에 한다.
+      // 앱을 연 직후 발견한 무효 세션은 조용히 정리하고 라우트 가드가 로그인으로 보낸다.
+      // 사용 중 확인된 세션이 끊긴 경우에만 안내를 확인한 뒤 로그인으로 보낸다.
+      const shouldShowSessionExpiredNotice = hasValidatedProtectedSession;
+
+      hasValidatedProtectedSession = false;
       clearAuth();
-      showAuthNotice({
-        message: AUTH_REQUIRED_MESSAGE,
-        shouldRedirectToLogin: true,
-      });
+
+      if (shouldShowSessionExpiredNotice) {
+        showAuthNotice({
+          message: AUTH_REQUIRED_MESSAGE,
+          shouldRedirectToLogin: true,
+        });
+      }
     }
 
     // 권한이 없는 화면이라 화면별로 알릴 일이 아니다. 루트의 모달 하나가 안내한다.
@@ -228,6 +256,8 @@ const request = async <T>(
       isAxiosError(error) &&
       isForbiddenError({ status: error.response?.status })
     ) {
+      // 403은 인증은 됐지만 해당 작업의 권한만 없다는 뜻이다.
+      hasValidatedProtectedSession = true;
       showAuthNotice({
         message:
           normalizedError instanceof ApiError && normalizedError.message

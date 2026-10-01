@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import type { InternalAxiosRequestConfig } from "axios";
 
-import { apiAxiosInstance, apiClient } from "../api-client";
+import {
+  apiAxiosInstance,
+  apiClient,
+  resetApiClientSessionValidationForTest,
+} from "../api-client";
 import { AUTH_URL } from "../auth/auth.endpoint";
 import { getAuthNotice, clearAuthNotice } from "../auth-notice";
 
@@ -88,11 +92,20 @@ const createRouterAdapter = ({ refreshDetails }: RouteOptions) => {
   return { adapter, calls };
 };
 
+const validateProtectedSession = async () => {
+  apiAxiosInstance.defaults.adapter = async (
+    config: InternalAxiosRequestConfig,
+  ) => createResponse(config, 200, successBody({ value: "response" }));
+
+  await apiClient.get("/private/validated");
+};
+
 describe("apiClient token refresh", () => {
   let storage: Storage;
   const originalAdapter = apiAxiosInstance.defaults.adapter;
 
   beforeEach(() => {
+    resetApiClientSessionValidationForTest();
     storage = createMemoryStorage();
     Object.defineProperty(globalThis, "localStorage", {
       configurable: true,
@@ -111,6 +124,17 @@ describe("apiClient token refresh", () => {
   afterEach(() => {
     apiAxiosInstance.defaults.adapter = originalAdapter;
     clearAuthNotice();
+  });
+
+  it("clears an invalid initial session without showing a notice", async () => {
+    const { adapter, calls } = createRouterAdapter({ refreshDetails: null });
+    apiAxiosInstance.defaults.adapter = adapter;
+
+    await assert.rejects(apiClient.get("/private"));
+
+    assert.equal(calls.refresh, 1);
+    assert.equal(storage.length, 0);
+    assert.equal(getAuthNotice(), null);
   });
 
   it("retries the original request once with the reissued access token", async () => {
@@ -173,6 +197,8 @@ describe("apiClient token refresh", () => {
   });
 
   it("skips the reissue and asks to sign in when no refresh token is stored", async () => {
+    await validateProtectedSession();
+
     const { adapter, calls } = createRouterAdapter({
       refreshDetails: { accessToken: "new-access-token" },
     });
@@ -187,6 +213,8 @@ describe("apiClient token refresh", () => {
   });
 
   it("clears the session and asks to sign in again when the reissue fails", async () => {
+    await validateProtectedSession();
+
     const { adapter, calls } = createRouterAdapter({ refreshDetails: null });
     apiAxiosInstance.defaults.adapter = adapter;
     storage.setItem("tokenExpiresAt", "1787362890");
@@ -230,6 +258,8 @@ describe("apiClient token refresh", () => {
   });
 
   it("replaces a permission notice with the sign-in notice", async () => {
+    await validateProtectedSession();
+
     const message = "해당 작업을 수행할 권한이 없습니다.";
     apiAxiosInstance.defaults.adapter = async (
       config: InternalAxiosRequestConfig,
