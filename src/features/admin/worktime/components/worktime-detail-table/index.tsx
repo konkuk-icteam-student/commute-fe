@@ -11,6 +11,7 @@ const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 interface WorktimeDetailTableProps {
   slotsByDay: WorktimeDetailTableCellType[][];
   maxConcurrentWorkers: number;
+  maxConcurrentWorkersByDate: Record<string, number>;
   isEditMode: boolean;
   // 시간표를 아직 받지 못한 상태. 칸 대신 스피너를 보여 준다.
   isLoading?: boolean;
@@ -19,6 +20,7 @@ interface WorktimeDetailTableProps {
 export default function WorktimeDetailTable({
   slotsByDay,
   maxConcurrentWorkers,
+  maxConcurrentWorkersByDate,
   isEditMode,
   isLoading = false,
 }: WorktimeDetailTableProps) {
@@ -63,7 +65,9 @@ export default function WorktimeDetailTable({
               <WorktimeDetailTableCell
                 key={`${slot.date}-${slot.start}`}
                 slot={slot}
-                maxConcurrentWorkers={maxConcurrentWorkers}
+                maxConcurrentWorkers={
+                  maxConcurrentWorkersByDate[slot.date] ?? maxConcurrentWorkers
+                }
                 isEditMode={isEditMode}
               />
             ))}

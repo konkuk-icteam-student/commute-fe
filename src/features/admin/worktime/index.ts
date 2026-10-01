@@ -16,5 +16,6 @@ export { EditRequestList, EditRequestStatus } from "./review";
 export {
   toAdminUserWeekScheduleSource,
   toAdminWeekScheduleSource,
+  toMaxConcurrentWorkersByDate,
   toWorktimeDetailSlotsByDay,
 } from "./utils";

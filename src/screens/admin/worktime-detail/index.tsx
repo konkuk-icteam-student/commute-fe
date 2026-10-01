@@ -14,6 +14,7 @@ import {
 } from "@/features/schedule";
 import {
   toWorktimeDetailSlotsByDay,
+  toMaxConcurrentWorkersByDate,
   WorktimeDetailQuickSearch,
   WorktimeDetailSection,
 } from "@/features/admin/worktime";
@@ -124,6 +125,14 @@ export default function WorktimeDetailScreen() {
   const isAdjacentMonthScheduleEnabled =
     adjacentMonthDates.length > 0 &&
     isMonthScheduleEnabled(adjacentYear, adjacentMonth);
+  const quickSearchDates = weekdays.filter(({ date }) => {
+    const [targetYear, targetMonth] = date.split("-").map(Number);
+
+    return isMonthScheduleEnabled(targetYear, targetMonth);
+  });
+  const quickSearchStartDate = quickSearchDates[0]?.date ?? startDate;
+  const quickSearchEndDate =
+    quickSearchDates[quickSearchDates.length - 1]?.date ?? endDate;
 
   const {
     adminWorkSchedulesData: currentMonthWorkSchedulesData,
@@ -168,14 +177,20 @@ export default function WorktimeDetailScreen() {
 
   // 조회에 실패하면 표가 잠긴 채로 남아 장애인지 알 수 없으므로 모달로 알린다.
   const { errorMessage, closeErrorModal } = useScheduleErrorModal([
-    currentMonthWorkSchedulesError,
-    adjacentMonthWorkSchedulesError,
+    isCurrentMonthScheduleEnabled ? currentMonthWorkSchedulesError : undefined,
+    isAdjacentMonthScheduleEnabled
+      ? adjacentMonthWorkSchedulesError
+      : undefined,
     currentMonthSettingsError,
     nextMonthSettingsError,
     followingMonthSettingsError,
   ]);
 
   const slotsByDay = toWorktimeDetailSlotsByDay(weekdays, workSchedulesData);
+  const maxConcurrentWorkersByDate = toMaxConcurrentWorkersByDate(
+    enabledCurrentMonthWorkSchedulesData,
+    enabledAdjacentMonthWorkSchedulesData,
+  );
 
   const handlePrevWeek = () => {
     if (isEditMode && selectedMonthIndex <= currentMonthIndex && week <= 1) {
@@ -223,6 +238,7 @@ export default function WorktimeDetailScreen() {
         week={week}
         slotsByDay={slotsByDay}
         maxConcurrentWorkers={workSchedulesData?.maxConcurrentWorkers ?? 0}
+        maxConcurrentWorkersByDate={maxConcurrentWorkersByDate}
         isLoading={
           (isCurrentMonthScheduleEnabled &&
             isFetchingCurrentMonthWorkSchedules) ||
@@ -240,9 +256,9 @@ export default function WorktimeDetailScreen() {
         handleChangeEditMode={handleChangeEditMode}
       />
       <WorktimeDetailQuickSearch
-        startDate={startDate}
-        endDate={endDate}
-        isScheduleEnabled={!isFutureUnavailableMonth}
+        startDate={quickSearchStartDate}
+        endDate={quickSearchEndDate}
+        isScheduleEnabled={quickSearchDates.length > 0}
       />
 
       <ScheduleErrorModal message={errorMessage} onClose={closeErrorModal} />
