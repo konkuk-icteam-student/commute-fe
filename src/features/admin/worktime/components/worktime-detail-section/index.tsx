@@ -8,6 +8,7 @@ interface WorktimeDetailSectionProps {
   week: number;
   slotsByDay: WorktimeDetailTableCellType[][];
   maxConcurrentWorkers: number;
+  maxConcurrentWorkersByDate: Record<string, number>;
   isLoading: boolean;
   isEditMode: boolean;
   isEditAvailable: boolean;
@@ -24,6 +25,7 @@ export default function WorktimeDetailSection({
   week,
   slotsByDay,
   maxConcurrentWorkers,
+  maxConcurrentWorkersByDate,
   isLoading,
   isEditMode,
   isEditAvailable,
@@ -50,6 +52,7 @@ export default function WorktimeDetailSection({
       <WorktimeDetailTable
         slotsByDay={slotsByDay}
         maxConcurrentWorkers={maxConcurrentWorkers}
+        maxConcurrentWorkersByDate={maxConcurrentWorkersByDate}
         isEditMode={isEditMode}
         isLoading={isLoading}
       />

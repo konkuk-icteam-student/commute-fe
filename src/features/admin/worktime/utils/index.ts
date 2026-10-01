@@ -162,3 +162,5 @@ export function formatWorktimeQuickSearchSlot({
 
   return `${Number(month)}.${day} (${dayOfWeek}) ${start} ~ ${end}`;
 }
+
+export { toMaxConcurrentWorkersByDate } from "./max-concurrent-workers";

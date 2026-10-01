@@ -17,6 +17,7 @@ import {
 import {
   toAdminUserWeekScheduleSource,
   toAdminWeekScheduleSource,
+  toMaxConcurrentWorkersByDate,
   WorktimeEditRequestSection,
   WorktimeScheduleSection,
 } from "@/features/admin/worktime";
@@ -141,6 +142,15 @@ export default function WorktimeScreen() {
   const scheduleSource = isUserSelected
     ? toAdminUserWeekScheduleSource(mergedAdminUserWorkSchedulesData)
     : toAdminWeekScheduleSource(mergedAdminWorkSchedulesData);
+  const maxConcurrentWorkersByDate = isUserSelected
+    ? toMaxConcurrentWorkersByDate(
+        adminUserWorkSchedulesData,
+        adjacentAdminUserWorkSchedulesData,
+      )
+    : toMaxConcurrentWorkersByDate(
+        adminWorkSchedulesData,
+        adjacentAdminWorkSchedulesData,
+      );
 
   const days = buildWeekSchedule(scheduleSource, weekdays);
 
@@ -200,6 +210,7 @@ export default function WorktimeScreen() {
         week={week}
         days={days}
         maxConcurrentWorkers={scheduleSource.maxConcurrentWorkers}
+        maxConcurrentWorkersByDate={maxConcurrentWorkersByDate}
         isLoading={
           isUserSelected
             ? isFetchingAdminUserWorkSchedules ||

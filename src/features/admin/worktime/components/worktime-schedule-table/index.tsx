@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 interface WorktimeScheduleTableProps {
   days: WeekDay[];
   maxConcurrentWorkers: number;
+  maxConcurrentWorkersByDate: Record<string, number>;
   // 시간표를 아직 받지 못한 상태. 칸 대신 스피너를 보여 준다.
   isLoading?: boolean;
 }
@@ -14,6 +15,7 @@ interface WorktimeScheduleTableProps {
 export default function WorktimeScheduleTable({
   days,
   maxConcurrentWorkers,
+  maxConcurrentWorkersByDate,
   isLoading = false,
 }: WorktimeScheduleTableProps) {
   return (
@@ -53,7 +55,9 @@ export default function WorktimeScheduleTable({
                             slot.status === "MY_SCHEDULE" && "text-white",
                           )}
                         >
-                          {slot.currentCount}/{maxConcurrentWorkers}
+                          {slot.currentCount}/
+                          {maxConcurrentWorkersByDate[day.date] ??
+                            maxConcurrentWorkers}
                         </span>
                       )}
                     </div>

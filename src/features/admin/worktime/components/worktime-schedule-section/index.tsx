@@ -16,6 +16,7 @@ interface WorktimeScheduleSectionProps {
   week: number;
   days: WeekDay[];
   maxConcurrentWorkers: number;
+  maxConcurrentWorkersByDate: Record<string, number>;
   isLoading: boolean;
   searchText: string;
   searchedUsers: AdminSearchedUser[];
@@ -36,6 +37,7 @@ export default function WorktimeScheduleSection({
   week,
   days,
   maxConcurrentWorkers,
+  maxConcurrentWorkersByDate,
   isLoading,
   searchText,
   searchedUsers,
@@ -73,6 +75,7 @@ export default function WorktimeScheduleSection({
         <WorktimeScheduleTable
           days={days}
           maxConcurrentWorkers={maxConcurrentWorkers}
+          maxConcurrentWorkersByDate={maxConcurrentWorkersByDate}
           isLoading={isLoading}
         />
         <Link
