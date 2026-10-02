@@ -30,13 +30,13 @@ const CLOCK_IN_RADIUS_METERS = parseNumberEnv(
 
 const CACHED_GEOLOCATION_OPTIONS: PositionOptions = {
   enableHighAccuracy: false,
-  maximumAge: 10 * 60_000,
-  timeout: 5_000,
+  maximumAge: 0,
+  timeout: 10_000,
 };
 
 const WATCH_GEOLOCATION_OPTIONS: PositionOptions = {
   enableHighAccuracy: false,
-  maximumAge: 60_000,
+  maximumAge: 0,
   timeout: 60_000,
 };
 
