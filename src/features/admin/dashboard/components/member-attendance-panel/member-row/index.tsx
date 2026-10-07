@@ -1,8 +1,8 @@
 import type { DashboardMemberAttendance } from "../../../types";
 import MemberStatusBadges from "../member-status-badges";
 
-const MEMBER_ROW_GRID_CLASS = "grid-cols-[169px_404px]";
-const METRIC_GRID_CLASS = "grid-cols-[80px_132px_139px]";
+const MEMBER_ROW_GRID_CLASS = "grid-cols-[190px_383px]";
+const METRIC_GRID_CLASS = "grid-cols-[73px_125px_132px]";
 
 export default function MemberRow({
   member,
