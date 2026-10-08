@@ -29,6 +29,9 @@ const getSlotPeriod = (start: string): DailyTaskPeriod => {
   return hour < 12 ? "morning" : "afternoon";
 };
 
+export const getDailyTaskPeriod = (date: Date): DailyTaskPeriod =>
+  date.getHours() < 12 ? "morning" : "afternoon";
+
 export const formatDailyTaskDate = (date: Date) => {
   const weekdayLabels = [
     "일요일",
