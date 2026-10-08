@@ -36,7 +36,7 @@ export default function WorktimeDetailSection({
   handleChangeEditMode,
 }: WorktimeDetailSectionProps) {
   return (
-    <div className="flex w-full min-w-240 flex-col gap-4 bg-white p-8 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+    <div className="flex w-full min-w-192 flex-col gap-3 bg-white p-6 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
       <WorktimeDetailHeader
         year={year}
         month={month}

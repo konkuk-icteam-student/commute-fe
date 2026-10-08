@@ -33,7 +33,7 @@ export default function WorktimeDetailTable({
     <div className="relative">
       <div
         className={cn(
-          "grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2.5",
+          "grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2",
           // 자리는 그대로 두고 감추기만 해서 표 높이가 흔들리지 않게 한다.
           isLoading && "invisible",
         )}
@@ -47,9 +47,9 @@ export default function WorktimeDetailTable({
             WEEKDAY_LABELS[new Date(`${date}T00:00:00Z`).getUTCDay()];
 
           return (
-            <div className="flex flex-col items-center gap-1" key={date}>
-              <span className="text-xl font-bold">{weekday}</span>
-              <span className="font-bold text-[#2D81FF]">
+            <div className="flex flex-col items-center gap-0.5" key={date}>
+              <span className="text-lg font-bold">{weekday}</span>
+              <span className="text-sm font-bold text-[#2D81FF]">
                 {Number(month)}.{Number(day)}
               </span>
             </div>
@@ -58,7 +58,7 @@ export default function WorktimeDetailTable({
 
         {slotsByTime.map((timeSlots) => (
           <Fragment key={timeSlots[0]?.start}>
-            <span className="mt-3 text-xs font-bold text-[#8E8E93]">
+            <span className="mt-2.5 text-[11px] font-bold text-[#8E8E93]">
               {timeSlots[0]?.start}
             </span>
             {timeSlots.map((slot) => (

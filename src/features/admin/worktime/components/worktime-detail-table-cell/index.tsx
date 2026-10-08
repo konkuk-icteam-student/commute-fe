@@ -125,11 +125,11 @@ export default function WorktimeDetailTableCell({
   const isFull = slot.currentCount >= maxConcurrentWorkers;
 
   return slot.isUnavailable ? (
-    <div className="min-h-28 rounded-xl bg-[#F2F2F7]" />
+    <div className="min-h-20 rounded-lg bg-[#F2F2F7]" />
   ) : (
     <div
       className={cn(
-        "flex min-h-25 flex-col gap-1.5 rounded-xl p-2.5",
+        "flex min-h-20 flex-col gap-1 rounded-lg p-2 text-sm",
         isEditMode ? "border-2 border-dashed" : "border",
         isFull
           ? "border-[rgba(255,59,48,0.30)]"
@@ -150,11 +150,11 @@ export default function WorktimeDetailTableCell({
           {slot.currentCount}/{maxConcurrentWorkers}
         </span>
       </div>
-      <div className="flex flex-row flex-wrap items-center gap-1.5">
+      <div className="flex flex-row flex-wrap items-center gap-1">
         {slot.users.map((user) => (
           <div
             key={user.userId}
-            className="flex flex-row items-center gap-1 rounded-md border border-[rgba(45,129,255,0.08)] bg-[#E9F2FF] px-1.5 py-0.5"
+            className="flex flex-row items-center gap-1 rounded-md border border-[rgba(45,129,255,0.08)] bg-[#E9F2FF] px-1.5 py-0.5 text-sm"
           >
             <span className="font-bold whitespace-nowrap text-[#2D81FF]">
               {user.userName}
