@@ -15,6 +15,7 @@ import {
 import { Toast } from "@/components/ui";
 import {
   formatDailyTaskDate,
+  getDailyTaskPeriod,
   HandoverMemoPanel,
   PeriodTabs,
   SectionCard,
@@ -49,8 +50,9 @@ const toHandoverMemo = (
 export default function DailyTasksScreen() {
   const today = useMemo(() => new Date(), []);
   const todayDate = formatDateValue(today);
-  const [selectedPeriod, setSelectedPeriod] =
-    useState<DailyTaskPeriod>("morning");
+  const [selectedPeriod, setSelectedPeriod] = useState<DailyTaskPeriod>(() =>
+    getDailyTaskPeriod(today),
+  );
   const [memo, setMemo] = useState("");
   const [openSections, setOpenSections] = useState({
     tasks: true,
