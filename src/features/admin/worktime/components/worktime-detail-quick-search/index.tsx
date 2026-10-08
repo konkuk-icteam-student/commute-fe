@@ -79,13 +79,13 @@ export default function WorktimeDetailQuickSearch({
   const isSearchResultOpen = searchText.trim() !== "";
 
   return (
-    <div className="relative min-w-73 bg-[#F4F5F6]">
-      <div className="sticky top-50 right-3 mx-1.5 flex h-fit w-70 flex-col gap-3 rounded-2xl border border-[#E5E5EA] bg-white p-7 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
-        <h3 className="mb-3 text-lg font-bold">🔍 빠른 찾기</h3>
+    <div className="relative min-w-63 bg-[#F4F5F6]">
+      <div className="sticky top-40 right-3 mx-1.5 flex h-fit w-60 flex-col gap-2.5 rounded-xl border border-[#E5E5EA] bg-white p-5 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+        <h3 className="mb-2 font-bold">🔍 빠른 찾기</h3>
         <input
           type="search"
           aria-label="빠른 찾기 이름 검색"
-          className="rounded-xl border border-[#E5E5EA] bg-[#F2F2F7] px-4 py-3.5"
+          className="rounded-lg border border-[#E5E5EA] bg-[#F2F2F7] px-3 py-3 text-sm"
           value={searchText}
           onChange={handleChangeSearchText}
           placeholder="이름을 입력하여 시간 확인"
