@@ -67,17 +67,37 @@ describe("auth session", () => {
     assert.equal(hasUsableStoredSession(), true);
   });
 
-  it("clears the session when the expiration cannot be parsed", () => {
+  it("keeps the refresh session when the access token expiration cannot be parsed", () => {
     const storage = createMemoryStorage();
     installBrowserStorage(storage);
     storage.setItem("accessToken", "access-token");
+    storage.setItem("refreshToken", "refresh-token");
+    storage.setItem("roleCode", "RL01");
     storage.setItem("tokenExpiresAt", "not-a-date");
 
-    assert.equal(hasUsableStoredSession(), false);
-    assert.equal(storage.length, 0);
+    assert.equal(hasUsableStoredSession(), true);
+    assert.equal(storage.getItem("accessToken"), null);
+    assert.equal(storage.getItem("tokenExpiresAt"), null);
+    assert.equal(storage.getItem("refreshToken"), "refresh-token");
+    assert.equal(storage.getItem("roleCode"), "RL01");
   });
 
-  it("clears the session when the token is expired", () => {
+  it("keeps the refresh session when the access token is expired", () => {
+    const storage = createMemoryStorage();
+    installBrowserStorage(storage);
+    storage.setItem("accessToken", "access-token");
+    storage.setItem("refreshToken", "refresh-token");
+    storage.setItem("roleCode", "RL01");
+    storage.setItem("tokenExpiresAt", String(Date.now() - 1000));
+
+    assert.equal(hasUsableStoredSession(), true);
+    assert.equal(storage.getItem("accessToken"), null);
+    assert.equal(storage.getItem("tokenExpiresAt"), null);
+    assert.equal(storage.getItem("refreshToken"), "refresh-token");
+    assert.equal(storage.getItem("roleCode"), "RL01");
+  });
+
+  it("clears an expired access-only session when refresh is unavailable", () => {
     const storage = createMemoryStorage();
     installBrowserStorage(storage);
     storage.setItem("accessToken", "access-token");

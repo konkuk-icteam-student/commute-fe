@@ -130,6 +130,20 @@ export const setTokenExpiresAt = (tokenExpiresAt: string | number) => {
   notifyAuthStorageChange();
 };
 
+// accessToken이 만료된 경우 refreshToken으로 세션을 복구할 수 있게
+// accessToken과 그 만료 시각만 지운다.
+export const deleteExpiredAccessToken = () => {
+  const storage = getStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  storage.removeItem(ACCESS_TOKEN_KEY);
+  storage.removeItem(TOKEN_EXPIRES_AT_KEY);
+  notifyAuthStorageChange();
+};
+
 // 로그인 직후처럼 한 번에 채워 넣을 때 쓴다.
 export const setAuthSession = ({
   accessToken,

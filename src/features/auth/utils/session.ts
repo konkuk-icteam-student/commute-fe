@@ -1,4 +1,5 @@
 import {
+  deleteExpiredAccessToken,
   deleteAuthToken,
   getAccessToken,
   getRefreshToken,
@@ -36,16 +37,15 @@ export const hasUsableStoredSession = () => {
 
   const expiresAtTime = normalizeExpiresAt(expiresAt);
 
-  if (expiresAtTime === null) {
+  if (expiresAtTime === null || expiresAtTime <= Date.now()) {
+    if (refreshToken) {
+      deleteExpiredAccessToken();
+      return true;
+    }
+
     deleteAuthToken();
     return false;
   }
 
-  const isExpired = expiresAtTime <= Date.now();
-
-  if (isExpired) {
-    deleteAuthToken();
-  }
-
-  return !isExpired;
+  return true;
 };
