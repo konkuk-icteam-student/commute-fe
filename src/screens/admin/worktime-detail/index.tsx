@@ -77,18 +77,13 @@ export default function WorktimeDetailScreen() {
     today.getFullYear(),
     today.getMonth() + 1,
   );
-  const latestViewableMonthIndex = editableMonths.reduce(
-    (latestMonthIndex, target) =>
-      Math.max(latestMonthIndex, getMonthIndex(target.year, target.month)),
-    currentMonthIndex,
-  );
   const isEditAvailable =
     !isPendingCurrentMonthSettings &&
     !isPendingNextMonthSettings &&
     !isPendingFollowingMonthSettings &&
     editableMonths.length > 0;
 
-  const { year, month, week, maxWeek } = getMonthWeekOfDate(selectedDate);
+  const { year, month, week } = getMonthWeekOfDate(selectedDate);
   const selectedMonthIndex = getMonthIndex(year, month);
   const isEditableMonth = (targetYear: number, targetMonth: number) =>
     editableMonths.some(
@@ -102,10 +97,20 @@ export default function WorktimeDetailScreen() {
     selectedMonthIndex > currentMonthIndex &&
     !isMonthScheduleEnabled(year, month);
   const isCurrentMonthScheduleEnabled = !isFutureUnavailableMonth;
-  const isLastViewableWeek =
-    selectedMonthIndex >= latestViewableMonthIndex && week >= maxWeek;
   const { startDate, endDate } = getMonthWeekDateRange(year, month, week);
   const weekdays = getWeekdaysOfMonthWeek(year, month, week);
+  const nextDate = shiftDateByWeeks(selectedDate, 1);
+  const nextMonthWeek = getMonthWeekOfDate(nextDate);
+  const nextWeekdays = getWeekdaysOfMonthWeek(
+    nextMonthWeek.year,
+    nextMonthWeek.month,
+    nextMonthWeek.week,
+  );
+  const isNextWeekDisabled = !nextWeekdays.some(({ date }) => {
+    const [targetYear, targetMonth] = date.split("-").map(Number);
+
+    return isEditableMonth(targetYear, targetMonth);
+  });
   const adjacentMonthDates = weekdays.filter(
     ({ isCurrentMonth }) => !isCurrentMonth,
   );
@@ -194,7 +199,7 @@ export default function WorktimeDetailScreen() {
   };
 
   const handleNextWeek = () => {
-    if (isLastViewableWeek) {
+    if (isNextWeekDisabled) {
       return;
     }
 
@@ -243,7 +248,7 @@ export default function WorktimeDetailScreen() {
         isPrevWeekDisabled={
           isEditMode && selectedMonthIndex <= currentMonthIndex && week <= 1
         }
-        isNextWeekDisabled={isLastViewableWeek}
+        isNextWeekDisabled={isNextWeekDisabled}
         handlePrevWeek={handlePrevWeek}
         handleNextWeek={handleNextWeek}
         handleChangeEditMode={handleChangeEditMode}
