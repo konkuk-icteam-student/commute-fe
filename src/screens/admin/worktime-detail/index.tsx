@@ -8,7 +8,6 @@ import {
 } from "@/apis/work-schedules";
 import { useGetWorkApplicationSettingsQuery } from "@/apis/admin/work-application-settings";
 import {
-  isWithinApplyPeriod,
   ScheduleErrorModal,
   useScheduleErrorModal,
 } from "@/features/schedule";
@@ -22,7 +21,6 @@ import {
   getMonthWeekDateRange,
   getMonthWeekOfDate,
   getWeekdaysOfMonthWeek,
-  formatDateString,
   shiftDateByWeeks,
   shiftYearMonth,
 } from "@/lib/date-formatter";
@@ -67,18 +65,13 @@ export default function WorktimeDetailScreen() {
     workApplicationSettingsError: followingMonthSettingsError,
   } = useGetWorkApplicationSettingsQuery(candidateMonths[2]);
 
-  const todayDate = formatDateString(today);
   const settingsEntries = [
     { target: candidateMonths[0], data: currentMonthSettings },
     { target: candidateMonths[1], data: nextMonthSettings },
     { target: candidateMonths[2], data: followingMonthSettings },
   ];
   const editableMonths = settingsEntries
-    .filter(
-      ({ data }, index) =>
-        index === 0 ||
-        (data?.isConfigured && isWithinApplyPeriod(todayDate, data)),
-    )
+    .filter(({ data }, index) => index === 0 || data?.isConfigured)
     .map(({ target }) => target);
   const currentMonthIndex = getMonthIndex(
     today.getFullYear(),
